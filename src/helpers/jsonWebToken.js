@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken')
-const secretKey = process.env.SECRETKEY_JWT 
+const secretKey = "sistemasinmoda123*"
 
 const verifyToken = (req,res,next) =>{
     const BearerHeader = req.headers['authorization']

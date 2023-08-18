@@ -4,7 +4,7 @@ const DASH = require('../../databases/DashConexion').dashConexion
 const validarUsuario = (req, res) => {
     const data = req.body
     const { strUsuario, strClave } = data
-    const secretKet = process.env.SECRETKEY_JWT
+    const secretKet = "sistemasinmoda123*"
     const query = `SELECT * FROM tbllogin where strUsuario = ? and strClave = ?`
     DASH.query(query, [strUsuario, strClave], (err, rows) => {
         if (err) {
