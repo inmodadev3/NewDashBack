@@ -247,7 +247,6 @@ const GetDataClientes = async (req, res) => {
 
 }
 
-
 const PostNuevaGestion = (req, res) => {
   const {
     clienteId,
@@ -268,6 +267,69 @@ const PostNuevaGestion = (req, res) => {
   })
 }
 
+const obtenerCiudadesClientes = async (req, res) => {
+  const { vendedorId } = req.body
+
+  const sqlDash = `select distinct c.intIdCiudad from dash.tblvendedores as v
+    inner join dash.tblvendedoreszonas as vz on v.strCedula = vz.strIdVendedor
+    inner join dash.tblciudadeszonas as c on c.intIdZona = vz.intIdZona
+    where v.strCedula = ?`
+  try {
+    const ObtenerCiudades = await new Promise((resolve, reject) => {
+      DASH.query(sqlDash, [vendedorId.toString()], (err, rows) => {
+        if (err) {
+          reject(err)
+        }
+        resolve(rows)
+      })
+    })
+
+    const ciudadesIdArr = []
+
+    for (const IdCiudad of ObtenerCiudades) {
+      ciudadesIdArr.push((IdCiudad.intIdCiudad).toString())
+    }
+
+    const ciudadesString = ciudadesIdArr.map((ciudad) => `'${ciudad}'`).join(', ');
+    const SqlHGI = `select StrDescripcion,StrIdCiudad from TblCiudades AS C where C.StrIdCiudad in (${ciudadesString})`
+
+    const obtenerCiudadesHgi = await new Promise((resolve, reject) => {
+      HGI.query(SqlHGI, (err, rows) => {
+        if (err) {
+          reject(err)
+        }
+        resolve(rows.recordset)
+      })
+    })
+    res.status(200).json({ data: obtenerCiudadesHgi })
+  } catch (error) {
+    res.status(400).json({ error: error })
+  }
+}
+
+const obtenerClientesXCiudad = async(req,res) =>{
+  const {ciudadId} = req.body
+
+  const sqlHgi = `SELECT top 300 T.StrIdTercero,T.StrNombre as Nombre_tercero, E.StrDescripcion as Estado,T.StrDato1 as Viaja, C.StrDescripcion as ciudad,
+    (SELECT TOP 1 DatFecha
+      FROM TblDocumentos
+      WHERE StrTercero = T.StrIdTercero
+          AND (IntTransaccion = '041' OR IntTransaccion = 47)
+      ORDER BY DatFecha DESC) AS ultima_Compra
+    FROM TblTerceros AS T
+    INNER JOIN TblEstados AS E ON T.IntTEstado = E.intIdEstado
+    INNER JOIN TblCiudades AS C ON C.StrIdCiudad = T.StrCiudad
+    where C.StrIdCiudad = '${ciudadId}' and T.StrIdTercero not in ('0','01211','0128','0130') order by E.StrDescripcion`
+
+    HGI.query(sqlHgi,(err,rows)=>{
+      if(err){
+        res.status(400).json({ error: err })
+        return;
+      }
+
+      res.status(200).json({data:rows.recordset})
+    })
+}
 
 module.exports = {
   GetClientes,
@@ -275,5 +337,7 @@ module.exports = {
   GetClienteXNombre,
   GetGestionesXCliente,
   PostNuevaGestion,
-  GetDataClientes
+  GetDataClientes,
+  obtenerCiudadesClientes,
+  obtenerClientesXCiudad
 }
