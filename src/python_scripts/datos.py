@@ -6,7 +6,7 @@ from createPDF import generar_catalogo
 
 #########################################
 
-defaultPath = 'C:/Users/venim/OneDrive/Documentos/owncloud/fotos_nube/FOTOS  POR SECCION CON PRECIO/'
+defaultPath = '/home/inmoda/ownCloud/fotos_nube/FOTOS  POR SECCION CON PRECIO/'
 rutasString =  sys.argv[1]
 precio_cat =  sys.argv[2]
 userId =  sys.argv[3]
@@ -15,10 +15,10 @@ newPaths = []
 dataProductos = []
 
 
-
 for path in rutasArray:
     newPaths.append(defaultPath+path)
 
+print(rutasArray)
 #########################################
 
 query = f"SELECT strIdProducto,strDescripcion,intPrecio{precio_cat} FROM tblProductos"
@@ -49,7 +49,7 @@ def procesar_data(ruta_principal):
                     rutaFoto = os.path.join(root,name).replace("\\","/")
                     dataProductos.append([refe, descrip, precio, rutaFoto ])
                 # print(os.path.join(refe, precio))
-        nombre_clase=(ruta_principal[85: len(ruta_principal)]) .replace("/","_")    # PARA CLASE NORMALES ESTA Y LINEA SIGUIENTE
+        nombre_clase=(ruta_principal[63: len(ruta_principal)]) .replace("/","_")    # PARA CLASE NORMALES ESTA Y LINEA SIGUIENTE
         generar_catalogo(f"{nombre_clase}", dataProductos,precio_cat,userId)
         #nombre_cAREY=(ruta_principal[106:-1])    #estas para sacar los carey
         #print(nombre_cAREY)

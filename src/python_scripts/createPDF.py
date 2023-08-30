@@ -24,14 +24,14 @@ def dividir_cadena(cadena, longitud_maxima=35):
 
 
 def generar_catalogo(NomPdf ,productos,precio,userId):
-    catalogo_folder = f"C:/Users/venim/OneDrive/Escritorio/proyect/NewDash/DashBack/public/pdfs/{userId}/"
+    catalogo_folder = f"/var/www/html/NewDashBack/public/pdfs/{userId}/"
 
     # Verificar si la carpeta "catalogo" existe
     if not os.path.exists(catalogo_folder):
         os.makedirs(catalogo_folder)  # Cre
 
     doc = SimpleDocTemplate(f"{catalogo_folder}{NomPdf}_{precio}.pdf", pagesize=A4)
-    path_image = "C:/Users/venim/OneDrive/Escritorio/proyect/NewDash/DashBack/assets/img/INMODA.png"
+    path_image = "/var/www/html/NewDashBack/assets/img/INMODA.png"
     elements = []
     styles = getSampleStyleSheet()
     title = ParagraphStyle(

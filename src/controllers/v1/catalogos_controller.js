@@ -41,9 +41,10 @@ const getFolders = async (req, res) => {
 const createPDF = async(req,res) =>{
 
     const { data,precio,userId } = req.body
-    const pythonScriptPath = 'C:/Users/venim/OneDrive/Escritorio/proyect/NewDash/DashBack/src/python_scripts/datos.py';
+    const pythonScriptPath = '/var/www/html/NewDashBack/src/python_scripts/datos.py';
 
-    const pythonProcess = spawn('python',[pythonScriptPath,JSON.stringify(data),precio,userId])
+    const pythonProcess = spawn('python3',[pythonScriptPath,JSON.stringify(data),precio,userId])
+    
 
     let pythonResponse = "";
 
@@ -51,8 +52,8 @@ const createPDF = async(req,res) =>{
         pythonResponse = data.toString();
     });
 
-    pythonProcess.stdout.on("end", () => {
-        res.json({ data: {data,precio},finish:"Correct" });
+    pythonProcess.stdout.on("end", (end) => {
+        res.json({ data:end,finish:"Correct" });
     });
     
 }

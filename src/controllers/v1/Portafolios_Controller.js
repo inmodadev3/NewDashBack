@@ -37,7 +37,7 @@ const GetClientes = async (req, res) => {
       FROM TblTerceros AS T
       INNER JOIN TblEstados AS E ON T.IntTEstado = E.intIdEstado
       INNER JOIN TblCiudades AS C ON C.StrIdCiudad = T.StrCiudad
-      where C.StrIdCiudad in (${ciudadesString}) and T.StrIdTercero not in ('0','01211','0128','0130') order by E.StrDescripcion`
+      where C.StrIdCiudad in (${ciudadesString}) and T.StrIdTercero not in ('0','01211','0128','0130') and t.intTipoTercero in ('01','02','03','04','05','09',17) order by E.StrDescripcion`
 
     const ObtenerClientesXCiudades = await new Promise((resolve, reject) => {
       if (ciudadesIdArr.length !== 0) {
@@ -91,7 +91,7 @@ const GetClienteXIdentificacion = async (req, res) => {
     FROM TblTerceros AS T
     INNER JOIN TblEstados AS E ON T.IntTEstado = E.intIdEstado
     INNER JOIN TblCiudades AS C ON C.StrIdCiudad = T.StrCiudad
-    where C.StrIdCiudad in (${ciudadesString}) and T.strIdTercero = '${clienteId}' order by E.StrDescripcion`
+    where C.StrIdCiudad in (${ciudadesString}) and T.strIdTercero = '${clienteId}' and t.intTipoTercero in ('01','02','03','04','05','09',17) order by E.StrDescripcion`
 
     const ObtenerClientesXCiudades = await new Promise((resolve, reject) => {
       if (ciudadesIdArr.length !== 0) {
@@ -145,7 +145,7 @@ const GetClienteXNombre = async (req, res) => {
     FROM TblTerceros AS T
     INNER JOIN TblEstados AS E ON T.IntTEstado = E.intIdEstado
     INNER JOIN TblCiudades AS C ON C.StrIdCiudad = T.StrCiudad
-    where C.StrIdCiudad in (${ciudadesString}) and T.strNombre like '%${clienteNombre}%' and T.StrIdTercero not in ('0','01211','0128','0130') order by E.StrDescripcion`
+    where C.StrIdCiudad in (${ciudadesString}) and T.strNombre like '%${clienteNombre}%' and T.StrIdTercero not in ('0','01211','0128','0130') and t.intTipoTercero in ('01','02','03','04','05','09',17) order by E.StrDescripcion`
 
     const ObtenerClientesXCiudades = await new Promise((resolve, reject) => {
       if (ciudadesIdArr.length !== 0) {
@@ -207,7 +207,7 @@ const GetDataClientes = async (req, res) => {
             INNER JOIN TblProductos as tp ON tdet.StrProducto = tp.StrIdProducto
             INNER JOIN TblClases as tc ON tc.StrIdClase = tp.StrClase
             WHERE tdoc.strTercero = '${id}'
-              AND tdoc.IntTransaccion IN ('041', '47', '46')
+              AND tdoc.IntTransaccion IN ('041', '47')
               AND tdet.StrProducto != '0'
               AND tc.StrIdClase IN ('1001', '101', '1011', '1021', '1031', '971', '981', '991')
             GROUP BY tc.StrDescripcion;`
@@ -310,7 +310,7 @@ const obtenerCiudadesClientes = async (req, res) => {
 const obtenerClientesXCiudad = async(req,res) =>{
   const {ciudadId} = req.body
 
-  const sqlHgi = `SELECT top 300 T.StrIdTercero,T.StrNombre as Nombre_tercero, E.StrDescripcion as Estado,T.StrDato1 as Viaja, C.StrDescripcion as ciudad,
+  const sqlHgi = `SELECT T.StrIdTercero,T.StrNombre as Nombre_tercero, E.StrDescripcion as Estado,T.StrDato1 as Viaja, C.StrDescripcion as ciudad,
     (SELECT TOP 1 DatFecha
       FROM TblDocumentos
       WHERE StrTercero = T.StrIdTercero

@@ -7,7 +7,7 @@ const route = require('express').Router()
 const verifyToken = require('../../helpers/jsonWebToken')
 
 
-route.get('/:strIdProducto',verifyToken,GetInfoProductos)
+route.get('/:strIdProducto',GetInfoProductos)
 route.get('/imagenes/:stridproducto',GetImagenesUnProducto)
 
 

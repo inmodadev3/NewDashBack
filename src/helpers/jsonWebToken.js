@@ -4,7 +4,7 @@ const secretKey = "sistemasinmoda123*"
 const verifyToken = (req,res,next) =>{
     const BearerHeader = req.headers['authorization']
 
-    if(typeof BearerHeader !== undefined){
+    if(typeof BearerHeader !== 'undefined'){
         const Token = BearerHeader.split(" ")[1]
         jwt.verify(Token,secretKey,(err,data)=>{
             if(err){
