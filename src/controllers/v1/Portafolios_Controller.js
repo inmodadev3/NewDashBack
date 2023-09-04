@@ -319,7 +319,7 @@ const obtenerClientesXCiudad = async(req,res) =>{
     FROM TblTerceros AS T
     INNER JOIN TblEstados AS E ON T.IntTEstado = E.intIdEstado
     INNER JOIN TblCiudades AS C ON C.StrIdCiudad = T.StrCiudad
-    where C.StrIdCiudad = '${ciudadId}' and T.StrIdTercero not in ('0','01211','0128','0130') order by E.StrDescripcion`
+    where C.StrIdCiudad = '${ciudadId}' and T.StrIdTercero not in ('0','01211','0128','0130') and t.intTipoTercero in ('01','02','03','04','05','09',17) order by E.StrDescripcion`
 
     HGI.query(sqlHgi,(err,rows)=>{
       if(err){
