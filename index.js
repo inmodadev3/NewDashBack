@@ -8,20 +8,27 @@ const path = require('path')
 const fs = require('fs')
 const {validarCnxDASH} = require('./src/databases/DashConexion')
 const {ConexionHgi} = require('./src/databases/HgiConexion')
+const https = require('https')
 
 
-app.use(cors({origin:'*'}))
+let privateKey = fs.readFileSync('certificados/privkey.pem')
+let certificate = fs.readFileSync('certificados/fullchain.pem')
+
+const options = {
+    key: privateKey,
+    cert: certificate
+  };
+
+//app.use(cors({origin:'*'}))
 app.use(express.json())
 app.use(rutas)
 
-validarCnxDASH()
-ConexionHgi()
-
-
-
-app.listen(port,()=>{
+https.createServer(options,app).listen(port,()=>{
     console.log(`SERVIDOR FUNCIONANDO EN PUERTO ${port}`)
+    validarCnxDASH()
+    ConexionHgi()
 })
+
 
 
 const pdfsFolderPath = path.join(__dirname, 'public', 'pdfs');
