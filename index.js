@@ -2,7 +2,7 @@ require('dotenv').config()
 const express = require('express')
 const app = express()
 const cors = require('cors')
-const port = process.env.PORTSERVER || 8083
+const port = /*process.env.PORTSERVER ||*/ 8083
 const rutas = require('./src/routes')
 const path = require('path')
 const fs = require('fs')
@@ -19,7 +19,7 @@ const options = {
     cert: certificate
   };
 
-//app.use(cors({origin:'*'}))
+app.use(cors({origin:'*'}))
 app.use(express.json())
 app.use(rutas)
 
