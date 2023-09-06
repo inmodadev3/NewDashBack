@@ -24,22 +24,10 @@ const CargarDetallesContenedor = async(req, res) => {
 
     //Calcular el total de la compra
     let total = 0 
-
-    /* 
-    item['Cantidad por paca']
-    item.Cantidad
-    item.Color
-    item.CxU
-    item.Descripcion
-    item.Dimension
-    item.Material
-    item.Referencia
-    item['Unidad de Medida']
-    item.Valor
-    */
-
+    let array = []
     data.forEach((item)=>{
-        let stringNumero = (item.Valor).replace(".","").replace(",",".") 
+     
+        let stringNumero = ((item.Valor).toFixed(2))/* .replace(".","").replace(",",".")  */
         let numero = parseFloat(stringNumero)
         total += numero * (item.Cantidad)
     })
@@ -52,21 +40,16 @@ const CargarDetallesContenedor = async(req, res) => {
     DASH.query(sql,[raggi,importacion,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,fecha,100,5,total],(err,rows)=>{
         if(err)return res.status(404).json({data:err,message:"HA OCURRIDO UN ERROR GENERANDO EL DOCUMENTO"})
         data.forEach((item)=>{
-            let stringNumero = (item.Valor).replace(".","").replace(",",".") 
+            let stringNumero = ((item.Valor).toFixed(2))/* .replace(".","").replace(",",".") */ 
             let valorParseado = parseFloat(stringNumero)
             DASH.query(sqlDetalle,["",item.Referencia,item.Cantidad,item['Unidad de Medida'],valorParseado,item.Descripcion,1,item.Color,item.CxU,item.Dimension,"",item['Cantidad por paca'],item.Material],(err,rows)=>{
                 if(err)return res.json(404).json({data:err,message:"Ha OCURRIDO UN ERROR INGRESANDO LOS PRODUCTOS"})
-                console.log("Creado con exito")
-                console.log(rows)
             })
         })
         
     })
     
-
-    console.log("Finalizado")
-    
-    res.json({ data:data,message:"Compra Cargada con exito" })
+    res.status(200).json({ data:data,message:"Compra Cargada con exito" })
 }
 
 
