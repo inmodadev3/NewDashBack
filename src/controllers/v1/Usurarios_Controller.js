@@ -11,7 +11,7 @@ const validarUsuario = (req, res) => {
             console.log(err)
         }
 
-        if (rows.length !== 0) {
+        if (rows && rows.length !== 0) {
             jwt.sign({ data }, secretKet, { expiresIn: '7d' }, (err, token) => {
                 res.status(200)
                 res.json({
