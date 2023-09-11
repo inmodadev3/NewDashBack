@@ -1,3 +1,5 @@
+const { GET_MARCAS, GET_GENEROS, GET_UNIDADES } = require('../../Querys/Productos_Querys');
+
 const HGI = require('../../databases/HgiConexion').HgiConexion
 
 const GetInfoProductos = (req, res) => {
@@ -14,7 +16,7 @@ const GetInfoProductos = (req, res) => {
      WHERE stridcodigo = p.StrIdProducto AND StrDescripcion = '1') AS productoImg, 
     (SELECT intCantidadFinal 
      FROM qrySaldosInv 
-     WHERE strProducto = p.StrIdProducto and IntAno = ${year} and IntPeriodo = ${month}) AS saldoInv
+     WHERE strProducto = p.StrIdProducto and IntAno = ${year} and IntPeriodo = ${month} and IntBodega = '01') AS saldoInv
     FROM tblproductos AS p
     INNER JOIN TblProdParametro1 AS pp1 ON pp1.StrIdPParametro1 = p.StrPParametro1
     INNER JOIN TblProdParametro2 AS pp2 ON pp2.StrIdPParametro = p.StrPParametro2
@@ -43,5 +45,32 @@ const GetImagenesUnProducto = (req, res) => {
     })
 }
 
+const GetMarcas = async(req,res) =>{
+    try {
+        const data = await GET_MARCAS()
+        res.status(200).json({marcas:data})
+    } catch (error) {
+        res.status(400).json({error})
+    }
+}
 
-module.exports = { GetInfoProductos, GetImagenesUnProducto }
+const GetGeneros = async(req,res) =>{
+    try {
+        const data = await GET_GENEROS()
+        res.status(200).json({generos:data})
+    } catch (error) {
+        res.status(400).json({error})
+    }
+}
+
+const GetUnidades = async(req,res)=>{
+    try {
+        const data = await GET_UNIDADES()
+        res.status(200).json({unidades:data})
+    } catch (error) {
+        res.status(400).json({error})
+    }
+}
+
+
+module.exports = { GetInfoProductos, GetImagenesUnProducto,GetMarcas,GetGeneros,GetUnidades }

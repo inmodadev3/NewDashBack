@@ -1,7 +1,18 @@
 const DASH = require('../../databases/DashConexion').dashConexion
 const xlsx = require('xlsx')
+const { 
+    COMPRAS, 
+    GET_PRODUCTOS_CONTENEDOR, 
+    GET_PRODUCTO_COMPRADETALLE, 
+    GET_INFO_PRODUCTO_HGI, 
+    GET_PRECIOS_EMPRESA, 
+    LIQUIDAR_PRODUCTO, 
+    GET_PRODUCTOS_LIQUIDADOS, 
+    ACTUALIZAR_ESTADO_PRODUCTOS
+} = require('../../Querys/Compras_Querys')
+const req = require('express/lib/request')
 
-const CargarDetallesContenedor = async(req, res) => {
+const CargarDetallesContenedor = async (req, res) => {
     //excel, importacion, raggi
     const file = req.file
     const { importacion, raggi } = req.body
@@ -14,45 +25,141 @@ const CargarDetallesContenedor = async(req, res) => {
 
     //Convertir el archivo xlsx en un objeto Json 
     const workbook = xlsx.read(file.buffer, { type: 'buffer' }) //transoformar el buffer en un archivo xlsx
-    const worksheet = workbook.Sheets[workbook.SheetNames[0]]; 
+    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
     const data = xlsx.utils.sheet_to_json(worksheet);
 
     //Validar que el documento tenga datos
-    if(data.length === 0){
-        return res.status(200).json({error:'El archivo no tiene datos.'})
+    if (data.length === 0) {
+        return res.status(200).json({ error: 'El archivo no tiene datos.' })
     }
 
     //Calcular el total de la compra
-    let total = 0 
+    let total = 0
     let array = []
-    data.forEach((item)=>{
-     
+    data.forEach((item) => {
+
         let stringNumero = ((item.Valor).toFixed(2))/* .replace(".","").replace(",",".")  */
         let numero = parseFloat(stringNumero)
         total += numero * (item.Cantidad)
     })
 
-    let sql = `INSERT INTO tbldocumentos (strRaggi,strImportacion,intTRM,intOTM,intOTMUSD,intOTMSUP,intArancel,intArancelUSD,intArancelSUP,intIVA,intIVAUSD,intIVASUP,intDescargues,intDescarguesUSD,intDescarguesSUP,intDepositoFranca
-    ,intDepositoFrancaUSD,intDepositoFrancaSUP,intNaviera,intNavieraUSD,intNavieraSUP,intTIC,intTICUSD,intTICSUP,intOtrosUno,intOtrosUnoUSD,intOtrosUnoSUP,intOtrosDos,intOtrosDosUSD,intOtrosDosSUP,datFecha,intPorcentajeDescuento,idEstado,intValorTotalCompra) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
+    let sql = COMPRAS.POSTDOCUMENTOS
 
-    let sqlDetalle = `CALL SP_AgregarDocumentoDetalleCompra(?,?,?,?,?,?,?,?,?,?,?,?,?)`
-    
-    DASH.query(sql,[raggi,importacion,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,fecha,100,5,total],(err,rows)=>{
-        if(err)return res.status(404).json({data:err,message:"HA OCURRIDO UN ERROR GENERANDO EL DOCUMENTO"})
-        data.forEach((item)=>{
-            let stringNumero = ((item.Valor).toFixed(2))/* .replace(".","").replace(",",".") */ 
+    let sqlDetalle = COMPRAS.POSTDETALLEDOCUMENTOS
+
+    DASH.query(sql, [raggi, importacion, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, fecha, 100, 5, total], (err, rows) => {
+        if (err) return res.status(404).json({ data: err, message: "HA OCURRIDO UN ERROR GENERANDO EL DOCUMENTO" })
+        data.forEach((item) => {
+            let stringNumero = ((item.Valor).toFixed(2))/* .replace(".","").replace(",",".") */
             let valorParseado = parseFloat(stringNumero)
-            DASH.query(sqlDetalle,["",item.Referencia,item.Cantidad,item['Unidad de Medida'],valorParseado,item.Descripcion,1,item.Color,item.CxU,item.Dimension,"",item['Cantidad por paca'],item.Material],(err,rows)=>{
-                if(err)return res.json(404).json({data:err,message:"Ha OCURRIDO UN ERROR INGRESANDO LOS PRODUCTOS"})
+            DASH.query(sqlDetalle, ["", item.Referencia, item.Cantidad, item['Unidad de Medida'], valorParseado, item.Descripcion, 1, item.Color, item.CxU, item.Dimension, "", item['Cantidad por paca'], item.Material], (err, rows) => {
+                if (err) return res.json(404).json({ data: err, message: "Ha OCURRIDO UN ERROR INGRESANDO LOS PRODUCTOS" })
             })
         })
-        
+
     })
-    
-    res.status(200).json({ data:data,message:"Compra Cargada con exito" })
+
+    res.status(200).json({ data: data, message: "Compra Cargada con exito" })
 }
 
+const GetProductosContenedorEstado = async (req, res) => {
+    try {
+        const data = await GET_PRODUCTOS_CONTENEDOR()
+        res.status(200).json({ data: data })
+    } catch (error) {
+        res.status(400).json({ error, message: "Ha ocurrido un error al consultar los datos" })
+    }
+}
+
+const GetProductosLiquidados = async(req,res) =>{
+    try {
+        let data = await GET_PRODUCTOS_LIQUIDADOS()
+        res.status(200).json({data})
+    } catch (error) {
+        res.status(400).json({error,message:"Ha ocurrido un error inesperado"})
+    }
+}
+
+const PostDataProductoContenedor = async (req, res) => {
+    const { id, referencia } = req.body
+
+    try {
+        const queryInfoDash = await GET_PRODUCTO_COMPRADETALLE(id)
+        const queryInfoHgi = await GET_INFO_PRODUCTO_HGI(referencia)
+
+        res.status(200).json({ dash: queryInfoDash[0], hgi: queryInfoHgi[0] })
+    } catch (error) {
+        res.status(400).json({ error, message: "Ha ocurrido un error con la consulta" })
+    }
+}
+
+const PostPreciosEmpresa = async (req, res) => {
+    const { precio } = req.body
+
+    if (precio !== 0 && precio !== null && precio !== undefined) {
+        try {
+            let data = await GET_PRECIOS_EMPRESA(precio)
+            res.status(200).json({ data: data[0] })
+        } catch (error) {
+            res.status(400).json({ error, message: "Ha ocurrido un error" })
+        }
+    }else{
+        res.status(400).json({message:"Precio incorrecto"})
+    }
+
+}
+
+const Post_Liquidar = async (req,res) =>{
+    const {
+        intIdDetalle,
+        strDescripcion,
+        intPrecioUno,
+        intPrecioDos,
+        intPrecioTres,
+        intPrecioCuatro,
+        intPrecioCinco,
+        strReferencia,
+        intCantidad,
+        strUDM,
+        intEstado,
+        strDimension,
+        intCxU,
+        strUnidadMedida,
+        intCantidadPaca,
+        strMaterial,
+        strObservacion,
+        strSexo,
+        strMarca,
+        strColor,
+    } = req.body
+
+    try {
+        let data = await LIQUIDAR_PRODUCTO(intIdDetalle,strDescripcion,intPrecioUno,intPrecioDos,intPrecioTres,
+            intPrecioCuatro,intPrecioCinco,strReferencia,intCantidad,strUDM,intEstado,strDimension,intCxU,
+            strUnidadMedida,intCantidadPaca,strMaterial,strObservacion,strSexo,strMarca,strColor)
+
+        res.status(200).json({success:true, data})
+    } catch (error) {
+        res.status(400).json({error,message:"Ha ocurrido un error inesperado"})
+    }
+}
+
+const Put_Modificar = async (req, res) => {
+    const { id } = req.params; // Obtener el id desde req.params
+    try {
+        let data = await ACTUALIZAR_ESTADO_PRODUCTOS(1, parseInt(id));
+        res.status(200).json({ data });
+    } catch (error) {
+        res.status(400).json({ error, message: "Ha ocurrido un error al actualizar el producto" });
+    }
+}
 
 module.exports = {
-    CargarDetallesContenedor
+    CargarDetallesContenedor,
+    GetProductosContenedorEstado,
+    PostDataProductoContenedor,
+    PostPreciosEmpresa,
+    Post_Liquidar,
+    GetProductosLiquidados,
+    Put_Modificar
 }
