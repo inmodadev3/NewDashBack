@@ -58,7 +58,7 @@ def generar_catalogo(NomPdf ,productos,precio,userId):
         #data.append([imagen, producto[0], producto[1], producto[2]])
         descripcion_porlineas = dividir_cadena(producto[1])if producto[1] else producto[1]
         combinar_data = [imagen,
-                         f"\n\nReferencia: {producto[0]}\n{descripcion_porlineas}\nPrecio: {producto[2]}"]
+                         f"\n\nReferencia: {producto[0]}\n{descripcion_porlineas}\nPrecio: {producto[2]}\nUnidad: {producto[4]}\nCant x unidad: {producto[5]}\nDimensión: {producto[6]}"]
         data.append(combinar_data)
 
 
