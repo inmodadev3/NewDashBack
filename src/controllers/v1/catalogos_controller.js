@@ -1,5 +1,3 @@
-const HGI = require('../../databases/HgiConexion').HgiConexion
-const path = require('path')
 const {spawn} = require('child_process')
 const axios = require('axios')
 const cheerio = require('cheerio');

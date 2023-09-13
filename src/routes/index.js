@@ -7,7 +7,6 @@ const borrarExtensionDirectorios = (file) =>{
 }
 
 const archivos = fs.readdirSync(path.join(__dirname+'/v1'))
-console.log(archivos)
 
 archivos.forEach((archivo)=>{
     let archivoSinExtension = borrarExtensionDirectorios(archivo)

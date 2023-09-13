@@ -2,15 +2,14 @@ const DASH = require('../../databases/DashConexion').dashConexion
 const xlsx = require('xlsx')
 const { 
     COMPRAS, 
-    GET_PRODUCTOS_CONTENEDOR, 
-    GET_PRODUCTO_COMPRADETALLE, 
-    GET_INFO_PRODUCTO_HGI, 
-    GET_PRECIOS_EMPRESA, 
-    LIQUIDAR_PRODUCTO, 
-    GET_PRODUCTOS_LIQUIDADOS, 
-    ACTUALIZAR_ESTADO_PRODUCTOS
+    ACTUALIZAR_ESTADO_PRODUCTOS,
+    GetProductosContenedorEstado_Query,
+    PostDataProductoContenedor_Dash_Query,
+    PostDataProductoContenedor_Hgi_Query,
+    PostPreciosEmpresa_Query,
+    Post_Liquidar_Query,
+    GetProductosLiquidados_Query
 } = require('../../Querys/Compras_Querys')
-const req = require('express/lib/request')
 
 const CargarDetallesContenedor = async (req, res) => {
     //excel, importacion, raggi
@@ -62,30 +61,33 @@ const CargarDetallesContenedor = async (req, res) => {
     res.status(200).json({ data: data, message: "Compra Cargada con exito" })
 }
 
+//Obtener los productos para liquidar
 const GetProductosContenedorEstado = async (req, res) => {
     try {
-        const data = await GET_PRODUCTOS_CONTENEDOR()
+        const data = await GetProductosContenedorEstado_Query()
         res.status(200).json({ data: data })
     } catch (error) {
         res.status(400).json({ error, message: "Ha ocurrido un error al consultar los datos" })
     }
 }
 
+//Obtener productos que han sido liquidados en el contenedor actual
 const GetProductosLiquidados = async(req,res) =>{
     try {
-        let data = await GET_PRODUCTOS_LIQUIDADOS()
+        let data = await GetProductosLiquidados_Query()
         res.status(200).json({data})
     } catch (error) {
         res.status(400).json({error,message:"Ha ocurrido un error inesperado"})
     }
 }
 
+//Obtener datos de un producto tanto del HGI como del documento de liquidacion para hacer comparacion
 const PostDataProductoContenedor = async (req, res) => {
     const { id, referencia } = req.body
 
     try {
-        const queryInfoDash = await GET_PRODUCTO_COMPRADETALLE(id)
-        const queryInfoHgi = await GET_INFO_PRODUCTO_HGI(referencia)
+        const queryInfoDash = await PostDataProductoContenedor_Dash_Query(id)
+        const queryInfoHgi = await PostDataProductoContenedor_Hgi_Query(referencia)
 
         res.status(200).json({ dash: queryInfoDash[0], hgi: queryInfoHgi[0] })
     } catch (error) {
@@ -93,12 +95,13 @@ const PostDataProductoContenedor = async (req, res) => {
     }
 }
 
+//Obtener lista de precios predefinidos en base al precio 1
 const PostPreciosEmpresa = async (req, res) => {
     const { precio } = req.body
 
     if (precio !== 0 && precio !== null && precio !== undefined) {
         try {
-            let data = await GET_PRECIOS_EMPRESA(precio)
+            let data = await PostPreciosEmpresa_Query(precio)
             res.status(200).json({ data: data[0] })
         } catch (error) {
             res.status(400).json({ error, message: "Ha ocurrido un error" })
@@ -109,6 +112,7 @@ const PostPreciosEmpresa = async (req, res) => {
 
 }
 
+//Opcion para liquidar un producto
 const Post_Liquidar = async (req,res) =>{
     const {
         intIdDetalle,
@@ -134,21 +138,25 @@ const Post_Liquidar = async (req,res) =>{
     } = req.body
 
     try {
-        let data = await LIQUIDAR_PRODUCTO(intIdDetalle,strDescripcion,intPrecioUno,intPrecioDos,intPrecioTres,
+        let data = await Post_Liquidar_Query(intIdDetalle,strDescripcion,intPrecioUno,intPrecioDos,intPrecioTres,
             intPrecioCuatro,intPrecioCinco,strReferencia,intCantidad,strUDM,intEstado,strDimension,intCxU,
             strUnidadMedida,intCantidadPaca,strMaterial,strObservacion,strSexo,strMarca,strColor)
 
-        res.status(200).json({success:true, data})
+        let liquidados = await GetProductosLiquidados_Query()
+
+        res.status(200).json({success:true, data,liquidados})
     } catch (error) {
         res.status(400).json({error,message:"Ha ocurrido un error inesperado"})
     }
 }
 
+//Convertir un producto de estado liquidado a por liquidar para modificar datos en caso de ser necesario
 const Put_Modificar = async (req, res) => {
     const { id } = req.params; // Obtener el id desde req.params
     try {
-        let data = await ACTUALIZAR_ESTADO_PRODUCTOS(1, parseInt(id));
-        res.status(200).json({ data });
+        await ACTUALIZAR_ESTADO_PRODUCTOS(1, parseInt(id));
+        let liquidar = await GetProductosContenedorEstado_Query()
+        res.status(200).json({ data:liquidar });
     } catch (error) {
         res.status(400).json({ error, message: "Ha ocurrido un error al actualizar el producto" });
     }

@@ -1,65 +1,103 @@
 const HGI = require('../databases/HgiConexion').HgiConexion
+const { obtenerDatosDb_Dash, obtenerDatosDB_Hgi } = require('./Global_Querys')
 
-const GET_GENEROS= () =>{
-    return new Promise((resolve,reject)=>{
-        const query = `select StrIdPParametro1 as id,StrDescripcion as descripcion from TblProdParametro1`
+const GetInfoProductos_Query = async (strIdProducto) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const fecha = new Date();
+            const year = fecha.getFullYear();
+            const month = fecha.getMonth() + 1;
+            const query = `SELECT TOP 10 p.StrIdProducto AS referencia, p.StrDescripcion AS descripcion, 
+            p.strunidad AS UM,p.strauxiliar as cantxEmpaque, p.strparam2 AS Ubicacion,  p.strparam3 AS medida, pp1.StrDescripcion AS sexo, 
+            pp2.StrDescripcion AS Material,  pp3.StrDescripcion AS Marca, 
+            p.intprecio1 as precio, 
+            (SELECT strarchivo 
+            FROM tblimagenes 
+            WHERE stridcodigo = p.StrIdProducto AND StrDescripcion = '1') AS productoImg, 
+            (SELECT intCantidadFinal 
+            FROM qrySaldosInv 
+            WHERE strProducto = p.StrIdProducto and IntAno = ${year} and IntPeriodo = ${month} and IntBodega = '01') AS saldoInv
+            FROM tblproductos AS p
+            INNER JOIN TblProdParametro1 AS pp1 ON pp1.StrIdPParametro1 = p.StrPParametro1
+            INNER JOIN TblProdParametro2 AS pp2 ON pp2.StrIdPParametro = p.StrPParametro2
+            INNER JOIN TblProdParametro3 AS pp3 ON pp3.StrIdPParametro = p.StrPParametro3
+            WHERE StrIdProducto LIKE '${strIdProducto}%'`
 
-        HGI.query(query,(err,rows)=>{
-            if(err){
-                reject(err)
-                return;
-            }
-            resolve(rows.recordset)
-        })
+            const data = await obtenerDatosDB_Hgi(query)
+            resolve(data)
+        } catch (error) {
+            reject(error)
+        }
     })
 }
 
-const GET_MATERIALES= () =>{
-    return new Promise((resolve,reject)=>{
-        const query = `select StrIdPParametro as id,StrDescripcion as descripcion from TblProdParametro2`
-
-        HGI.query(query,(err,rows)=>{
-            if(err){
-                reject(err)
-                return;
-            }
-            resolve(rows.recordset)
-        })
+const GetImagenesUnProducto_Query = async (stridproducto) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const query = `select StrArchivo from TblImagenes where StrIdCodigo = '${stridproducto}' and IntOrden != 0`
+            const data = obtenerDatosDB_Hgi(query)
+            resolve(data)
+        } catch (error) {
+            reject(error)
+        }
     })
 }
 
-const GET_MARCAS = () =>{
-    return new Promise((resolve,reject)=>{
-        const query = `select StrIdPParametro as id,StrDescripcion as descripcion from TblProdParametro3`
+const GetGeneros_Query = async () => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const query = `select StrIdPParametro1 as id,StrDescripcion as descripcion from TblProdParametro1`
+            const data = await obtenerDatosDB_Hgi(query)
+            resolve(data)
+        } catch (error) {
+            reject(error)
+        }
 
-        HGI.query(query,(err,rows)=>{
-            if(err){
-                reject(err)
-                return;
-            }
-            resolve(rows.recordset)
-        })
     })
 }
 
-const GET_UNIDADES = () =>{
-    return new Promise((resolve,reject)=>{
-        const query = `select StrIdUnidad from TblUnidades`
+const GetMateriales_Query = async() => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            const query = `select StrIdPParametro as id,StrDescripcion as descripcion from TblProdParametro2`
+            const data = await  obtenerDatosDB_Hgi(query)
+            resolve(data)
+        } catch (error) {
+          reject(error)  
+        }
+    })
+}
 
-        HGI.query(query,(err,rows)=>{
-            if(err){
-                reject(err)
-                return;
-            }
-            resolve(rows.recordset)
-        })
+const GetMarcas_Query = async () => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const query = `select StrIdPParametro as id,StrDescripcion as descripcion from TblProdParametro3`
+            const data = await obtenerDatosDB_Hgi(query)
+            resolve(data)
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+
+const GetUnidades_Query = async() => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const query = `select StrIdUnidad from TblUnidades`
+            const data = await obtenerDatosDB_Hgi(query)
+            resolve(data)
+        } catch (error) {
+            reject(error)
+        }
     })
 }
 
 
 module.exports = {
-    GET_GENEROS,
-    GET_MATERIALES,
-    GET_MARCAS,
-    GET_UNIDADES
+    GetGeneros_Query,
+    GetMateriales_Query,
+    GetMarcas_Query,
+    GetUnidades_Query,
+    GetInfoProductos_Query,
+    GetImagenesUnProducto_Query
 }

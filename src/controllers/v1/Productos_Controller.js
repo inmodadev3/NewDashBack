@@ -1,71 +1,55 @@
-const { GET_MARCAS, GET_GENEROS, GET_UNIDADES } = require('../../Querys/Productos_Querys');
+const { GetInfoProductos_Query, GetImagenesUnProducto_Query, GetMarcas_Query, GetGeneros_Query, GetUnidades_Query } = require('../../Querys/Productos_Querys');
 
-const HGI = require('../../databases/HgiConexion').HgiConexion
 
-const GetInfoProductos = (req, res) => {
+//obtener informacion acerca de un producto
+const GetInfoProductos = async(req, res) => {
     const { strIdProducto } = req.params
-    const fecha = new Date();
-    const year = fecha.getFullYear();
-    const month = fecha.getMonth() + 1;
-    const query = `SELECT TOP 10 p.StrIdProducto AS referencia, p.StrDescripcion AS descripcion, 
-    p.strunidad AS UM,p.strauxiliar as cantxEmpaque, p.strparam2 AS Ubicacion,  p.strparam3 AS medida, pp1.StrDescripcion AS sexo, 
-    pp2.StrDescripcion AS Material,  pp3.StrDescripcion AS Marca, 
-    p.intprecio1 as precio, 
-    (SELECT strarchivo 
-     FROM tblimagenes 
-     WHERE stridcodigo = p.StrIdProducto AND StrDescripcion = '1') AS productoImg, 
-    (SELECT intCantidadFinal 
-     FROM qrySaldosInv 
-     WHERE strProducto = p.StrIdProducto and IntAno = ${year} and IntPeriodo = ${month} and IntBodega = '01') AS saldoInv
-    FROM tblproductos AS p
-    INNER JOIN TblProdParametro1 AS pp1 ON pp1.StrIdPParametro1 = p.StrPParametro1
-    INNER JOIN TblProdParametro2 AS pp2 ON pp2.StrIdPParametro = p.StrPParametro2
-    INNER JOIN TblProdParametro3 AS pp3 ON pp3.StrIdPParametro = p.StrPParametro3
-    WHERE StrIdProducto LIKE '${strIdProducto}%'`
-
-    HGI.query(query, (err, rows) => {
-        if (err) {
-            res.status(404).json({ error: err.message, stack: err.stack , success:false});
-            return;
-        }
-        res.status(200).json({ data: rows.recordset, success: true })
-    })
+    
+    try {
+        const data = await GetInfoProductos_Query(strIdProducto)
+        res.status(200).json({ data: data, success: true })
+    } catch (error) {
+        res.status(404).json({ error: err.message, stack: err.stack , success:false});
+    }
 }
 
-const GetImagenesUnProducto = (req, res) => {
+//Obtener la lista de imagenes de un producto
+const GetImagenesUnProducto = async(req, res) => {
     const { stridproducto } = req.params
-    const query = `select StrArchivo from TblImagenes where StrIdCodigo = '${stridproducto}' and IntOrden != 0`
 
-    HGI.query(query, (err, rows) => {
-        if (err) {
-            res.status(404).json({ error: err.message, stack: err.stack ,success:false});
-            return
-        }
-        res.status(200).json({ data: rows.recordset, success: true })
-    })
+    try {
+        const data = await GetImagenesUnProducto_Query(stridproducto)
+        res.status(200).json({ data: data, success: true })
+    } catch (error) {
+        res.status(404).json({ error: err.message, stack: err.stack ,success:false});
+        throw error
+    }
 }
 
+//Obtener marcas registradas en HGI
 const GetMarcas = async(req,res) =>{
     try {
-        const data = await GET_MARCAS()
+        const data = await GetMarcas_Query()
         res.status(200).json({marcas:data})
     } catch (error) {
         res.status(400).json({error})
     }
 }
 
+//Obtener Generos registrados en HGI
 const GetGeneros = async(req,res) =>{
     try {
-        const data = await GET_GENEROS()
+        const data = await GetGeneros_Query()
         res.status(200).json({generos:data})
     } catch (error) {
         res.status(400).json({error})
     }
 }
 
+//Obtener lista de unidades de medida en HGI
 const GetUnidades = async(req,res)=>{
     try {
-        const data = await GET_UNIDADES()
+        const data = await GetUnidades_Query()
         res.status(200).json({unidades:data})
     } catch (error) {
         res.status(400).json({error})

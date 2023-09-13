@@ -6,8 +6,6 @@ const port = /*process.env.PORTSERVER ||*/ 8083
 const rutas = require('./src/routes')
 const path = require('path')
 const fs = require('fs')
-const {validarCnxDASH} = require('./src/databases/DashConexion')
-const {ConexionHgi} = require('./src/databases/HgiConexion')
 const https = require('https')
 
 
@@ -25,8 +23,6 @@ app.use(rutas)
 
 https.createServer(options,app).listen(port,()=>{
     console.log(`SERVIDOR FUNCIONANDO EN PUERTO ${port}`)
-    validarCnxDASH()
-    ConexionHgi()
 })
 
 
