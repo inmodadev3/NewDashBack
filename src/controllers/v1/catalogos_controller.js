@@ -1,11 +1,11 @@
-const {spawn} = require('child_process')
+const { spawn } = require('child_process')
 const axios = require('axios')
 const cheerio = require('cheerio');
 
 const getFolders = async (req, res) => {
     const { ruta } = req.body
     const ruta_alterna = "http://10.10.10.128/ownCloud/fotos_nube/FOTOS%20%20POR%20SECCION%20CON%20PRECIO/"
-    
+
     try {
         const response = await axios.get(ruta ? ruta : ruta_alterna);
         const html = response.data; // Esto dependerá del formato de respuesta del servidor
@@ -29,31 +29,48 @@ const getFolders = async (req, res) => {
             folderPaths.shift();
         }
 
-        res.json({folderPaths,imageFileNames});
+        res.json({ folderPaths, imageFileNames });
     } catch (error) {
         console.error('Error fetching folder paths:', error);
         res.status(500).json({ error: 'An error occurred' });
     }
 }
 
-const createPDF = async(req,res) =>{
+const createPDF = async (req, res) => {
 
-    const { data,precio,userId } = req.body
-    const pythonScriptPath = '/var/www/html/NewDashBack/src/python_scripts/datos.py';
+    try {
+        const { data, precio, userId } = req.body
+        const pythonScriptPath = '/var/www/html/NewDashBack/src/python_scripts/datos.py';
 
-    const pythonProcess = spawn('python3',[pythonScriptPath,JSON.stringify(data),precio,userId])
-    
+        const pythonProcess = spawn('python3', [pythonScriptPath, JSON.stringify(data), precio, userId])
 
-    let pythonResponse = "";
 
-    pythonProcess.stdout.on('data', (data) => {
-        pythonResponse = data.toString();
-    });
+        let pythonResponse = "";
 
-    pythonProcess.stdout.on("end", (end) => {
-        res.json({ data:end,finish:"Correct" });
-    });
-    
+        pythonProcess.stdout.on('data', (data) => {
+            try {
+                const dataString = data.toString()
+                console.log(dataString)
+                /*const result = JSON.parse(dataString)
+                if(result.error) {
+                    console.error(`Error en el script de python ${result.error}`)
+                }else{
+                    console.log(dataString)
+                }*/
+            } catch (error) {
+                console.log(error)
+                console.error("Ha ocurrido un error ")
+            }
+        });
+
+        /*pythonProcess.stdout.on("end", (end) => {
+            res.json({ data: end, finish: "Correct" });
+        });*/
+    } catch (error) {
+        console.log(error)
+    }
+
+
 }
 
 module.exports = {

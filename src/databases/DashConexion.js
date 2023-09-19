@@ -6,7 +6,7 @@ const poolDash = mysql.createPool({
     password: 'Sistemas2018*',
     database: 'DASH',
     multipleStatements: true,
-    connectionLimit: 30
+    connectionLimit: 100
 })
 
 module.exports = poolDash

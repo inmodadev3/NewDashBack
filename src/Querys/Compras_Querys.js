@@ -71,7 +71,7 @@ const PostPreciosEmpresa_Query = async(precio1) => {
 const GetProductosLiquidados_Query = async() => {
     return new Promise(async(resolve, reject) => {
         try {
-            const query = `Select detalle.intIdDetalle as id,detalle.strReferencia,detalle.strDescripcion,detalle.intPrecio1,detalle.intPrecio2,detalle.intPrecio3,detalle.intPrecio4, doc.strRaggi as raggi,detalle.strUnidadMedida
+            const query = `Select detalle.intIdDetalle as id,detalle.strReferencia,detalle.strDescripcion,detalle.intPrecio1,detalle.intPrecio2,detalle.intPrecio3,detalle.intPrecio4, doc.strRaggi as raggi,detalle.strUnidadMedidaM as strUnidadMedida
                             from tbldocumentocompradetalle as detalle 
                             inner join tbldocumentos as doc on detalle.intIdDocumento = doc.intIdDocumentoReferencia
                             where detalle.intEstado = 2`
@@ -132,6 +132,37 @@ const ACTUALIZAR_ESTADO_PRODUCTOS = async(estado, id) => {
     })
 }
 
+const CargarDetallesContenedor_Query = async(raggi,importacion,fecha,total)=>{
+    return new Promise(async(resolve,reject)=>{
+        try {
+            const sql = `INSERT INTO tbldocumentos (strRaggi,strImportacion,intTRM,intOTM,intOTMUSD,intOTMSUP,intArancel,intArancelUSD,intArancelSUP,intIVA,intIVAUSD,intIVASUP,intDescargues,intDescarguesUSD,intDescarguesSUP,intDepositoFranca
+                ,intDepositoFrancaUSD,intDepositoFrancaSUP,intNaviera,intNavieraUSD,intNavieraSUP,intTIC,intTICUSD,intTICSUP,intOtrosUno,intOtrosUnoUSD,intOtrosUnoSUP,intOtrosDos,intOtrosDosUSD,intOtrosDosSUP,datFecha,intPorcentajeDescuento,idEstado,intValorTotalCompra) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
+        
+            await obtenerDatosDb_Dash(sql,[raggi, importacion, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, fecha, 100, 5, total])
+
+            resolve(1)
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+
+const CargarDetallesContenedorDatos_Query = async(datos)=>{
+    return new Promise(async(resolve,reject)=>{
+        try {    
+            const sqlDetalle = `CALL SP_AgregarDocumentoDetalleCompra(?,?,?,?,?,?,?,?,?,?,?,?,?)`
+            
+            datos.forEach(async(item) => {
+                let stringNumero = ((item.Valor).toFixed(2))
+                let valorParseado = parseFloat(stringNumero)
+                 await obtenerDatosDb_Dash(sqlDetalle,["", item.Referencia, item.Cantidad, item['Unidad de Medida'], valorParseado, item.Descripcion, 1, item.Color, item.CxU, item.Dimension, "", item['Cantidad por paca'], item.Material])
+            })
+            resolve(1)
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
 
 const COMPRAS = {
     POSTDOCUMENTOS: `INSERT INTO tbldocumentos (strRaggi,strImportacion,intTRM,intOTM,intOTMUSD,intOTMSUP,intArancel,intArancelUSD,intArancelSUP,intIVA,intIVAUSD,intIVASUP,intDescargues,intDescarguesUSD,intDescarguesSUP,intDepositoFranca
@@ -149,5 +180,7 @@ module.exports = {
     PostPreciosEmpresa_Query,
     Post_Liquidar_Query,
     GetProductosLiquidados_Query,
-    ACTUALIZAR_ESTADO_PRODUCTOS
+    ACTUALIZAR_ESTADO_PRODUCTOS,
+    CargarDetallesContenedor_Query,
+    CargarDetallesContenedorDatos_Query
 }

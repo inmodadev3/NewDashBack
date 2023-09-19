@@ -1,64 +1,57 @@
 const DASH = require('../../databases/DashConexion').dashConexion
 const xlsx = require('xlsx')
-const { 
-    COMPRAS, 
+const {
+    COMPRAS,
     ACTUALIZAR_ESTADO_PRODUCTOS,
     GetProductosContenedorEstado_Query,
     PostDataProductoContenedor_Dash_Query,
     PostDataProductoContenedor_Hgi_Query,
     PostPreciosEmpresa_Query,
     Post_Liquidar_Query,
-    GetProductosLiquidados_Query
+    GetProductosLiquidados_Query,
+    CargarDetallesContenedor_Query,
+    CargarDetallesContenedorDatos_Query
 } = require('../../Querys/Compras_Querys')
 
 const CargarDetallesContenedor = async (req, res) => {
     //excel, importacion, raggi
-    const file = req.file
-    const { importacion, raggi } = req.body
-    const fecha = new Date()
 
-    //Validar que halla llegado un archivo
-    if (!file) {
-        return res.status(400).json({ error: 'No se ha seleccionado ningún archivo' })
-    }
+    try {
+        const file = req.file
+        const { importacion, raggi } = req.body
+        const fecha = new Date()
 
-    //Convertir el archivo xlsx en un objeto Json 
-    const workbook = xlsx.read(file.buffer, { type: 'buffer' }) //transoformar el buffer en un archivo xlsx
-    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-    const data = xlsx.utils.sheet_to_json(worksheet);
+        //Validar que halla llegado un archivo
+        if (!file) {
+            return res.status(400).json({ error: 'No se ha seleccionado ningún archivo' })
+        }
 
-    //Validar que el documento tenga datos
-    if (data.length === 0) {
-        return res.status(200).json({ error: 'El archivo no tiene datos.' })
-    }
+        //Convertir el archivo xlsx en un objeto Json 
+        const workbook = xlsx.read(file.buffer, { type: 'buffer' }) //transoformar el buffer en un archivo xlsx
+        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+        const data = xlsx.utils.sheet_to_json(worksheet);
 
-    //Calcular el total de la compra
-    let total = 0
-    let array = []
-    data.forEach((item) => {
+        //Validar que el documento tenga datos
+        if (data.length === 0) {
+            return res.status(200).json({ error: 'El archivo no tiene datos.' })
+        }
 
-        let stringNumero = ((item.Valor).toFixed(2))/* .replace(".","").replace(",",".")  */
-        let numero = parseFloat(stringNumero)
-        total += numero * (item.Cantidad)
-    })
-
-    let sql = COMPRAS.POSTDOCUMENTOS
-
-    let sqlDetalle = COMPRAS.POSTDETALLEDOCUMENTOS
-
-    DASH.query(sql, [raggi, importacion, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, fecha, 100, 5, total], (err, rows) => {
-        if (err) return res.status(404).json({ data: err, message: "HA OCURRIDO UN ERROR GENERANDO EL DOCUMENTO" })
+        //Calcular el total de la compra
+        let total = 0
         data.forEach((item) => {
-            let stringNumero = ((item.Valor).toFixed(2))/* .replace(".","").replace(",",".") */
-            let valorParseado = parseFloat(stringNumero)
-            DASH.query(sqlDetalle, ["", item.Referencia, item.Cantidad, item['Unidad de Medida'], valorParseado, item.Descripcion, 1, item.Color, item.CxU, item.Dimension, "", item['Cantidad por paca'], item.Material], (err, rows) => {
-                if (err) return res.json(404).json({ data: err, message: "Ha OCURRIDO UN ERROR INGRESANDO LOS PRODUCTOS" })
-            })
+
+            let stringNumero = ((item.Valor).toFixed(2))/* .replace(".","").replace(",",".")  */
+            let numero = parseFloat(stringNumero)
+            total += numero * (item.Cantidad)
         })
+        await CargarDetallesContenedor_Query(raggi,importacion,fecha,total)
+        await CargarDetallesContenedorDatos_Query(data)
+        res.status(200).json({ data: data, message: "Compra Cargada con exito" })
 
-    })
+    } catch (error) {
+        res.status(400).json({ error, message: "Ha ocurrido un error al intentar ingresar datos del contenedor" })
+    }
 
-    res.status(200).json({ data: data, message: "Compra Cargada con exito" })
 }
 
 //Obtener los productos para liquidar
@@ -72,12 +65,12 @@ const GetProductosContenedorEstado = async (req, res) => {
 }
 
 //Obtener productos que han sido liquidados en el contenedor actual
-const GetProductosLiquidados = async(req,res) =>{
+const GetProductosLiquidados = async (req, res) => {
     try {
         let data = await GetProductosLiquidados_Query()
-        res.status(200).json({data})
+        res.status(200).json({ data })
     } catch (error) {
-        res.status(400).json({error,message:"Ha ocurrido un error inesperado"})
+        res.status(400).json({ error, message: "Ha ocurrido un error inesperado" })
     }
 }
 
@@ -106,14 +99,14 @@ const PostPreciosEmpresa = async (req, res) => {
         } catch (error) {
             res.status(400).json({ error, message: "Ha ocurrido un error" })
         }
-    }else{
-        res.status(400).json({message:"Precio incorrecto"})
+    } else {
+        res.status(400).json({ message: "Precio incorrecto" })
     }
 
 }
 
 //Opcion para liquidar un producto
-const Post_Liquidar = async (req,res) =>{
+const Post_Liquidar = async (req, res) => {
     const {
         intIdDetalle,
         strDescripcion,
@@ -138,15 +131,15 @@ const Post_Liquidar = async (req,res) =>{
     } = req.body
 
     try {
-        let data = await Post_Liquidar_Query(intIdDetalle,strDescripcion,intPrecioUno,intPrecioDos,intPrecioTres,
-            intPrecioCuatro,intPrecioCinco,strReferencia,intCantidad,strUDM,intEstado,strDimension,intCxU,
-            strUnidadMedida,intCantidadPaca,strMaterial,strObservacion,strSexo,strMarca,strColor)
+        let data = await Post_Liquidar_Query(intIdDetalle, strDescripcion, intPrecioUno, intPrecioDos, intPrecioTres,
+            intPrecioCuatro, intPrecioCinco, strReferencia, intCantidad, strUDM, intEstado, strDimension, intCxU,
+            strUnidadMedida, intCantidadPaca, strMaterial, strObservacion, strSexo, strMarca, strColor)
 
         let liquidados = await GetProductosLiquidados_Query()
 
-        res.status(200).json({success:true, data,liquidados})
+        res.status(200).json({ success: true, data, liquidados })
     } catch (error) {
-        res.status(400).json({error,message:"Ha ocurrido un error inesperado"})
+        res.status(400).json({ error, message: "Ha ocurrido un error inesperado" })
     }
 }
 
@@ -156,7 +149,7 @@ const Put_Modificar = async (req, res) => {
     try {
         await ACTUALIZAR_ESTADO_PRODUCTOS(1, parseInt(id));
         let liquidar = await GetProductosContenedorEstado_Query()
-        res.status(200).json({ data:liquidar });
+        res.status(200).json({ data: liquidar });
     } catch (error) {
         res.status(400).json({ error, message: "Ha ocurrido un error al actualizar el producto" });
     }

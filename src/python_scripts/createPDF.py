@@ -58,7 +58,7 @@ def generar_catalogo(NomPdf ,productos,precio,userId):
         #data.append([imagen, producto[0], producto[1], producto[2]])
         descripcion_porlineas = dividir_cadena(producto[1])if producto[1] else producto[1]
         combinar_data = [imagen,
-                         f"\n\nReferencia: {producto[0]}\n{descripcion_porlineas}\nPrecio: {producto[2]}\nUnidad: {producto[4]}\nCant x unidad: {producto[5]}\nDimensión: {producto[6]}"]
+                         f"\n\nReferencia: {producto[0]}\n{descripcion_porlineas}\nPrecio: {producto[2]}\nUnidad: {producto[4]}\nCant x unidad: {producto[5]}\nDimension: {producto[6]}"]
         data.append(combinar_data)
 
 
@@ -79,15 +79,6 @@ def generar_catalogo(NomPdf ,productos,precio,userId):
         ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
         ('FONTNAME', (0, 0), (-1, -1), 'Helvetica-Bold'),
     ]))
-    
+    print("Creando PDF")
     elements.append(table)
     doc.build(elements)
-
-
-""" ("BACKGROUND", (0, 0), (-1, 0), colors.grey),  # Fila de encabezado gris
-    ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),  # Color de texto en el encabezado
-    ("ALIGN", (0, 0), (-1, -1), "CENTER"),  # Alineación del contenido al centro
-    ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),  # Fuente en negrita para el encabezado
-    ("BOTTOMPADDING", (0, 0), (-1, 0), 12),  # Espaciado inferior en el encabezado
-    ("BACKGROUND", (0, 1), (-1, -1), colors.beige),  # Color de fondo de las filas de datos
-    ("GRID", (0, 0), (-1, -1), 1, colors.black),  # Líneas de cuadrícula """
