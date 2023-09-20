@@ -39,13 +39,18 @@ const GetClientes_Query = async (vendedorId) => {
             INNER JOIN TblCiudades AS C ON C.StrIdCiudad = T.StrCiudad
             where C.StrIdCiudad in (${ciudadesString}) and T.StrIdTercero not in ('0','01211','0128','0130') and t.intTipoTercero in ('01','02','03','04','05','09',17) order by E.StrDescripcion`
 
-            const ObtenerClientesXCiudades = await obtenerDatosDB_Hgi(sqlHgi)
+            if (ciudadesString) {
+                const ObtenerClientesXCiudades = await obtenerDatosDB_Hgi(sqlHgi)
 
-            if (ObtenerClientesXCiudades !== 0) {
-                resolve(ObtenerClientesXCiudades)
-            } else {
-                resolve(null)
+                if (ObtenerClientesXCiudades !== 0) {
+                    resolve(ObtenerClientesXCiudades)
+                } else {
+                    resolve(null)
+                }
+            }else{
+                reject("No se encontraron ciudades asociadas")
             }
+
         } catch (error) {
             reject(error)
         }
@@ -97,7 +102,7 @@ const GetClienteXNombre_Query = async (clienteNombre, vendedorId) => {
                         INNER JOIN TblEstados AS E ON T.IntTEstado = E.intIdEstado
                         INNER JOIN TblCiudades AS C ON C.StrIdCiudad = T.StrCiudad
                         where C.StrIdCiudad in (${ciudadesString}) and T.strNombre like '%${clienteNombre}%' and T.StrIdTercero not in ('0','01211','0128','0130') and t.intTipoTercero in ('01','02','03','04','05','09',17) order by E.StrDescripcion`
-             
+
             const ObtenerClientesXCiudades = await obtenerDatosDB_Hgi(sqlHgi)
 
             if (ObtenerClientesXCiudades !== 0) {
@@ -111,14 +116,14 @@ const GetClienteXNombre_Query = async (clienteNombre, vendedorId) => {
     })
 }
 
-const GetGestionesXCliente_Query = async(idTercero) => {
-    return new Promise(async(resolve,reject)=>{
+const GetGestionesXCliente_Query = async (idTercero) => {
+    return new Promise(async (resolve, reject) => {
         try {
             const query = `select g.intIdGestion,g.intTipoGestion, l.strNombreEmpleado,g.strObservacion,g.dtFechaGestion from dash.tblgestiondestapemadrinatercero as g
                             inner join dash.tbllogin as  l on g.intIdLogin = l.idLogin
                             where strIdTercero = ? order by dtFechaGestion desc`
 
-            const gestiones_Cliente = await obtenerDatosDb_Dash(query,[idTercero])
+            const gestiones_Cliente = await obtenerDatosDb_Dash(query, [idTercero])
             resolve(gestiones_Cliente)
         } catch (error) {
             reject(error)
@@ -126,8 +131,8 @@ const GetGestionesXCliente_Query = async(idTercero) => {
     })
 }
 
-const GetDataClientes_dataClientes_Query = async(id)=>{
-    return new Promise(async(resolve,reject)=>{
+const GetDataClientes_dataClientes_Query = async (id) => {
+    return new Promise(async (resolve, reject) => {
         try {
             const fecha = new Date();
             const year = fecha.getFullYear();
@@ -157,8 +162,8 @@ const GetDataClientes_dataClientes_Query = async(id)=>{
     })
 }
 
-const GetDataClientes_dataGrafica_Query = async(id)=>{
-    return new Promise(async(resolve,reject)=>{
+const GetDataClientes_dataGrafica_Query = async (id) => {
+    return new Promise(async (resolve, reject) => {
         try {
             let sql = `SELECT tc.StrDescripcion, SUM(tdet.IntCantidad) as TotalCantidad
             FROM tbldocumentos as tdoc
@@ -179,8 +184,8 @@ const GetDataClientes_dataGrafica_Query = async(id)=>{
     })
 }
 
-const GetDataClientes_dataProductosMasComprados_Query = async(id)=>{
-    return new Promise(async(resolve,reject)=>{
+const GetDataClientes_dataProductosMasComprados_Query = async (id) => {
+    return new Promise(async (resolve, reject) => {
         try {
             let sql = `SELECT TOP 8 tdet.StrProducto, SUM(tdet.IntCantidad) as cantidades
                         FROM tbldocumentos as tdoc
@@ -198,24 +203,24 @@ const GetDataClientes_dataProductosMasComprados_Query = async(id)=>{
     })
 }
 
-const PostNuevaGestion_Query = async(clienteId,intTipoGestion,intIdLogin,strObservacion) =>{
-    return new Promise(async(resolve,reject)=>{
+const PostNuevaGestion_Query = async (clienteId, intTipoGestion, intIdLogin, strObservacion) => {
+    return new Promise(async (resolve, reject) => {
         try {
             const fecha = new Date()
             const fechaFormated = fecha.toISOString()
             const sql = "INSERT INTO tblgestiondestapemadrinatercero (intTipoGestion,intIdLogin,strIdTercero,dtFechaGestion,intEstado,strObservacion) VALUES (?,?,?,?,?,?)"
 
-            const data = await obtenerDatosDb_Dash(sql,[intTipoGestion, intIdLogin, clienteId, fechaFormated, 1, strObservacion])
+            const data = await obtenerDatosDb_Dash(sql, [intTipoGestion, intIdLogin, clienteId, fechaFormated, 1, strObservacion])
 
-            resolve({data: data, completed: true, message: "Gestion agregada con exito"})
+            resolve({ data: data, completed: true, message: "Gestion agregada con exito" })
         } catch (error) {
             reject(error)
         }
     })
 }
 
-const obtenerCiudadesClientes_Query = async(vendedorId) =>{
-    return new Promise(async(resolve,reject)=>{
+const obtenerCiudadesClientes_Query = async (vendedorId) => {
+    return new Promise(async (resolve, reject) => {
         try {
             const ciudadesString = await ObtenerCiudades_Query(vendedorId)
             const SqlHGI = `select StrDescripcion,StrIdCiudad from TblCiudades AS C where C.StrIdCiudad in (${ciudadesString})`
@@ -228,8 +233,8 @@ const obtenerCiudadesClientes_Query = async(vendedorId) =>{
     })
 }
 
-const obtenerClientesXCiudad_Query = async(ciudadId) =>{
-    return new Promise(async(resolve,reject)=>{
+const obtenerClientesXCiudad_Query = async (ciudadId) => {
+    return new Promise(async (resolve, reject) => {
         try {
             const sqlHgi = `SELECT T.StrIdTercero,T.StrNombre as Nombre_tercero, E.StrDescripcion as Estado,T.StrDato1 as Viaja, C.StrDescripcion as ciudad,
                             (SELECT TOP 1 DatFecha
@@ -241,7 +246,7 @@ const obtenerClientesXCiudad_Query = async(ciudadId) =>{
                             INNER JOIN TblEstados AS E ON T.IntTEstado = E.intIdEstado
                             INNER JOIN TblCiudades AS C ON C.StrIdCiudad = T.StrCiudad
                             where C.StrIdCiudad = '${ciudadId}' and T.StrIdTercero not in ('0','01211','0128','0130') and t.intTipoTercero in ('01','02','03','04','05','09',17) order by E.StrDescripcion`
-            
+
             const ClientesxCiudad = obtenerDatosDB_Hgi(sqlHgi)
             resolve(ClientesxCiudad)
         } catch (error) {

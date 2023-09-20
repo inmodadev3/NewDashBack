@@ -92,12 +92,11 @@ const GetUnidades_Query = async() => {
     })
 }
 
-
 module.exports = {
     GetGeneros_Query,
     GetMateriales_Query,
     GetMarcas_Query,
     GetUnidades_Query,
     GetInfoProductos_Query,
-    GetImagenesUnProducto_Query
+    GetImagenesUnProducto_Query,
 }

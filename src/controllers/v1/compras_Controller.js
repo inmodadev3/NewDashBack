@@ -155,6 +155,16 @@ const Put_Modificar = async (req, res) => {
     }
 }
 
+const Get_DataProducto_Modificar = async(req,res)=>{
+    const { id } = req.params
+    try {
+        const data = await PostDataProductoContenedor_Dash_Query(id)
+        res.status(200).json({ producto:data[0] })
+    } catch (error) {
+        res.status(400).json({ error, message: "Ha ocurrido un error al recuperar los datos para modificar" })
+    }
+}
+
 module.exports = {
     CargarDetallesContenedor,
     GetProductosContenedorEstado,
@@ -162,5 +172,6 @@ module.exports = {
     PostPreciosEmpresa,
     Post_Liquidar,
     GetProductosLiquidados,
-    Put_Modificar
+    Put_Modificar,
+    Get_DataProducto_Modificar
 }

@@ -1,7 +1,17 @@
-const { GetPedidosEnProceso_query, GetPedidosEnTerminal_Query, GetPedidosNuevos_Query, GetInfoPedido_Query, GetInfoPedidoTerminal_Query, GetPedidoXId_Query } = require('../../Querys/Pedidos_Querys')
+const { GetPedidosEnProceso_query, GetPedidosEnTerminal_Query, GetPedidosNuevos_Query, GetInfoPedido_Query, GetInfoPedidoTerminal_Query, GetPedidoXId_Query, GetPedidos_Query, PutEstadoPedido_Query } = require('../../Querys/Pedidos_Querys')
 const { GetUbicaciones } = require('../../helpers/helpers')
 
 const DASH = require('../../databases/DashConexion').dashConexion
+
+const GetPedidos = async(req,res)=>{
+    try {
+        let data = await GetPedidos_Query()
+        res.status(200).json({data:data, success:true})
+    } catch (error) {
+        res.status(400).json({error,message:"Ha ocurrido un error al obtener los pedidos nuevos ",success:false})
+        throw error
+    }
+}
 
 //Obtener pedidos nuevos
 const GetPedidosNuevos = async(req, res) => {
@@ -14,6 +24,7 @@ const GetPedidosNuevos = async(req, res) => {
     }
 }
 
+//obtener pedidos en proceso (con id diferente de 1)
 const GetPedidosEnProceso = async(req, res) => {
     
     try {
@@ -25,6 +36,7 @@ const GetPedidosEnProceso = async(req, res) => {
     }
 }
 
+//obtener data de pedidos en terminal
 const GetPedidosEnTerminal = async(req, res) => {
     try {
         const data = await GetPedidosEnTerminal_Query()
@@ -66,6 +78,18 @@ const GetPedidoXId = async(req,res) =>{
     }
 }
 
+const PutEstadoPedido = async(req,res)=>{
+    const {id,estado} = req.body
+    try {
+        const data = await PutEstadoPedido_Query(id,estado)
+        res.status(200).json({data:data,success:true})
+        
+    } catch (error) {
+        res.status(400).json({error:err.message , stack:err.stack , success:false})
+        throw error
+    }
+}
+
 
 
 module.exports = {
@@ -74,5 +98,7 @@ module.exports = {
     GetPedidosEnTerminal,
     GetInfoPedido,
     GetInfoPedidoTerminal,
-    GetPedidoXId
+    GetPedidoXId,
+    GetPedidos,
+    PutEstadoPedido
 }

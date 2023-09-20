@@ -1,5 +1,17 @@
 const { obtenerDatosDB_Hgi, obtenerDatosDb_Dash } = require('./Global_Querys')
 
+const GetPedidos_Query =async()=>{
+    return new Promise(async(resolve,reject)=>{
+        try {
+            const query = `SELECT intIdPedido,strIdPedidoVendedor,strNombVendedor,strNombCliente,dtFechaFinalizacion,dtFechaEnvio,intValorTotal,intEstado FROM tblPedidos order by intIdPedido desc limit 80 offset 0`
+            const data = await obtenerDatosDb_Dash(query)
+            resolve(data)
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+
 const GetPedidosNuevos_Query = async() =>{
     return new Promise(async(resolve,reject)=>{
         try {
@@ -76,7 +88,7 @@ const GetInfoPedidoTerminal_Query = async(id) =>{
 const GetPedidoXId_Query = async(id) =>{
     return new Promise(async(resolve,reject)=>{
         try {
-            const query = `SELECT intIdPedido,strIdPedidoVendedor,strNombVendedor,strNombCliente,dtFechaFinalizacion,dtFechaEnvio,intValorTotal FROM tblPedidos where intIdPedido like '${id}%' order by intIdPedido desc limit 80 offset 0`
+            const query = `SELECT intIdPedido,strIdPedidoVendedor,strNombVendedor,strNombCliente,dtFechaFinalizacion,dtFechaEnvio,intValorTotal,intEstado FROM tblPedidos where intIdPedido like '${id}%' order by intIdPedido desc limit 80 offset 0`
 
             const data = await obtenerDatosDb_Dash(query)
             resolve(data)
@@ -86,6 +98,17 @@ const GetPedidoXId_Query = async(id) =>{
     })
 }
 
+const PutEstadoPedido_Query = async(id,estado) =>{
+    return new Promise(async(resolve,reject)=>{
+        try {
+            const query = `UPDATE tblpedidos SET intEstado = ? where intIdPedido = ?`
+            await obtenerDatosDb_Dash(query,[estado,id])
+            resolve(1)
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
 
 module.exports = {
     GetPedidosNuevos_Query,
@@ -93,5 +116,7 @@ module.exports = {
     GetPedidosEnTerminal_Query,
     GetInfoPedido_Query,
     GetInfoPedidoTerminal_Query,
-    GetPedidoXId_Query
+    GetPedidoXId_Query,
+    GetPedidos_Query,
+    PutEstadoPedido_Query
 }
