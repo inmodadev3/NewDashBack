@@ -48,15 +48,32 @@ const GetPedidosEnTerminal_Query = async() =>{
     })
 }
 
+const GetUbicaciones = async(strIdProducto) =>{
+    return new Promise(async(resolve,reject)=>{
+        try {
+            const query = `select StrParam2 from TblProductos where StrIdProducto = '${strIdProducto}'`
+            const data = await obtenerDatosDB_Hgi(query)
+            resolve(data)
+        } catch (error) {
+            reject(err)
+        }
+    })
+}
+
 const GetInfoPedido_Query = async(id) =>{
     return new Promise(async(resolve,reject)=>{
         try {
             const query = `SELECT * FROM tbldetallepedidos where intIdpedido = ?`;
             const queryCabecera = `SELECT strIdCliente,strNombCliente,strCiudadCliente,strTelefonoClienteAct,dtFechaEnvio,strNombVendedor,intIdpedido,strCorreoClienteAct,strObservacion,intValorTotal FROM tblpedidos where intIdPedido = ?`;
-
-            const data = await obtenerDatosDb_Dash(query,[id])
+            let data = await obtenerDatosDb_Dash(query,[id])
             const header = await obtenerDatosDb_Dash(queryCabecera,[id])
-            resolve({data,header})
+            const  array_productos = []
+            for (const producto of data) {
+                let ubicaciones = await GetUbicaciones(producto.strIdProducto)
+                await array_productos.push({...producto,ubicaciones:ubicaciones[0].StrParam2
+                })
+            }
+            resolve({data:array_productos,header})
         } catch (error) {
             reject(error)
         }

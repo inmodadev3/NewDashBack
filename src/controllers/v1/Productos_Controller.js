@@ -1,4 +1,4 @@
-const { GetInfoProductos_Query, GetImagenesUnProducto_Query, GetMarcas_Query, GetGeneros_Query, GetUnidades_Query } = require('../../Querys/Productos_Querys');
+const { GetInfoProductos_Query, GetImagenesUnProducto_Query, GetMarcas_Query, GetGeneros_Query, GetUnidades_Query, GetInfoProductos_Nombre_Query } = require('../../Querys/Productos_Querys');
 
 
 //obtener informacion acerca de un producto
@@ -7,6 +7,17 @@ const GetInfoProductos = async(req, res) => {
     
     try {
         const data = await GetInfoProductos_Query(strIdProducto)
+        res.status(200).json({ data: data, success: true })
+    } catch (error) {
+        res.status(404).json({ error: err.message, stack: err.stack , success:false});
+    }
+}
+
+const GetInfoProductos_Nombre = async(req, res) => {
+    const { strNombre } = req.params
+    
+    try {
+        const data = await GetInfoProductos_Nombre_Query(strNombre)
         res.status(200).json({ data: data, success: true })
     } catch (error) {
         res.status(404).json({ error: err.message, stack: err.stack , success:false});
@@ -57,4 +68,4 @@ const GetUnidades = async(req,res)=>{
 }
 
 
-module.exports = { GetInfoProductos, GetImagenesUnProducto,GetMarcas,GetGeneros,GetUnidades }
+module.exports = { GetInfoProductos, GetImagenesUnProducto,GetMarcas,GetGeneros,GetUnidades,GetInfoProductos_Nombre }
