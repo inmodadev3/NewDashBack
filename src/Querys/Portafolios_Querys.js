@@ -167,7 +167,7 @@ const GetDataClientes_dataGrafica_Query = async (id) => {
         try {
             let sql = `SELECT tc.StrDescripcion, SUM(tdet.IntCantidad) as TotalCantidad
             FROM tbldocumentos as tdoc
-            INNER JOIN TblDetalleDocumentos as tdet ON tdet.IntDocumento = tdoc.IntDocumento
+            INNER JOIN TblDetalleDocumentos as tdet ON tdet.IntDocumento = tdoc.IntDocumento and tdet.IntTransaccion = tdoc.IntTransaccion
             INNER JOIN TblProductos as tp ON tdet.StrProducto = tp.StrIdProducto
             INNER JOIN TblClases as tc ON tc.StrIdClase = tp.StrClase
             WHERE tdoc.strTercero = '${id}'
@@ -189,7 +189,7 @@ const GetDataClientes_dataProductosMasComprados_Query = async (id) => {
         try {
             let sql = `SELECT TOP 8 tdet.StrProducto, SUM(tdet.IntCantidad) as cantidades
                         FROM tbldocumentos as tdoc
-                        INNER JOIN TblDetalleDocumentos as tdet ON tdet.IntDocumento = tdoc.IntDocumento
+                        INNER JOIN TblDetalleDocumentos as tdet ON tdet.IntDocumento = tdoc.IntDocumento and tdet.IntTransaccion = tdoc.IntTransaccion
                         WHERE tdoc.strTercero = '${id}'
                             AND tdoc.IntTransaccion IN ('041', '47', '46')
                             AND tdet.StrProducto != '0'

@@ -37,7 +37,7 @@ const GetInfoProductos_Nombre_Query = async (strNombre) => {
             const fecha = new Date();
             const year = fecha.getFullYear();
             const month = fecha.getMonth() + 1;
-            const query = `SELECT TOP 10 p.StrIdProducto AS referencia, p.StrDescripcion AS descripcion, 
+            const query = `SELECT TOP 25 p.StrIdProducto AS referencia, p.StrDescripcion AS descripcion, 
             p.strunidad AS UM,p.strauxiliar as cantxEmpaque, p.strparam2 AS Ubicacion,  p.strparam3 AS medida, pp1.StrDescripcion AS sexo, 
             pp2.StrDescripcion AS Material,  pp3.StrDescripcion AS Marca, 
             p.intprecio1 as precio, 
