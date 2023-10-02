@@ -47,7 +47,7 @@ const GetClientes_Query = async (vendedorId) => {
                 } else {
                     resolve(null)
                 }
-            }else{
+            } else {
                 reject("No se encontraron ciudades asociadas")
             }
 
@@ -233,19 +233,34 @@ const obtenerCiudadesClientes_Query = async (vendedorId) => {
     })
 }
 
-const obtenerClientesXCiudad_Query = async (ciudadId) => {
+const obtenerClientesXCiudad_Query = async (ciudadId, segmentoInt) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const sqlHgi = `SELECT T.StrIdTercero,T.StrNombre as Nombre_tercero, E.StrDescripcion as Estado,T.StrDato1 as Viaja, C.StrDescripcion as ciudad,
-                            (SELECT TOP 1 DatFecha
-                            FROM TblDocumentos
-                            WHERE StrTercero = T.StrIdTercero
-                                AND (IntTransaccion = '041' OR IntTransaccion = 47)
-                            ORDER BY DatFecha DESC) AS ultima_Compra
-                            FROM TblTerceros AS T
-                            INNER JOIN TblEstados AS E ON T.IntTEstado = E.intIdEstado
-                            INNER JOIN TblCiudades AS C ON C.StrIdCiudad = T.StrCiudad
-                            where C.StrIdCiudad = '${ciudadId}' and T.StrIdTercero not in ('0','01211','0128','0130') and t.intTipoTercero in ('01','02','03','04','05','09',17) order by E.StrDescripcion`
+            let sqlHgi;
+            if (segmentoInt.toString() !== "0") {
+                sqlHgi = `SELECT T.StrIdTercero,T.StrNombre as Nombre_tercero, E.StrDescripcion as Estado,T.StrDato1 as Viaja, C.StrDescripcion as ciudad,
+                (SELECT TOP 1 DatFecha
+                FROM TblDocumentos
+                WHERE StrTercero = T.StrIdTercero
+                    AND (IntTransaccion = '041' OR IntTransaccion = 47)
+                ORDER BY DatFecha DESC) AS ultima_Compra
+                FROM TblTerceros AS T
+                INNER JOIN TblEstados AS E ON T.IntTEstado = E.intIdEstado
+                INNER JOIN TblCiudades AS C ON C.StrIdCiudad = T.StrCiudad
+                where C.StrIdCiudad = '${ciudadId}' and T.StrIdTercero not in ('0','01211','0128','0130') and t.intTipoTercero = '${segmentoInt}' order by E.StrDescripcion`
+            } else {
+                sqlHgi = `SELECT T.StrIdTercero,T.StrNombre as Nombre_tercero, E.StrDescripcion as Estado,T.StrDato1 as Viaja, C.StrDescripcion as ciudad,
+                (SELECT TOP 1 DatFecha
+                FROM TblDocumentos
+                WHERE StrTercero = T.StrIdTercero
+                    AND (IntTransaccion = '041' OR IntTransaccion = 47)
+                ORDER BY DatFecha DESC) AS ultima_Compra
+                FROM TblTerceros AS T
+                INNER JOIN TblEstados AS E ON T.IntTEstado = E.intIdEstado
+                INNER JOIN TblCiudades AS C ON C.StrIdCiudad = T.StrCiudad
+                where C.StrIdCiudad = '${ciudadId}' and T.StrIdTercero not in ('0','01211','0128','0130') and t.intTipoTercero in ('01','02','03','04','05','09',17) order by E.StrDescripcion`
+            }
+
 
             const ClientesxCiudad = obtenerDatosDB_Hgi(sqlHgi)
             resolve(ClientesxCiudad)

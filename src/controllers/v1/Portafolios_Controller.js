@@ -12,13 +12,10 @@ const {
   obtenerClientesXCiudad_Query
 } = require('../../Querys/Portafolios_Querys')
 
-const DASH = require('../../databases/DashConexion').dashConexion
-const HGI = require('../../databases/HgiConexion').HgiConexion
-
 //Obtener todos los clientes de la zonas correspondientes al vendedor
 const GetClientes = async (req, res) => {
   const { vendedorId } = req.params
-
+  console.log(vendedorId)
   try {
     let data = await GetClientes_Query(vendedorId)
     res.status(200).json({ data: data })
@@ -106,9 +103,9 @@ const obtenerCiudadesClientes = async (req, res) => {
 
 //Obtener clientes en base a una ciudad especifica
 const obtenerClientesXCiudad = async (req, res) => {
-  const { ciudadId } = req.body
+  const { ciudadId ,segmentoInt } = req.body
   try {
-    const clientes = await obtenerClientesXCiudad_Query(ciudadId)
+    const clientes = await obtenerClientesXCiudad_Query(ciudadId,segmentoInt)
     res.status(200).json({data:clientes})
   } catch (error) {
     res.status(400).json({ error: error })
