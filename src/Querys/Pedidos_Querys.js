@@ -100,24 +100,29 @@ const ValidarPrecios_PDF = (productoId, producto_Precio_Actual, terceroId) => {
             where T.StrIdTercero = '${terceroId}'`
 
             const IntPrecio = await obtenerDatosDB_Hgi(query_Precio);
-            const obtenerPrecioProducto_query = `Select intPrecio${IntPrecio[0].IntPrecio} from tblProductos where StrIdProducto = '${productoId}'`
-            const Precio_Producto = await obtenerDatosDB_Hgi(obtenerPrecioProducto_query)
-            const objeto = Precio_Producto[0];
+            if ((IntPrecio[0].IntPrecio).toString() !== '0') {
+                const obtenerPrecioProducto_query = `Select intPrecio${IntPrecio[0].IntPrecio} from tblProductos where StrIdProducto = '${productoId}'`
+                const Precio_Producto = await obtenerDatosDB_Hgi(obtenerPrecioProducto_query)
+                const objeto = Precio_Producto[0];
 
-            let valor;
+                let valor;
 
-            for (const propiedad in objeto) {
-                if (objeto.hasOwnProperty(propiedad)) {
-                    valor = objeto[propiedad];
-                    break; // Terminar el bucle después de encontrar la primera propiedad y su valor
+                for (const propiedad in objeto) {
+                    if (objeto.hasOwnProperty(propiedad)) {
+                        valor = objeto[propiedad];
+                        break; // Terminar el bucle después de encontrar la primera propiedad y su valor
+                    }
                 }
-            }
 
-            if (producto_Precio_Actual !== valor) {
-                resolve(true)
-            } else {
+                if (producto_Precio_Actual !== valor) {
+                    resolve(true)
+                } else {
+                    resolve(false)
+                }
+            }else{
                 resolve(false)
             }
+
         } catch (error) {
             reject(error)
         }
