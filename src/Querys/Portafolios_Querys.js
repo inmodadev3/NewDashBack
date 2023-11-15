@@ -280,5 +280,6 @@ module.exports = {
     GetDataClientes_dataProductosMasComprados_Query,
     PostNuevaGestion_Query,
     obtenerCiudadesClientes_Query,
-    obtenerClientesXCiudad_Query
+    obtenerClientesXCiudad_Query,
+    ObtenerCiudades_Query
 }
