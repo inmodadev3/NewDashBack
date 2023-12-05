@@ -50,6 +50,6 @@ app.get('/api/v1/pdfs/:id', (req, res) => {
 });
 
 // Configurar la carpeta "pdfs" como carpeta estática
-app.use('/api/v1/pdfs', express.static(pdfsFolderPath));
+app.use('/api/pdfs', express.static(pdfsFolderPath));
 
 app.use('/archivos', express.static(path.join(__dirname,'assets','Rut')))
