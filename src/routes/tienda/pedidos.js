@@ -25,8 +25,8 @@ route.get('/cantidades/:idCliente', Consultar_CantidadProductos_Pedido)
 route.get('/vendedor_telefono/:id',Obtener_Telefono_Vendedor)
 
 /* DELETE */
-route.delete('/eliminar_producto/:id', Eliminar_Producto)
-route.delete('/eliminar_productos/:id', Eliminar_TodosLosProductos)
+route.delete('/eliminar_producto/:id/:strIdCliente', Eliminar_Producto)
+route.delete('/eliminar_productos/:id/:strIdCliente', Eliminar_TodosLosProductos)
 
 
 

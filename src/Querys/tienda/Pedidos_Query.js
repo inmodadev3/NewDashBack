@@ -129,12 +129,22 @@ const Agregar_productos_Query = (Idvendedor, clienteData, productoData) => {
     })
 }
 
-const Actualizar_Cantidad_Observacion_Producto_Query = (cantidad, observacion, id) => {
+const Actualizar_Cantidad_Observacion_Producto_Query = (cantidad, observacion, id, strIdCliente) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const query = `UPDATE tbldetallepedidostienda SET intCantidad = ? , strObservacion = ? where intIdPedDetalle = ?`
-            await obtenerDatosDb_Dash(query, [cantidad, observacion, id])
-            resolve(1)
+
+            const obtener_id_pedido = await Obtener_id_pedido_activo_cliente(strIdCliente);
+
+            if (obtener_id_pedido.length > 0) {
+                const idPedidoActivo = obtener_id_pedido[0].intIdPedido;
+                const query = `UPDATE tbldetallepedidostienda SET intCantidad = ? , strObservacion = ? where intIdPedDetalle = ?`
+                await obtenerDatosDb_Dash(query, [cantidad, observacion, id])
+                await Actualizar_total_pedido_Query(idPedidoActivo);
+                resolve(1)
+            }
+
+
+
         } catch (error) {
             reject(error)
         }
@@ -177,24 +187,40 @@ const Consultar_Producto_Agregado_Query = (strIdCliente, strIdProducto) => {
     })
 }
 
-const Eliminar_Producto_query = (id) => {
+const Eliminar_Producto_query = (id, strIdCliente) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const query = `UPDATE tbldetallepedidostienda set intEstado = -1 where intIdPedDetalle = ?`
-            await obtenerDatosDb_Dash(query, [id])
-            resolve(1)
+            const obtener_id_pedido = await Obtener_id_pedido_activo_cliente(strIdCliente);
+
+
+            if (obtener_id_pedido.length > 0) {
+                const idPedidoActivo = obtener_id_pedido[0].intIdPedido;
+                const query = `UPDATE tbldetallepedidostienda set intEstado = -1 where intIdPedDetalle = ?`
+                await obtenerDatosDb_Dash(query, [id])
+                await Actualizar_total_pedido_Query(idPedidoActivo);
+                resolve(1)
+            }
+
+
         } catch (error) {
             reject(error)
         }
     })
 }
 
-const Eliminar_TodosLosProductos_Query = (id) => {
+const Eliminar_TodosLosProductos_Query = (id, strIdCliente) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const query = `UPDATE tbldetallepedidostienda set intEstado = -1 where intIdPedido = ?`
-            await obtenerDatosDb_Dash(query, [id])
-            resolve(1)
+            const obtener_id_pedido = await Obtener_id_pedido_activo_cliente(strIdCliente);
+
+            if (obtener_id_pedido.length > 0) {
+                const idPedidoActivo = obtener_id_pedido[0].intIdPedido;
+                const query = `UPDATE tbldetallepedidostienda set intEstado = -1 where intIdPedido = ?`
+                await obtenerDatosDb_Dash(query, [id])
+                await Actualizar_total_pedido_Query(idPedidoActivo);
+                resolve(1)
+            }
+
         } catch (error) {
             reject(error)
         }

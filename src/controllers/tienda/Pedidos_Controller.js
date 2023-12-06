@@ -28,9 +28,9 @@ const Agregar_productos = async (req, res) => {
 }
 
 const Actualizar_Cantidad_Observacion_Producto = async (req, res) => {
-    const { cantidad, observacion, id } = req.body
+    const { cantidad, observacion, id , strIdCliente } = req.body
     try {
-        const data = await Actualizar_Cantidad_Observacion_Producto_Query(cantidad, observacion, id)
+        const data = await Actualizar_Cantidad_Observacion_Producto_Query(cantidad, observacion, id, strIdCliente)
         if (data === 1) {
             res.status(200).json({ message: "Datos actualizados correctamente" })
         }
@@ -70,9 +70,10 @@ const Consultar_Productos_Pedido = async(req,res)=>{
 }
 
 const Eliminar_Producto = async (req, res) => {
-    const { id } = req.params
+    const { id, strIdCliente } = req.params
+
     try {
-        const data = await Eliminar_Producto_query(id)
+        const data = await Eliminar_Producto_query(id, strIdCliente)
         if (data === 1) {
             res.status(200).json({ message: "Producto eliminado correctamente del pedido" })
         }
@@ -82,9 +83,9 @@ const Eliminar_Producto = async (req, res) => {
 }
 
 const Eliminar_TodosLosProductos = async(req,res) =>{
-    const { id } = req.params
+    const { id, strIdCliente } = req.params
     try {
-        const data = await Eliminar_TodosLosProductos_Query(id)
+        const data = await Eliminar_TodosLosProductos_Query(id,strIdCliente)
         if(data === 1){
             res.status(200).json({message:"Pedido limipiado con exito"})
         }
