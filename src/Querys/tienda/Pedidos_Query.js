@@ -518,10 +518,13 @@ const Enviar_pedido_Database_Query = async (strIdCliente, strObservacion, seller
                         1
                     ]);
                 }
-
                 await connection.commit(); // Confirmar la transacción
 
-                return lastId;
+                const obtener_total_Query = `SELECT intValorTotal FROM tblpedidos where intIdPedido = ?`
+                const total_pedido = await obtenerDatosDb_Dash(obtener_total_Query,[lastId])
+                const total = total_pedido[0].intValorTotal
+
+                return {lastId,total};
             }
         } else {
             throw new Error("NO SE ENCUENTRA NINGUN PEDIDO INICIADO");
