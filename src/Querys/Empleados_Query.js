@@ -52,9 +52,11 @@ const Eliminar_Empleado_Query = (id) =>{
     })
 }
 
+
 module.exports = {
     Crear_Empleado_Query,
     Consultar_Empleados_Query,
     Actualizar_Empleado_Query,
-    Eliminar_Empleado_Query
+    Eliminar_Empleado_Query,
+    Consultar_Empleados_Query
 }

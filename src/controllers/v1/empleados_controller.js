@@ -46,10 +46,9 @@ const Eliminar_Empleado = async(req,res) =>{
     }
 }
 
-
 module.exports = {
     Crear_Empleado,
     Obtener_Empleados,
     Actualizar_Empleado,
-    Eliminar_Empleado
+    Eliminar_Empleado,
 }
