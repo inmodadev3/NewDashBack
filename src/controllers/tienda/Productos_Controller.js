@@ -78,9 +78,9 @@ const GetProductosXTipos = async (req, res) => {
 //OBTENER UN PRODUCTO POR StrIdProducto
 const GetProductoXid = async (req, res) => {
     const { id } = req.params
-    let imagenes = await GetImagesXid_Query(id)
-
+    
     try {
+        let imagenes = await GetImagesXid_Query(id)
         const data = await GetProductoXid_Query(id)
         res.status(200).json({ success: true, data: data, images: imagenes })
     } catch (error) {

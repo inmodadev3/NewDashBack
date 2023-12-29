@@ -102,7 +102,7 @@ const GetProductoXid_Query = async (id) => {
     return new Promise(async (resolve, reject) => {
         try {
             const query = `select P.StrIdProducto,P.StrDescripcion,P.Strauxiliar,P.StrUnidad,P.IntPrecio1,P.IntPrecio2,
-            P.IntPrecio3,P.IntPrecio4,P.StrParam3,P2.StrDescripcion as material,P.StrDescripcionCorta 
+            P.IntPrecio3,P.IntPrecio4,P.StrParam3,P2.StrDescripcion as material,P.StrDescripcionCorta , P.IntControl as CantPaca
             from TblProductos as P inner join TblProdParametro2 as P2 on P2.StrIdPParametro = P.StrPParametro2  where StrIdProducto = '${id}'`
 
             const data = await obtenerDatosDB_Hgi(query)
