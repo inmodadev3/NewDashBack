@@ -61,7 +61,6 @@ const Consultar_Top_compradoresMes_Query = (mes,anio) =>{
             Inner Join TblTerceros as TERC on TDOC.StrTercero = TERC.StrIdTercero
             where TDOC.IntPeriodo = ${mes} and TDOC.IntAno = ${anio} and TDOC.IntTransaccion in ('041','47')
             Group by TERC.StrNombre
-            having COUNT(*) > 2
             order by TotalComprasTercero desc`
 
             const data = await obtenerDatosDB_Hgi(query)
