@@ -10,7 +10,7 @@ const Crear_Pedido = async (req, res) => {
             res.status(201).json({ message: "Pedido Creado Correctamente" })
         }
     } catch (error) {
-        console.log(error)
+        console.error(error)
         res.status(400).json({ message: error })
     }
 }

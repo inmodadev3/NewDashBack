@@ -58,7 +58,7 @@ const createPDF = async (req, res) => {
                     console.log(dataString)
                 }*/
             } catch (error) {
-                console.log(error)
+                console.error(error)
                 console.error("Ha ocurrido un error ")
             }
         });
@@ -67,7 +67,7 @@ const createPDF = async (req, res) => {
             res.json({ data: end, finish: "Correct" });
         });*/
     } catch (error) {
-        console.log(error)
+        console.error(error)
     }
 
 

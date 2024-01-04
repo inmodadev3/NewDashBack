@@ -15,7 +15,6 @@ const {
 //Obtener todos los clientes de la zonas correspondientes al vendedor
 const GetClientes = async (req, res) => {
   const { vendedorId } = req.params
-  console.log(vendedorId)
   try {
     let data = await GetClientes_Query(vendedorId)
     res.status(200).json({ data: data })

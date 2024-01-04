@@ -177,7 +177,7 @@ const Contar_Productos_Busqueda = async (req, res) => {
         const cantidadPaginas = CalcularPaginas(data[0].totalColumna)
         res.status(200).json({ success: true, total: data[0].totalColumna, Paginas: cantidadPaginas });
     } catch (error) {
-        console.log(error)
+        console.error(error)
         res.status(400).json({ success: false, error: error, message: "Ha ocurrido un error al contar los productos" })
     }
 }

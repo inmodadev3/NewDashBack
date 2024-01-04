@@ -26,7 +26,7 @@ const validarUsuario = async (req, res) => {
             res.json({ ErrMessage: "Usuario no encontrado" })
         }
     } catch (error) {
-        console.log(error)
+        console.error(error)
     }
 }
 

@@ -68,7 +68,6 @@ const GetInfoPedido_Query = async (id) => {
             let data = await obtenerDatosDb_Dash(query, [id])
             const header = await obtenerDatosDb_Dash(queryCabecera, [id])
             const array_productos = []
-            console.log(header[0].strIdCliente)
             for (const producto of data) {
                 let ubicaciones = await GetUbicaciones(producto.strIdProducto)
 

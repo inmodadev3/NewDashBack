@@ -8,7 +8,9 @@ const {
     Post_Liquidar,
     GetProductosLiquidados,
     Put_Modificar,
-    Get_DataProducto_Modificar
+    Get_DataProducto_Modificar,
+    Get_Compras,
+    Get_Productos_Compra
 } = require('../../controllers/v1/compras_Controller')
 
 const storage = multer.memoryStorage()
@@ -25,6 +27,8 @@ route.get('/modificar_liquidado/:id',Get_DataProducto_Modificar)
 
 //COMPRAS
 route.post('/cargar/detalles',upload.single('file'),CargarDetallesContenedor)
+route.get('/raggi',Get_Compras)
+route.get('/raggi/productos',Get_Productos_Compra)
 
 
 module.exports = route

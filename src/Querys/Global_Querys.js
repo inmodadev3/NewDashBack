@@ -40,5 +40,15 @@ const obtenerDatosDB_Hgi = async (query) =>{
     }
 }
 
+const obtenerDatosDb_Dash_transaccion = async (connection, query, params) => {
+    try {
+        const [rows] = await connection.query(query, params);
+        return rows;
+    } catch (error) {
+        console.error('Error al obtener datos desde la base de datos:', error);
+        throw error;
+    }
+}
 
-module.exports = {obtenerDatosDb_Dash,obtenerDatosDB_Hgi}
+
+module.exports = {obtenerDatosDb_Dash,obtenerDatosDB_Hgi,obtenerDatosDb_Dash_transaccion}

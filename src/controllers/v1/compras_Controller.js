@@ -10,7 +10,9 @@ const {
     Post_Liquidar_Query,
     GetProductosLiquidados_Query,
     CargarDetallesContenedor_Query,
-    CargarDetallesContenedorDatos_Query
+    CargarDetallesContenedorDatos_Query,
+    Obtener_Compras_Query,
+    Obtener_productos_compra_query
 } = require('../../Querys/Compras_Querys')
 
 const CargarDetallesContenedor = async (req, res) => {
@@ -39,11 +41,14 @@ const CargarDetallesContenedor = async (req, res) => {
         //Calcular el total de la compra
         let total = 0
         data.forEach((item) => {
-
-            let stringNumero = ((item.Valor).toFixed(2))/* .replace(".","").replace(",",".")  */
+            let itemValues = Object.values(item)
+            let stringNumero = (itemValues[5])/* .replace(".","").replace(",",".")  */
             let numero = parseFloat(stringNumero)
-            total += numero * (item.Cantidad)
+            total += numero * itemValues[3]
         })
+
+        total = parseInt(total.toFixed(0))
+
         await CargarDetallesContenedor_Query(raggi,importacion,fecha,total)
         await CargarDetallesContenedorDatos_Query(data)
         res.status(200).json({ data: data, message: "Compra Cargada con exito" })
@@ -165,6 +170,25 @@ const Get_DataProducto_Modificar = async(req,res)=>{
     }
 }
 
+const Get_Compras = async(req,res) =>{
+    try {
+        const data = await Obtener_Compras_Query()
+        res.status(200).json({compras:data})
+    } catch (error) {
+        res.status(400).json({error,message:"Ha ocurrido un error al recuperar los datos de las compras"})
+    }
+}
+
+const Get_Productos_Compra = async(req,res) =>{
+    const { id } = req.query
+    try {
+        const data = await Obtener_productos_compra_query(id)
+        res.status(200).json({productos:data})
+    } catch (error) {
+        res.status(400).json({error, message:`Ha ocurrido un error al recuperar los productos de la compra ${id}`})
+    }
+}
+
 module.exports = {
     CargarDetallesContenedor,
     GetProductosContenedorEstado,
@@ -173,5 +197,7 @@ module.exports = {
     Post_Liquidar,
     GetProductosLiquidados,
     Put_Modificar,
-    Get_DataProducto_Modificar
+    Get_DataProducto_Modificar,
+    Get_Compras,
+    Get_Productos_Compra
 }
