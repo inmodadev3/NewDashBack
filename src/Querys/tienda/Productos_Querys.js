@@ -80,16 +80,17 @@ const GetProductosXGrupos_Query = async (grupos, skipReg, cantidadReg) => {
 const GetProductosXTipos_Query = async (tipos, skipReg, cantidadReg) => {
     return new Promise(async (resolve, reject) => {
         try {
-            tipos = tipos.map((tipo) => `'${tipo}'`).join(', ')
-            const query = `select StrIdProducto,P.StrDescripcion,P.strLinea as linea,Strauxiliar,StrUnidad,IntPrecio1,IntPrecio2,IntPrecio3,IntPrecio4, I.StrArchivo
-                            from TblProductos as P
-                            inner join TblImagenes as I on P.StrIdProducto = I.StrIdCodigo
-                            where IntHabilitarProd = 1
-                            and P.strTipo in (${tipos})
-                            and I.IntOrden = 1
-                            order by P.StrIdProducto
-                            OFFSET ${skipReg} ROWS
-                            FETCH NEXT ${cantidadReg} ROWS ONLY`
+            const tipoGrupoConditions = tipos.map(({ IdTipo, IdGrupo }) => `(P.strTipo = '${IdTipo}' AND P.StrGrupo = '${IdGrupo}')`).join(' OR ');
+
+            const query = `SELECT StrIdProducto, P.StrDescripcion, P.strLinea AS linea, Strauxiliar, StrUnidad, IntPrecio1, IntPrecio2, IntPrecio3, IntPrecio4, I.StrArchivo
+            FROM TblProductos AS P
+            INNER JOIN TblImagenes AS I ON P.StrIdProducto = I.StrIdCodigo
+            WHERE IntHabilitarProd = 1
+            AND (${tipoGrupoConditions})
+            AND I.IntOrden = 1
+            ORDER BY P.StrIdProducto
+            OFFSET ${skipReg} ROWS
+            FETCH NEXT ${cantidadReg} ROWS ONLY`;
             const data = await obtenerDatosDB_Hgi(query)
             resolve(data)
         } catch (error) {
