@@ -168,8 +168,8 @@ const CargarDetallesContenedorDatos_Query = async (datos) => {
             const color = itemValues[6];
             const dimension = itemValues[7];
             const cxu = itemValues[8];
-            const cantidad_Paca = itemValues[9];
-            const material = itemValues[10];
+            const cantidad_Paca = itemValues[10];
+            const material = itemValues[11];
 
             await obtenerDatosDb_Dash_transaccion(connection, sqlDetalle, ["", referencia, cantidad, udm, valorParseado, descripcion, 1, color, cxu, dimension, "", cantidad_Paca, material]);
         }

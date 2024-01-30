@@ -29,9 +29,13 @@ const CargarDetallesContenedor = async (req, res) => {
         }
 
         //Convertir el archivo xlsx en un objeto Json 
-        const workbook = xlsx.read(file.buffer, { type: 'buffer' }) //transoformar el buffer en un archivo xlsx
+        const workbook = xlsx.read(file.buffer, { type: 'buffer' })
         const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-        const data = xlsx.utils.sheet_to_json(worksheet);
+        const options = {
+            blankrows: false, // Evita que las filas en blanco sean ignoradas
+            defval: '', // Define el valor por defecto para celdas vacías
+        };
+        const data = xlsx.utils.sheet_to_json(worksheet,options);
 
         //Validar que el documento tenga datos
         if (data.length === 0) {
@@ -42,7 +46,7 @@ const CargarDetallesContenedor = async (req, res) => {
         let total = 0
         data.forEach((item) => {
             let itemValues = Object.values(item)
-            let stringNumero = (itemValues[5])/* .replace(".","").replace(",",".")  */
+            let stringNumero = (itemValues[5])
             let numero = parseFloat(stringNumero)
             total += numero * itemValues[3]
         })
