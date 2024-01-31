@@ -99,7 +99,6 @@ const ValidarPrecios_PDF = (productoId, producto_Precio_Actual, terceroId) => {
             where T.StrIdTercero = '${terceroId}'`
 
             const IntPrecio = await obtenerDatosDB_Hgi(query_Precio);
-            console.log(IntPrecio)
             if (IntPrecio.length > 0) {
                 if ((IntPrecio[0].IntPrecio).toString() !== '0') {
                     const obtenerPrecioProducto_query = `Select intPrecio${IntPrecio[0].IntPrecio} from tblProductos where StrIdProducto = '${productoId}'`

@@ -6,7 +6,7 @@ const GetProductos_Query = async (clase, skipReg, cantidadReg) => {
             let query;
 
             if (clase) {
-                query = `select StrIdProducto,P.StrDescripcion,Strauxiliar,StrUnidad,IntPrecio1,IntPrecio2,IntPrecio3,IntPrecio4, I.StrArchivo
+                query = `select StrIdProducto,P.StrDescripcion,Strauxiliar,StrUnidad,IntPrecio1,IntPrecio2,IntPrecio3,IntPrecio4,IntPrecio7, IntPrecio8, I.StrArchivo
                         from TblProductos as P
                         inner join TblImagenes as I on P.StrIdProducto = I.StrIdCodigo
                         where IntHabilitarProd = 1
@@ -16,7 +16,7 @@ const GetProductos_Query = async (clase, skipReg, cantidadReg) => {
                         OFFSET ${skipReg} ROWS
                         FETCH NEXT ${cantidadReg} ROWS ONLY`
             } else {
-                query = `select StrIdProducto,P.StrDescripcion,Strauxiliar,StrUnidad,IntPrecio1,IntPrecio2,IntPrecio3,IntPrecio4, I.StrArchivo
+                query = `select StrIdProducto,P.StrDescripcion,Strauxiliar,StrUnidad,IntPrecio1,IntPrecio2,IntPrecio3,IntPrecio4,IntPrecio7, IntPrecio8, I.StrArchivo
                         from TblProductos as P
                         inner join TblImagenes as I on P.StrIdProducto = I.StrIdCodigo
                         where IntHabilitarProd = 1
@@ -39,7 +39,7 @@ const GetProductosXlinea_Query = async (lineas, skipReg, cantidadReg) => {
         try {
             lineas = lineas.map((linea) => `'${linea}'`).join(', ')
 
-            const query = `select StrIdProducto,P.StrDescripcion,P.strLinea as linea,Strauxiliar,StrUnidad,IntPrecio1,IntPrecio2,IntPrecio3,IntPrecio4, I.StrArchivo
+            const query = `select StrIdProducto,P.StrDescripcion,P.strLinea as linea,Strauxiliar,StrUnidad,IntPrecio1,IntPrecio2,IntPrecio3,IntPrecio4,IntPrecio7, IntPrecio8, I.StrArchivo
                             from TblProductos as P
                             inner join TblImagenes as I on P.StrIdProducto = I.StrIdCodigo
                             where IntHabilitarProd = 1
@@ -60,7 +60,7 @@ const GetProductosXGrupos_Query = async (grupos, skipReg, cantidadReg) => {
     return new Promise(async (resolve, reject) => {
         try {
             grupos = grupos.map((grupo) => `'${grupo}'`).join(', ')
-            const query = `select StrIdProducto,P.StrDescripcion,P.strLinea as linea,Strauxiliar,StrUnidad,IntPrecio1,IntPrecio2,IntPrecio3,IntPrecio4, I.StrArchivo
+            const query = `select StrIdProducto,P.StrDescripcion,P.strLinea as linea,Strauxiliar,StrUnidad,IntPrecio1,IntPrecio2,IntPrecio3,IntPrecio4,IntPrecio7, IntPrecio8, I.StrArchivo
                             from TblProductos as P
                             inner join TblImagenes as I on P.StrIdProducto = I.StrIdCodigo
                             where IntHabilitarProd = 1
@@ -82,7 +82,7 @@ const GetProductosXTipos_Query = async (tipos, skipReg, cantidadReg) => {
         try {
             const tipoGrupoConditions = tipos.map(({ IdTipo, IdGrupo }) => `(P.strTipo = '${IdTipo}' AND P.StrGrupo = '${IdGrupo}')`).join(' OR ');
 
-            const query = `SELECT StrIdProducto, P.StrDescripcion, P.strLinea AS linea, Strauxiliar, StrUnidad, IntPrecio1, IntPrecio2, IntPrecio3, IntPrecio4, I.StrArchivo
+            const query = `SELECT StrIdProducto, P.StrDescripcion, P.strLinea AS linea, Strauxiliar, StrUnidad, IntPrecio1, IntPrecio2, IntPrecio3, IntPrecio4,IntPrecio7, IntPrecio8, I.StrArchivo
             FROM TblProductos AS P
             INNER JOIN TblImagenes AS I ON P.StrIdProducto = I.StrIdCodigo
             WHERE IntHabilitarProd = 1
@@ -103,7 +103,7 @@ const GetProductoXid_Query = async (id) => {
     return new Promise(async (resolve, reject) => {
         try {
             const query = `select P.StrIdProducto,P.StrDescripcion,P.Strauxiliar,P.StrUnidad,P.IntPrecio1,P.IntPrecio2,
-            P.IntPrecio3,P.IntPrecio4,P.StrParam3,P2.StrDescripcion as material,P.StrDescripcionCorta , P.IntControl as CantPaca
+            P.IntPrecio3,P.IntPrecio4,IntPrecio7, IntPrecio8,P.StrParam3,P2.StrDescripcion as material,P.StrDescripcionCorta , P.IntControl as CantPaca, P.StrParam5 as Color
             from TblProductos as P inner join TblProdParametro2 as P2 on P2.StrIdPParametro = P.StrPParametro2  where StrIdProducto = '${id}'`
 
             const data = await obtenerDatosDB_Hgi(query)
@@ -191,7 +191,7 @@ const ContarProductosXTipos_Query = async (tiposString) => {
 const Buscar_Productos_Query = async (text, skipReg, cantidadReg) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const query = `select StrIdProducto,P.StrDescripcion,Strauxiliar,StrUnidad,IntPrecio1,IntPrecio2,IntPrecio3,IntPrecio4, I.StrArchivo
+            const query = `select StrIdProducto,P.StrDescripcion,Strauxiliar,StrUnidad,IntPrecio1,IntPrecio2,IntPrecio3,IntPrecio4,IntPrecio7, IntPrecio8, I.StrArchivo
             from TblProductos as P
             inner join TblImagenes as I on P.StrIdProducto = I.StrIdCodigo
             where IntHabilitarProd = 1
@@ -212,7 +212,7 @@ const Buscar_Productos_Query = async (text, skipReg, cantidadReg) => {
 const Contar_Productos_Busqueda_Query = (text) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const query = `select COUNT(*) as totalColumna from(select StrIdProducto,P.StrDescripcion, I.StrArchivo ,P.intPrecio1,P.intPrecio2,P.intPrecio3,P.intPrecio4
+            const query = `select COUNT(*) as totalColumna from(select StrIdProducto,P.StrDescripcion, I.StrArchivo ,P.intPrecio1,P.intPrecio2,P.intPrecio3,P.intPrecio4,IntPrecio7, IntPrecio8
                 from TblProductos as P
                 inner join TblImagenes as I on P.StrIdProducto = I.StrIdCodigo
                 where IntHabilitarProd = 1
