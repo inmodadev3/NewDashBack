@@ -37,7 +37,7 @@ const GetClientes_Query = async (vendedorId) => {
             FROM TblTerceros AS T
             INNER JOIN TblEstados AS E ON T.IntTEstado = E.intIdEstado
             INNER JOIN TblCiudades AS C ON C.StrIdCiudad = T.StrCiudad
-            where C.StrIdCiudad in (${ciudadesString}) and T.StrIdTercero not in ('0','01211','0128','0130') and t.intTipoTercero in ('01','02','03','04','05','09',17) order by E.StrDescripcion`
+            where C.StrIdCiudad in (${ciudadesString}) and T.StrIdTercero not in ('0','01211','0128','0130') and t.intTipoTercero in ('01','02','03','04','05','09',17,18,19) order by E.StrDescripcion`
 
             if (ciudadesString) {
                 const ObtenerClientesXCiudades = await obtenerDatosDB_Hgi(sqlHgi)
@@ -71,7 +71,7 @@ const GetClienteXIdentificacion_Query = async (clienteId, vendedorId) => {
                         FROM TblTerceros AS T
                         INNER JOIN TblEstados AS E ON T.IntTEstado = E.intIdEstado
                         INNER JOIN TblCiudades AS C ON C.StrIdCiudad = T.StrCiudad
-                        where C.StrIdCiudad in (${ciudadesString}) and T.strIdTercero = '${clienteId}' and t.intTipoTercero in ('01','02','03','04','05','09',17) order by E.StrDescripcion`
+                        where C.StrIdCiudad in (${ciudadesString}) and T.strIdTercero = '${clienteId}' and t.intTipoTercero in ('01','02','03','04','05','09',17,18,19) order by E.StrDescripcion`
 
             const ObtenerClientesXCiudades = await obtenerDatosDB_Hgi(sqlHgi)
 
@@ -101,7 +101,7 @@ const GetClienteXNombre_Query = async (clienteNombre, vendedorId) => {
                         FROM TblTerceros AS T
                         INNER JOIN TblEstados AS E ON T.IntTEstado = E.intIdEstado
                         INNER JOIN TblCiudades AS C ON C.StrIdCiudad = T.StrCiudad
-                        where C.StrIdCiudad in (${ciudadesString}) and T.strNombre like '%${clienteNombre}%' and T.StrIdTercero not in ('0','01211','0128','0130') and t.intTipoTercero in ('01','02','03','04','05','09',17) order by E.StrDescripcion`
+                        where C.StrIdCiudad in (${ciudadesString}) and T.strNombre like '%${clienteNombre}%' and T.StrIdTercero not in ('0','01211','0128','0130') and t.intTipoTercero in ('01','02','03','04','05','09',17,18,19) order by E.StrDescripcion`
 
             const ObtenerClientesXCiudades = await obtenerDatosDB_Hgi(sqlHgi)
 
@@ -258,7 +258,7 @@ const obtenerClientesXCiudad_Query = async (ciudadId, segmentoInt) => {
                 FROM TblTerceros AS T
                 INNER JOIN TblEstados AS E ON T.IntTEstado = E.intIdEstado
                 INNER JOIN TblCiudades AS C ON C.StrIdCiudad = T.StrCiudad
-                where C.StrIdCiudad = '${ciudadId}' and T.StrIdTercero not in ('0','01211','0128','0130') and t.intTipoTercero in ('01','02','03','04','05','09',17) order by E.StrDescripcion`
+                where C.StrIdCiudad = '${ciudadId}' and T.StrIdTercero not in ('0','01211','0128','0130') and t.intTipoTercero in ('01','02','03','04','05','09',17,18,19) order by E.StrDescripcion`
             }
 
 
