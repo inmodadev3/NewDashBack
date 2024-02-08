@@ -1,4 +1,4 @@
-const { GetInfoProductos_Query, GetImagenesUnProducto_Query, GetMarcas_Query, GetGeneros_Query, GetUnidades_Query, GetInfoProductos_Nombre_Query } = require('../../Querys/Productos_Querys');
+const { GetInfoProductos_Query, GetImagenesUnProducto_Query, GetMarcas_Query, GetGeneros_Query, GetUnidades_Query, GetInfoProductos_Nombre_Query, PostActualizarUbicacion_Query } = require('../../Querys/Productos_Querys');
 
 
 //obtener informacion acerca de un producto
@@ -67,5 +67,18 @@ const GetUnidades = async(req,res)=>{
     }
 }
 
+//Actualizar ubicaciones
+const PostActualizarUbicacion = async(req,res)=>{
+    const {
+        ubicacion, referencia, idUsuario, ultima_ubicacion
+    } = req.body
+    try {
+        const data = await PostActualizarUbicacion_Query(ubicacion, referencia, idUsuario, ultima_ubicacion)
+        res.status(200).json({message:data})
+    } catch (error) {
+        res.status(400).json({error:error})
+    }
+}
 
-module.exports = { GetInfoProductos, GetImagenesUnProducto,GetMarcas,GetGeneros,GetUnidades,GetInfoProductos_Nombre }
+
+module.exports = { GetInfoProductos, GetImagenesUnProducto,GetMarcas,GetGeneros,GetUnidades,GetInfoProductos_Nombre,PostActualizarUbicacion }

@@ -86,14 +86,14 @@ const GetGeneros_Query = async () => {
     })
 }
 
-const GetMateriales_Query = async() => {
-    return new Promise(async(resolve, reject) => {
+const GetMateriales_Query = async () => {
+    return new Promise(async (resolve, reject) => {
         try {
             const query = `select StrIdPParametro as id,StrDescripcion as descripcion from TblProdParametro2`
-            const data = await  obtenerDatosDB_Hgi(query)
+            const data = await obtenerDatosDB_Hgi(query)
             resolve(data)
         } catch (error) {
-          reject(error)  
+            reject(error)
         }
     })
 }
@@ -110,7 +110,7 @@ const GetMarcas_Query = async () => {
     })
 }
 
-const GetUnidades_Query = async() => {
+const GetUnidades_Query = async () => {
     return new Promise(async (resolve, reject) => {
         try {
             const query = `select StrIdUnidad from TblUnidades`
@@ -122,44 +122,42 @@ const GetUnidades_Query = async() => {
     })
 }
 
-const GetProductoUbicacion = async(type,value) =>{
-    return new Promise((resolve, reject) => {
+const DeshabilitarTrigger = async()=>{
+    try {
+
+        let sql = `EXEC('use INMODANET; 
+        IF OBJECT_ID (''TgHgiNet_TblProductos'', ''TR'') IS NOT NULL
+            BEGIN 
+                DROP TRIGGER TgHgiNet_TblProductos;
+                SELECT 1;
+            END
+        ELSE
+            BEGIN
+                SELECT 0;
+            END')`;
+        const rpta = await obtenerDatosDB_Hgi(sql);
+        return rpta;
+    } catch (error) {
+        console.log("----------------------------ERROR------------------------")
+        console.log(error);
+        console.log("----------------------------ERROR------------------------")
+        return false;
+    }
+    
+}
+
+const PostActualizarUbicacion_Query = async (value, referencia, idUsuario, ultima_ubicacion) => {
+    return new Promise(async(resolve, reject) => {
         try {
-           
-            let search_value;
-            const fecha = new Date();
-            const year = fecha.getFullYear();
-            const month = fecha.getMonth() + 1;
-
-            if(!type){
-                reject("Ha ocurrido un error con la variable tipo")
-            }
-
-            if(type == 1){
-                search_value =  'StrIdProducto'
-            }else if(type = 2){
-                search_value = 'StrParam2'
-            }
-
-            let sql = `SELECT TOP 10 p.StrIdProducto AS referencia, p.StrDescripcion AS descripcion, 
-            p.strunidad AS UM,p.strauxiliar as cantxEmpaque, p.strparam2 AS Ubicacion,  p.strparam3 AS medida, pp1.StrDescripcion AS sexo, 
-            pp2.StrDescripcion AS Material,  pp3.StrDescripcion AS Marca, 
-            p.intprecio1 as precio, 
-            (SELECT strarchivo 
-            FROM tblimagenes 
-            WHERE stridcodigo = p.StrIdProducto AND StrDescripcion = '1') AS productoImg, 
-            (SELECT intCantidadFinal 
-            FROM qrySaldosInv 
-            WHERE strProducto = p.StrIdProducto and IntAno = ${year} and IntPeriodo = ${month} and IntBodega = '01') AS saldoInv
-            FROM tblproductos AS p
-            INNER JOIN TblProdParametro1 AS pp1 ON pp1.StrIdPParametro1 = p.StrPParametro1
-            INNER JOIN TblProdParametro2 AS pp2 ON pp2.StrIdPParametro = p.StrPParametro2
-            INNER JOIN TblProdParametro3 AS pp3 ON pp3.StrIdPParametro = p.StrPParametro3
-            WHERE '${search_value}' = '${value}'`;
-
-                
+            const fecha = new Date()
+            const HGI_SQL = `update tblProductos set strParam2 = '${value}' where stridproducto = '${referencia}' `
+            const DASH_SQL = `INSERT INTO tblUbicacionesRegistro (idLogin,nueva_ubicacion,antigua_ubicacion,fecha_cambio) VALUES (?,?,?,?)`
+            await DeshabilitarTrigger()
+            await obtenerDatosDB_Hgi(HGI_SQL)
+            await obtenerDatosDb_Dash(DASH_SQL,[idUsuario,value,ultima_ubicacion,fecha])
+            resolve("Actualizada con exito")
         } catch (error) {
-            
+            resolve(error)
         }
     })
 }
@@ -171,5 +169,6 @@ module.exports = {
     GetUnidades_Query,
     GetInfoProductos_Query,
     GetImagenesUnProducto_Query,
-    GetInfoProductos_Nombre_Query
+    GetInfoProductos_Nombre_Query,
+    PostActualizarUbicacion_Query
 }
