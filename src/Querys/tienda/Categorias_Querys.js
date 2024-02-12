@@ -37,10 +37,10 @@ const GetGrupo_Query = async (linea) => {
     })
 }
 
-const GetTipo_Query = async (Grupo) => {
+const GetTipo_Query = async (Grupo,Linea) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const query = `select distinct T.strIdTipo, T.strDescripcion from TblTipos as T inner join tblProductos as P on T.strIdTipo = P.strTipo where P.strGrupo = '${Grupo}' and P.IntHabilitarProd = 1`
+            const query = `select distinct T.strIdTipo, T.strDescripcion from TblTipos as T inner join tblProductos as P on T.strIdTipo = P.strTipo where P.strGrupo = '${Grupo}' and P.StrLinea = '${Linea}' and P.IntHabilitarProd = 1`
             const data = await obtenerDatosDB_Hgi(query)
             resolve(data)
         } catch (error) {

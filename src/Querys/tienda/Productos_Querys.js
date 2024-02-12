@@ -6,7 +6,8 @@ const GetProductos_Query = async (clase, skipReg, cantidadReg) => {
             let query;
 
             if (clase) {
-                query = `select StrIdProducto,P.StrDescripcion,Strauxiliar,StrUnidad,IntPrecio1,IntPrecio2,IntPrecio3,IntPrecio4,IntPrecio7, IntPrecio8, I.StrArchivo
+                query = `select StrIdProducto,P.StrDescripcion,Strauxiliar,StrUnidad,IntPrecio1,IntPrecio2,IntPrecio3,IntPrecio4,IntPrecio5,
+                        IntPrecio6,IntPrecio7, IntPrecio8, I.StrArchivo
                         from TblProductos as P
                         inner join TblImagenes as I on P.StrIdProducto = I.StrIdCodigo
                         where IntHabilitarProd = 1
@@ -16,7 +17,8 @@ const GetProductos_Query = async (clase, skipReg, cantidadReg) => {
                         OFFSET ${skipReg} ROWS
                         FETCH NEXT ${cantidadReg} ROWS ONLY`
             } else {
-                query = `select StrIdProducto,P.StrDescripcion,Strauxiliar,StrUnidad,IntPrecio1,IntPrecio2,IntPrecio3,IntPrecio4,IntPrecio7, IntPrecio8, I.StrArchivo
+                query = `select StrIdProducto,P.StrDescripcion,Strauxiliar,StrUnidad,IntPrecio1,IntPrecio2,IntPrecio3,IntPrecio4,IntPrecio5,
+                        IntPrecio6,IntPrecio7, IntPrecio8, I.StrArchivo
                         from TblProductos as P
                         inner join TblImagenes as I on P.StrIdProducto = I.StrIdCodigo
                         where IntHabilitarProd = 1
@@ -39,7 +41,9 @@ const GetProductosXlinea_Query = async (lineas, skipReg, cantidadReg) => {
         try {
             lineas = lineas.map((linea) => `'${linea}'`).join(', ')
 
-            const query = `select StrIdProducto,P.StrDescripcion,P.strLinea as linea,Strauxiliar,StrUnidad,IntPrecio1,IntPrecio2,IntPrecio3,IntPrecio4,IntPrecio7, IntPrecio8, I.StrArchivo
+            const query = `select StrIdProducto,P.StrDescripcion,P.strLinea as linea,Strauxiliar,StrUnidad,
+                            IntPrecio1,IntPrecio2,IntPrecio3,IntPrecio4,IntPrecio5,
+                            IntPrecio6,IntPrecio7, IntPrecio8, I.StrArchivo
                             from TblProductos as P
                             inner join TblImagenes as I on P.StrIdProducto = I.StrIdCodigo
                             where IntHabilitarProd = 1
@@ -59,16 +63,22 @@ const GetProductosXlinea_Query = async (lineas, skipReg, cantidadReg) => {
 const GetProductosXGrupos_Query = async (grupos, skipReg, cantidadReg) => {
     return new Promise(async (resolve, reject) => {
         try {
-            grupos = grupos.map((grupo) => `'${grupo}'`).join(', ')
-            const query = `select StrIdProducto,P.StrDescripcion,P.strLinea as linea,Strauxiliar,StrUnidad,IntPrecio1,IntPrecio2,IntPrecio3,IntPrecio4,IntPrecio7, IntPrecio8, I.StrArchivo
+            //grupos = grupos.map((grupo) => `'${grupo}'`).join(', ')
+            const GrupoConditions = grupos.map(({ IdGrupo, IdLinea }) => `(P.StrGrupo = '${IdGrupo}'
+            AND P.StrLinea = '${IdLinea}')`).join(' OR ');
+
+            const query = `select StrIdProducto,P.StrDescripcion,P.strLinea as linea,Strauxiliar,StrUnidad,
+                            IntPrecio1,IntPrecio2,IntPrecio3,IntPrecio4,IntPrecio5,
+                            IntPrecio6,IntPrecio7, IntPrecio8, I.StrArchivo
                             from TblProductos as P
                             inner join TblImagenes as I on P.StrIdProducto = I.StrIdCodigo
                             where IntHabilitarProd = 1
-                            and P.strGrupo in (${grupos})
+                            AND (${GrupoConditions})
                             and I.IntOrden = 1
                             order by P.StrIdProducto
                             OFFSET ${skipReg} ROWS
                             FETCH NEXT ${cantidadReg} ROWS ONLY`
+                            console.log(query)
             const data = await obtenerDatosDB_Hgi(query)
             resolve(data)
         } catch (error) {
@@ -80,9 +90,11 @@ const GetProductosXGrupos_Query = async (grupos, skipReg, cantidadReg) => {
 const GetProductosXTipos_Query = async (tipos, skipReg, cantidadReg) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const tipoGrupoConditions = tipos.map(({ IdTipo, IdGrupo }) => `(P.strTipo = '${IdTipo}' AND P.StrGrupo = '${IdGrupo}')`).join(' OR ');
+            const tipoGrupoConditions = tipos.map(({ IdTipo, IdGrupo, IdLinea }) => `(P.strTipo = '${IdTipo}' AND P.StrGrupo = '${IdGrupo}'
+            AND P.StrLinea = '${IdLinea}')`).join(' OR ');
 
-            const query = `SELECT StrIdProducto, P.StrDescripcion, P.strLinea AS linea, Strauxiliar, StrUnidad, IntPrecio1, IntPrecio2, IntPrecio3, IntPrecio4,IntPrecio7, IntPrecio8, I.StrArchivo
+            const query = `SELECT StrIdProducto, P.StrDescripcion, P.strLinea AS linea, Strauxiliar, StrUnidad,
+            IntPrecio1,IntPrecio2,IntPrecio3,IntPrecio4,IntPrecio5,IntPrecio6,IntPrecio7, IntPrecio8, I.StrArchivo
             FROM TblProductos AS P
             INNER JOIN TblImagenes AS I ON P.StrIdProducto = I.StrIdCodigo
             WHERE IntHabilitarProd = 1
@@ -91,6 +103,7 @@ const GetProductosXTipos_Query = async (tipos, skipReg, cantidadReg) => {
             ORDER BY P.StrIdProducto
             OFFSET ${skipReg} ROWS
             FETCH NEXT ${cantidadReg} ROWS ONLY`;
+            console.log(tipoGrupoConditions)
             const data = await obtenerDatosDB_Hgi(query)
             resolve(data)
         } catch (error) {
@@ -191,7 +204,9 @@ const ContarProductosXTipos_Query = async (tiposString) => {
 const Buscar_Productos_Query = async (text, skipReg, cantidadReg) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const query = `select StrIdProducto,P.StrDescripcion,Strauxiliar,StrUnidad,IntPrecio1,IntPrecio2,IntPrecio3,IntPrecio4,IntPrecio7, IntPrecio8, I.StrArchivo
+            const query = `select StrIdProducto,P.StrDescripcion,Strauxiliar,StrUnidad,
+            IntPrecio1,IntPrecio2,IntPrecio3,IntPrecio4,IntPrecio5,
+            IntPrecio6,IntPrecio7, IntPrecio8, I.StrArchivo
             from TblProductos as P
             inner join TblImagenes as I on P.StrIdProducto = I.StrIdCodigo
             where IntHabilitarProd = 1

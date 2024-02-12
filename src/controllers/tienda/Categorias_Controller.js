@@ -41,10 +41,10 @@ const GetGrupo = async (req, res) => {
 
 //OBTENER SUBCATEGORIA3 O TIPOS
 const GetTipo = async(req, res) => {
-    const { Grupo } = req.query
+    const { Grupo,Linea } = req.query
 
     try {
-        const data = await GetTipo_Query(Grupo)
+        const data = await GetTipo_Query(Grupo,Linea)
         if(data.strIdTipo !== 0){
             res.status(200).json({ success: true, data: data })
         }else{

@@ -51,10 +51,13 @@ const GetProductosXGrupos = async (req, res) => {
     const skipReg = pagina * cantidadReg
     const { grupos } = req.body
 
+    console.log(grupos)
+
     try {
         const data = await GetProductosXGrupos_Query(grupos, skipReg, cantidadReg)
         res.status(200).json({ success: true, data: data })
     } catch (error) {
+        console.log(error)
         res.status(400).json({ success: false, error: error, message: "Ha ocurrido un error al obtener los productos" })
     }
 
