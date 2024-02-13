@@ -51,8 +51,6 @@ const GetProductosXGrupos = async (req, res) => {
     const skipReg = pagina * cantidadReg
     const { grupos } = req.body
 
-    console.log(grupos)
-
     try {
         const data = await GetProductosXGrupos_Query(grupos, skipReg, cantidadReg)
         res.status(200).json({ success: true, data: data })

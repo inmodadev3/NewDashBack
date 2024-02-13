@@ -78,7 +78,6 @@ const GetProductosXGrupos_Query = async (grupos, skipReg, cantidadReg) => {
                             order by P.StrIdProducto
                             OFFSET ${skipReg} ROWS
                             FETCH NEXT ${cantidadReg} ROWS ONLY`
-                            console.log(query)
             const data = await obtenerDatosDB_Hgi(query)
             resolve(data)
         } catch (error) {
@@ -103,7 +102,6 @@ const GetProductosXTipos_Query = async (tipos, skipReg, cantidadReg) => {
             ORDER BY P.StrIdProducto
             OFFSET ${skipReg} ROWS
             FETCH NEXT ${cantidadReg} ROWS ONLY`;
-            console.log(tipoGrupoConditions)
             const data = await obtenerDatosDB_Hgi(query)
             resolve(data)
         } catch (error) {
