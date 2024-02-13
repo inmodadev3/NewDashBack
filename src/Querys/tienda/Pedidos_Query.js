@@ -693,6 +693,18 @@ const Enviar_pedido_tblPedidos = async (
     })
 }
 
+const cambiar_estado_pedidosTienda_Query = async(estado,idPedido)=> {
+    return new Promise(async(resolve, reject) => {
+        try {
+            const query_pedido = `UPDATE tblpedidostienda SET intEstado = ? WHERE intIdPedido = ?`;
+            await obtenerDatosDb_Dash(query_pedido,[estado,idPedido])
+            resolve(1)
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+
 
 module.exports = {
     Crear_Pedido_Query,
@@ -711,5 +723,6 @@ module.exports = {
     Actualizar_total_pedido_Query,
     Enviar_pedido_Database_Query,
     Obtener_Telefono_Vendedor_Query,
-    Enviar_Pedido_Local_Query
+    Enviar_Pedido_Local_Query,
+    cambiar_estado_pedidosTienda_Query
 }

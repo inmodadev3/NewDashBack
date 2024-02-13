@@ -1,4 +1,4 @@
-const { Crear_Pedido_Query, Agregar_productos_Query, Actualizar_Cantidad_Observacion_Producto_Query, Consultar_CantidadProductos_Pedido_Query, Consultar_Producto_Agregado_Query, Eliminar_Producto_query, Eliminar_TodosLosProductos_Query, Consultar_Productos_Query, Consultar_Datos_Cliente_Query, Validar_Agotados_Pedido_Query, Validar_Precios_Pedido_Query, Actualizar_Agotados_Pedido_Query, Actualizar_Cambios_Precios_Pedido_Query, Enviar_pedido_Database_Query, Obtener_Telefono_Vendedor_Query, Enviar_Pedido_Local_Query } = require("../../Querys/tienda/Pedidos_Query")
+const { Crear_Pedido_Query, Agregar_productos_Query, Actualizar_Cantidad_Observacion_Producto_Query, Consultar_CantidadProductos_Pedido_Query, Consultar_Producto_Agregado_Query, Eliminar_Producto_query, Eliminar_TodosLosProductos_Query, Consultar_Productos_Query, Consultar_Datos_Cliente_Query, Validar_Agotados_Pedido_Query, Validar_Precios_Pedido_Query, Actualizar_Agotados_Pedido_Query, Actualizar_Cambios_Precios_Pedido_Query, Enviar_pedido_Database_Query, Obtener_Telefono_Vendedor_Query, Enviar_Pedido_Local_Query, cambiar_estado_pedidosTienda_Query } = require("../../Querys/tienda/Pedidos_Query")
 
 const Crear_Pedido = async (req, res) => {
 
@@ -175,6 +175,16 @@ const Obtener_Telefono_Vendedor = async(req,res)=>{
     }
 }
 
+const cambiar_estado_pedidosTienda = async(req,res)=>{
+    const {estado ,idPedido } = req.body
+    try {
+        await cambiar_estado_pedidosTienda_Query(estado,idPedido)
+        res.status(200).json({message:"Actualizado con exito."})
+    } catch (error) {
+        res.status(400).json({message:`${error}`})
+    }
+}
+
 
 module.exports = {
     Crear_Pedido,
@@ -190,5 +200,6 @@ module.exports = {
     Actualizar_Agotados_Precios_Pedido,
     Enviar_pedido,
     Obtener_Telefono_Vendedor,
-    Enviar_Pedido_Local
+    Enviar_Pedido_Local,
+    cambiar_estado_pedidosTienda
 }
