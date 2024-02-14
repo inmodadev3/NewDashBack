@@ -1,31 +1,33 @@
 const { obtenerDatosDB_Hgi } = require('../Global_Querys')
 
+const datosPrinciaplesProductos =`StrIdProducto, P.StrDescripcion, P.strLinea AS linea, Strauxiliar, StrUnidad,
+IntPrecio1,IntPrecio2,IntPrecio3,IntPrecio4,IntPrecio5,
+IntPrecio6,IntPrecio7, IntPrecio8, I.StrArchivo , DatFechaFProdHab`
+
+const GetProductosPrincipal = (instruccion_adicional,skipReg,cantidadReg) =>{
+
+    const query = `SELECT ${datosPrinciaplesProductos}
+    FROM TblProductos AS P
+    INNER JOIN TblImagenes AS I ON P.StrIdProducto = I.StrIdCodigo
+    WHERE IntHabilitarProd = 1
+    ${instruccion_adicional}
+    AND I.IntOrden = 1
+    ORDER BY DatFechaFProdHab desc, P.StrIdProducto
+    OFFSET ${skipReg} ROWS
+    FETCH NEXT ${cantidadReg} ROWS ONLY`
+
+    return query
+}
+
 const GetProductos_Query = async (clase, skipReg, cantidadReg) => {
     return new Promise(async (resolve, reject) => {
         try {
             let query;
 
             if (clase) {
-                query = `select StrIdProducto,P.StrDescripcion,Strauxiliar,StrUnidad,IntPrecio1,IntPrecio2,IntPrecio3,IntPrecio4,IntPrecio5,
-                        IntPrecio6,IntPrecio7, IntPrecio8, I.StrArchivo
-                        from TblProductos as P
-                        inner join TblImagenes as I on P.StrIdProducto = I.StrIdCodigo
-                        where IntHabilitarProd = 1
-                        and P.StrClase = ${clase}
-                        and I.IntOrden = 1
-                        order by P.StrIdProducto
-                        OFFSET ${skipReg} ROWS
-                        FETCH NEXT ${cantidadReg} ROWS ONLY`
+                query = GetProductosPrincipal(`and P.StrClase = ${clase}`,skipReg,cantidadReg)
             } else {
-                query = `select StrIdProducto,P.StrDescripcion,Strauxiliar,StrUnidad,IntPrecio1,IntPrecio2,IntPrecio3,IntPrecio4,IntPrecio5,
-                        IntPrecio6,IntPrecio7, IntPrecio8, I.StrArchivo
-                        from TblProductos as P
-                        inner join TblImagenes as I on P.StrIdProducto = I.StrIdCodigo
-                        where IntHabilitarProd = 1
-                        and I.IntOrden = 1
-                        order by P.StrIdProducto
-                        OFFSET ${skipReg} ROWS
-                        FETCH NEXT ${cantidadReg} ROWS ONLY`
+                query = GetProductosPrincipal('',skipReg,cantidadReg)
             }
 
             const data = await obtenerDatosDB_Hgi(query)
@@ -40,18 +42,7 @@ const GetProductosXlinea_Query = async (lineas, skipReg, cantidadReg) => {
     return new Promise(async (resolve, reject) => {
         try {
             lineas = lineas.map((linea) => `'${linea}'`).join(', ')
-
-            const query = `select StrIdProducto,P.StrDescripcion,P.strLinea as linea,Strauxiliar,StrUnidad,
-                            IntPrecio1,IntPrecio2,IntPrecio3,IntPrecio4,IntPrecio5,
-                            IntPrecio6,IntPrecio7, IntPrecio8, I.StrArchivo
-                            from TblProductos as P
-                            inner join TblImagenes as I on P.StrIdProducto = I.StrIdCodigo
-                            where IntHabilitarProd = 1
-                            and P.strLinea in (${lineas})
-                            and I.IntOrden = 1
-                            order by P.StrIdProducto
-                            OFFSET ${skipReg} ROWS
-                            FETCH NEXT ${cantidadReg} ROWS ONLY`
+            const query = GetProductosPrincipal(`and P.strLinea in (${lineas})`,skipReg,cantidadReg)
             const data = await obtenerDatosDB_Hgi(query)
             resolve(data)
         } catch (error) {
@@ -63,21 +54,10 @@ const GetProductosXlinea_Query = async (lineas, skipReg, cantidadReg) => {
 const GetProductosXGrupos_Query = async (grupos, skipReg, cantidadReg) => {
     return new Promise(async (resolve, reject) => {
         try {
-            //grupos = grupos.map((grupo) => `'${grupo}'`).join(', ')
             const GrupoConditions = grupos.map(({ IdGrupo, IdLinea }) => `(P.StrGrupo = '${IdGrupo}'
             AND P.StrLinea = '${IdLinea}')`).join(' OR ');
 
-            const query = `select StrIdProducto,P.StrDescripcion,P.strLinea as linea,Strauxiliar,StrUnidad,
-                            IntPrecio1,IntPrecio2,IntPrecio3,IntPrecio4,IntPrecio5,
-                            IntPrecio6,IntPrecio7, IntPrecio8, I.StrArchivo
-                            from TblProductos as P
-                            inner join TblImagenes as I on P.StrIdProducto = I.StrIdCodigo
-                            where IntHabilitarProd = 1
-                            AND (${GrupoConditions})
-                            and I.IntOrden = 1
-                            order by P.StrIdProducto
-                            OFFSET ${skipReg} ROWS
-                            FETCH NEXT ${cantidadReg} ROWS ONLY`
+            const query = GetProductosPrincipal(`AND (${GrupoConditions})`,skipReg,cantidadReg)
             const data = await obtenerDatosDB_Hgi(query)
             resolve(data)
         } catch (error) {
@@ -91,17 +71,7 @@ const GetProductosXTipos_Query = async (tipos, skipReg, cantidadReg) => {
         try {
             const tipoGrupoConditions = tipos.map(({ IdTipo, IdGrupo, IdLinea }) => `(P.strTipo = '${IdTipo}' AND P.StrGrupo = '${IdGrupo}'
             AND P.StrLinea = '${IdLinea}')`).join(' OR ');
-
-            const query = `SELECT StrIdProducto, P.StrDescripcion, P.strLinea AS linea, Strauxiliar, StrUnidad,
-            IntPrecio1,IntPrecio2,IntPrecio3,IntPrecio4,IntPrecio5,IntPrecio6,IntPrecio7, IntPrecio8, I.StrArchivo
-            FROM TblProductos AS P
-            INNER JOIN TblImagenes AS I ON P.StrIdProducto = I.StrIdCodigo
-            WHERE IntHabilitarProd = 1
-            AND (${tipoGrupoConditions})
-            AND I.IntOrden = 1
-            ORDER BY P.StrIdProducto
-            OFFSET ${skipReg} ROWS
-            FETCH NEXT ${cantidadReg} ROWS ONLY`;
+            const query = GetProductosPrincipal(`AND (${tipoGrupoConditions})`,skipReg,cantidadReg)
             const data = await obtenerDatosDB_Hgi(query)
             resolve(data)
         } catch (error) {
@@ -114,9 +84,9 @@ const GetProductoXid_Query = async (id) => {
     return new Promise(async (resolve, reject) => {
         try {
             const query = `select P.StrIdProducto,P.StrDescripcion,P.Strauxiliar,P.StrUnidad,P.IntPrecio1,P.IntPrecio2,
-            P.IntPrecio3,P.IntPrecio4,IntPrecio7, IntPrecio8,P.StrParam3,P2.StrDescripcion as material,P.StrDescripcionCorta , P.IntControl as CantPaca, P.StrParam5 as Color
+            P.IntPrecio3,P.IntPrecio4,IntPrecio7, IntPrecio8,P.StrParam3,P2.StrDescripcion as material,P.StrDescripcionCorta , 
+            P.IntControl as CantPaca, P.StrParam5 as Color
             from TblProductos as P inner join TblProdParametro2 as P2 on P2.StrIdPParametro = P.StrPParametro2  where StrIdProducto = '${id}'`
-
             const data = await obtenerDatosDB_Hgi(query)
             resolve(data)
         } catch (error) {
@@ -134,9 +104,7 @@ const GetImagesXid_Query = async (referencia) => {
         } catch (error) {
             reject(error)
         }
-
     })
-
 }
 
 const ContarProductos_Query = () => {
@@ -202,18 +170,8 @@ const ContarProductosXTipos_Query = async (tiposString) => {
 const Buscar_Productos_Query = async (text, skipReg, cantidadReg) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const query = `select StrIdProducto,P.StrDescripcion,Strauxiliar,StrUnidad,
-            IntPrecio1,IntPrecio2,IntPrecio3,IntPrecio4,IntPrecio5,
-            IntPrecio6,IntPrecio7, IntPrecio8, I.StrArchivo
-            from TblProductos as P
-            inner join TblImagenes as I on P.StrIdProducto = I.StrIdCodigo
-            where IntHabilitarProd = 1
-            and I.IntOrden = 1
-            and (P.strIdproducto like '%${text}%' or P.StrDescripcion like '%${text}%')
-            order by P.StrIdProducto
-            OFFSET ${skipReg} ROWS
-            FETCH NEXT ${cantidadReg} ROWS ONLY`
-
+            const query_extra = `and (P.strIdproducto like '%${text}%' or P.StrDescripcion like '%${text}%')`
+            const query = GetProductosPrincipal(query_extra,skipReg,cantidadReg)
             const data = await obtenerDatosDB_Hgi(query)
             resolve(data)
         } catch (error) {
@@ -239,8 +197,6 @@ const Contar_Productos_Busqueda_Query = (text) => {
         }
     })
 }
-
-
 
 module.exports = {
     GetProductos_Query,
