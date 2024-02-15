@@ -2,7 +2,7 @@ const { obtenerDatosDB_Hgi } = require('../Global_Querys')
 
 const datosPrinciaplesProductos =`StrIdProducto, P.StrDescripcion, P.strLinea AS linea, Strauxiliar, StrUnidad,
 IntPrecio1,IntPrecio2,IntPrecio3,IntPrecio4,IntPrecio5,
-IntPrecio6,IntPrecio7, IntPrecio8, I.StrArchivo , DatFechaFProdHab`
+IntPrecio6,IntPrecio7, IntPrecio8, I.StrArchivo , DatFechaFProdHab,DatFechaFProdNuevo`
 
 const GetProductosPrincipal = (instruccion_adicional,skipReg,cantidadReg) =>{
 
@@ -12,7 +12,7 @@ const GetProductosPrincipal = (instruccion_adicional,skipReg,cantidadReg) =>{
     WHERE IntHabilitarProd = 1
     ${instruccion_adicional}
     AND I.IntOrden = 1
-    ORDER BY DatFechaFProdHab desc, P.StrIdProducto
+    ORDER BY DatFechaFProdHab desc,DatFechaFProdNuevo desc, P.StrIdProducto
     OFFSET ${skipReg} ROWS
     FETCH NEXT ${cantidadReg} ROWS ONLY`
 
