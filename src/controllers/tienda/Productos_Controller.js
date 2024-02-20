@@ -11,7 +11,8 @@ const {
     ContarProductos_Query,
     ContarProductosXTipos_Query,
     Buscar_Productos_Query,
-    Contar_Productos_Busqueda_Query
+    Contar_Productos_Busqueda_Query,
+    BuscarProductosSimilares_Query
 } = require('../../Querys/tienda/Productos_Querys')
 
 //OBTENER TODOS LOS PRODUCTOS O POR CLASE
@@ -79,7 +80,7 @@ const GetProductosXTipos = async (req, res) => {
 //OBTENER UN PRODUCTO POR StrIdProducto
 const GetProductoXid = async (req, res) => {
     const { id } = req.params
-    
+
     try {
         let imagenes = await GetImagesXid_Query(id)
         const data = await GetProductoXid_Query(id)
@@ -165,6 +166,24 @@ const Buscar_Productos = async (req, res) => {
 
     try {
         const data = await Buscar_Productos_Query(texto, skipReg, cantidadReg)
+        if(data.length > 0){
+            res.status(200).json({ success: true, data: data })
+        }else{
+            res.status(200).json({ success:false, data:0})
+        }
+    } catch (error) {
+        res.status(400).json({ success: false, error: error, message: "Ha ocurrido un error al obtener los productos" })
+    }
+}
+
+const BuscarProductosSimilares = async (req, res) => {
+    const pagina = req.query.pag ? parseInt(req.query.pag) : 0
+    const texto = req.query.p
+    const cantidadReg = 30
+    const skipReg = pagina * cantidadReg
+
+    try {
+        const data = await BuscarProductosSimilares_Query(texto, skipReg, cantidadReg)
         res.status(200).json({ success: true, data: data })
     } catch (error) {
         res.status(400).json({ success: false, error: error, message: "Ha ocurrido un error al obtener los productos" })
@@ -200,5 +219,6 @@ module.exports = {
     ContarProductos,
     ContarProductosXTipos,
     Buscar_Productos,
-    Contar_Productos_Busqueda
+    Contar_Productos_Busqueda,
+    BuscarProductosSimilares
 }

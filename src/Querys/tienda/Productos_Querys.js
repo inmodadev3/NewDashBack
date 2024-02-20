@@ -1,10 +1,12 @@
 const { obtenerDatosDB_Hgi } = require('../Global_Querys')
+const descripciones = require('../../utils/Descripciones')
+const { levenshteinDistance } = require('../../helpers/helpers')
 
-const datosPrinciaplesProductos =`StrIdProducto, P.StrDescripcion, P.strLinea AS linea, Strauxiliar, StrUnidad,
+const datosPrinciaplesProductos = `StrIdProducto, P.StrDescripcion, P.strLinea AS linea, Strauxiliar, StrUnidad,
 IntPrecio1,IntPrecio2,IntPrecio3,IntPrecio4,IntPrecio5,
 IntPrecio6,IntPrecio7, IntPrecio8, I.StrArchivo , DatFechaFProdHab,DatFechaFProdNuevo`
 
-const GetProductosPrincipal = (instruccion_adicional,skipReg,cantidadReg) =>{
+const GetProductosPrincipal = (instruccion_adicional, skipReg, cantidadReg) => {
 
     const query = `SELECT ${datosPrinciaplesProductos}
     FROM TblProductos AS P
@@ -25,9 +27,9 @@ const GetProductos_Query = async (clase, skipReg, cantidadReg) => {
             let query;
 
             if (clase) {
-                query = GetProductosPrincipal(`and P.StrClase = ${clase}`,skipReg,cantidadReg)
+                query = GetProductosPrincipal(`and P.StrClase = ${clase}`, skipReg, cantidadReg)
             } else {
-                query = GetProductosPrincipal('',skipReg,cantidadReg)
+                query = GetProductosPrincipal('', skipReg, cantidadReg)
             }
 
             const data = await obtenerDatosDB_Hgi(query)
@@ -42,7 +44,7 @@ const GetProductosXlinea_Query = async (lineas, skipReg, cantidadReg) => {
     return new Promise(async (resolve, reject) => {
         try {
             lineas = lineas.map((linea) => `'${linea}'`).join(', ')
-            const query = GetProductosPrincipal(`and P.strLinea in (${lineas})`,skipReg,cantidadReg)
+            const query = GetProductosPrincipal(`and P.strLinea in (${lineas})`, skipReg, cantidadReg)
             const data = await obtenerDatosDB_Hgi(query)
             resolve(data)
         } catch (error) {
@@ -57,7 +59,7 @@ const GetProductosXGrupos_Query = async (grupos, skipReg, cantidadReg) => {
             const GrupoConditions = grupos.map(({ IdGrupo, IdLinea }) => `(P.StrGrupo = '${IdGrupo}'
             AND P.StrLinea = '${IdLinea}')`).join(' OR ');
 
-            const query = GetProductosPrincipal(`AND (${GrupoConditions})`,skipReg,cantidadReg)
+            const query = GetProductosPrincipal(`AND (${GrupoConditions})`, skipReg, cantidadReg)
             const data = await obtenerDatosDB_Hgi(query)
             resolve(data)
         } catch (error) {
@@ -71,7 +73,7 @@ const GetProductosXTipos_Query = async (tipos, skipReg, cantidadReg) => {
         try {
             const tipoGrupoConditions = tipos.map(({ IdTipo, IdGrupo, IdLinea }) => `(P.strTipo = '${IdTipo}' AND P.StrGrupo = '${IdGrupo}'
             AND P.StrLinea = '${IdLinea}')`).join(' OR ');
-            const query = GetProductosPrincipal(`AND (${tipoGrupoConditions})`,skipReg,cantidadReg)
+            const query = GetProductosPrincipal(`AND (${tipoGrupoConditions})`, skipReg, cantidadReg)
             const data = await obtenerDatosDB_Hgi(query)
             resolve(data)
         } catch (error) {
@@ -171,7 +173,7 @@ const Buscar_Productos_Query = async (text, skipReg, cantidadReg) => {
     return new Promise(async (resolve, reject) => {
         try {
             const query_extra = `and (P.strIdproducto like '%${text}%' or P.StrDescripcion like '%${text}%')`
-            const query = GetProductosPrincipal(query_extra,skipReg,cantidadReg)
+            const query = GetProductosPrincipal(query_extra, skipReg, cantidadReg)
             const data = await obtenerDatosDB_Hgi(query)
             resolve(data)
         } catch (error) {
@@ -198,6 +200,62 @@ const Contar_Productos_Busqueda_Query = (text) => {
     })
 }
 
+const BuscarProductosSimilares_Query = async (text) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            
+
+            const buscador_coincidencias = (umbral) => {
+                const coincidencias = []
+                for (const palabraBD of descripciones) {
+                    const palabrasBD = palabraBD.split(" ");
+                    for (const palabraEnBD of palabrasBD) {
+                        const distancia = levenshteinDistance(text.toLowerCase(), palabraEnBD.toLowerCase());
+                        if (distancia <= umbral) {
+                            coincidencias.push(palabraBD);
+                            break;
+                        }
+                    }
+                }
+
+                return coincidencias
+            }
+
+            const coincidencias = buscador_coincidencias(2);
+            let coincidencias_exactas = [];
+            /* for (const palabraBD of descripciones) {
+                const palabrasBD = palabraBD.split(" ");
+                for (const palabraEnBD of palabrasBD) {
+                    const distancia = levenshteinDistance(text.toLowerCase(), palabraEnBD.toLowerCase());
+                    if (distancia <= 2) {
+                        coincidencias.push(palabraBD);
+                        break;
+                    }
+                }
+            } */
+
+            if (coincidencias.length > 15) {
+                coincidencias_exactas = buscador_coincidencias(1)
+                /* for (const palabraBD of coincidencias) {
+                    const palabrasBD = palabraBD.split(" ");
+                    for (const palabraEnBD of palabrasBD) {
+                        const distancia = levenshteinDistance(text.toLowerCase(), palabraEnBD.toLowerCase());
+                        if (distancia <= 1) {
+                            coincidencias_exactas.push(palabraBD);
+                            break;
+                        }
+                    }
+                } */
+            }
+
+            const descripciones_busqueda = coincidencias_exactas.length > 0 ? coincidencias_exactas[0].split(" ")[0] : coincidencias[0].split(" ")[0]
+            resolve(descripciones_busqueda)
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+
 module.exports = {
     GetProductos_Query,
     GetProductosXlinea_Query,
@@ -211,5 +269,6 @@ module.exports = {
     ContarProductos_Query,
     ContarProductosXTipos_Query,
     Buscar_Productos_Query,
-    Contar_Productos_Busqueda_Query
+    Contar_Productos_Busqueda_Query,
+    BuscarProductosSimilares_Query
 }

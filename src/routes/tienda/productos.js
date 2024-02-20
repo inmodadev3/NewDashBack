@@ -11,7 +11,8 @@ const {
     ContarProductos,
     ContarProductosXTipos,
     Buscar_Productos,
-    Contar_Productos_Busqueda
+    Contar_Productos_Busqueda,
+    BuscarProductosSimilares
 } = require('../../controllers/tienda/Productos_Controller')
 
 //OBTENER TODOS LOS PRODUCTOS
@@ -19,6 +20,7 @@ route.get('/',GetProductos)
 
 //OBTENER PRODUCTOS POR METODO DE BUSCA
 route.get('/buscar',Buscar_Productos)
+route.get('/buscar/similares',BuscarProductosSimilares)
 
 route.get('/contar/busqueda',Contar_Productos_Busqueda)
 
