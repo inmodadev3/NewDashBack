@@ -1,3 +1,4 @@
+
 const { 
     GetInfoProductos,
     GetImagenesUnProducto,
@@ -5,7 +6,8 @@ const {
     GetMarcas,
     GetUnidades,
     GetInfoProductos_Nombre,
-    PostActualizarUbicacion
+    PostActualizarUbicacion,
+    GetProductoXid
 } = require('../../controllers/v1/Productos_Controller')
 const route = require('express').Router()
 
@@ -17,5 +19,6 @@ route.post('/ubicaciones', PostActualizarUbicacion)
 
 route.get('/nombre/:strNombre',GetInfoProductos_Nombre)
 route.get('/:strIdProducto',GetInfoProductos)
+route.get('/id/:strIdProducto',GetProductoXid)
 
 module.exports = route

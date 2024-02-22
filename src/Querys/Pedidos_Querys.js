@@ -63,7 +63,7 @@ const GetUbicaciones = async (strIdProducto) => {
 const GetInfoPedido_Query = async (id) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const query = `SELECT * FROM tbldetallepedidos where intIdpedido = ?`;
+            const query = `SELECT * FROM tbldetallepedidos where intIdpedido = ? and intEstado != -1`;
             const queryCabecera = `SELECT strIdCliente,strNombCliente,strCiudadCliente,strTelefonoClienteAct,dtFechaEnvio,strNombVendedor,intIdpedido,strCorreoClienteAct,strObservacion,intValorTotal FROM tblpedidos where intIdPedido = ?`;
             let data = await obtenerDatosDb_Dash(query, [id])
             const header = await obtenerDatosDb_Dash(queryCabecera, [id])
@@ -122,7 +122,7 @@ const ValidarPrecios_PDF = (productoId, producto_Precio_Actual, terceroId) => {
                 } else {
                     resolve(false)
                 }
-            }else{
+            } else {
                 resolve(false)
             }
 
@@ -180,6 +180,104 @@ const PutEstadoPedido_Query = async (id, estado) => {
     })
 }
 
+const PutTotalPrecioPedido_Query = async (id,total) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const query = `UPDATE tblpedidos SET intValorTotal = ? where intIdPedido = ?`
+            const data = await obtenerDatosDb_Dash(query, [total, id])
+            resolve(1)
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+
+const PutEstadoProductoPedido_query = async (id,valor,valor_total,tipo,pedidoId) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let variable_actualizar = "intEstado"
+            if(tipo == 1){
+                variable_actualizar = "intEstado"
+            }else{
+                variable_actualizar = "intCantidad"
+            }
+
+            const query = `UPDATE tbldetallepedidos SET ${variable_actualizar} = ?  where intIdPedDetalle = ?`
+            await obtenerDatosDb_Dash(query,[valor,id])
+            await PutTotalPrecioPedido_Query(pedidoId,valor_total)
+            resolve(1)
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+
+const PostProductoPedido_query = async(idCliente,idProducto,idPedido)=>{
+    return new Promise(async(resolve,reject)=>{
+        try {
+            //obtener el ultimo id de la tabla tbldetallepedidos
+            const ultimoId_query = `SELECT COALESCE((SELECT MAX(intIdPedDetalle) FROM dash.tbldetallepedidos), 0) as ultimoID`;
+            const lastIdDet = await obtenerDatosDb_Dash(ultimoId_query);
+            const nuevoIdDetalle = lastIdDet[0].ultimoID + 1;
+
+            //obtener el precio del cliente
+            const obtener_precioProducto_query = `select TTT.IntPrecio as tipo_precio from TblTerceros as TT
+            inner join TblTiposTercero as TTT on TT.IntTipoTercero = TTT.IntIdTipoTercero
+            where TT.StrIdTercero = '${idCliente}'`
+            const obtener_precioProducto = await obtenerDatosDB_Hgi(obtener_precioProducto_query)
+
+            //obtener los datos del producto
+            const data_producto_query = `select StrIdProducto, StrDescripcion,StrUnidad,IntPrecio${obtener_precioProducto[0].tipo_precio} as precio from TblProductos
+            where StrIdProducto = '${idProducto}'`
+            const data_producto = await obtenerDatosDB_Hgi(data_producto_query)
+            const producto = data_producto[0]
+
+            //agregar producto a la base de datos
+            const insertar_producto_Query = `INSERT INTO tbldetallepedidos (
+                intIdPedDetalle,
+                intIdPedido,
+                strIdProducto,
+                strDescripcion,
+                intCantidad,
+                strUnidadMedida,
+                strObservacion,
+                intPrecio,
+                intPrecioProducto,
+                intEstado
+            )VALUES(
+                ?,?,?,?,?,?,?,?,?,?
+            )`;
+
+
+            await obtenerDatosDb_Dash(insertar_producto_Query, [
+                nuevoIdDetalle,
+                idPedido,
+                producto.StrIdProducto,
+                producto.StrDescripcion,
+                1,
+                producto.StrUnidad,
+                "",
+                producto.precio,
+                producto.precio,
+                1
+            ]);
+
+            resolve({
+                nuevoIdDetalle,
+                idPedido,
+                referencia:producto.StrIdProducto,
+                descripcion:producto.StrDescripcion,
+                intCantidad:1,
+                strUnidad:producto.StrUnidad,
+                precio:producto.precio,
+            })
+            
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+
 module.exports = {
     GetPedidosNuevos_Query,
     GetPedidosEnProceso_query,
@@ -188,5 +286,7 @@ module.exports = {
     GetInfoPedidoTerminal_Query,
     GetPedidoXId_Query,
     GetPedidos_Query,
-    PutEstadoPedido_Query
+    PutEstadoPedido_Query,
+    PutEstadoProductoPedido_query,
+    PostProductoPedido_query
 }

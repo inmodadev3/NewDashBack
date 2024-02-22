@@ -21,7 +21,7 @@ const GetInfoProductos_Query = async (strIdProducto) => {
             INNER JOIN TblProdParametro1 AS pp1 ON pp1.StrIdPParametro1 = p.StrPParametro1
             INNER JOIN TblProdParametro2 AS pp2 ON pp2.StrIdPParametro = p.StrPParametro2
             INNER JOIN TblProdParametro3 AS pp3 ON pp3.StrIdPParametro = p.StrPParametro3
-            WHERE StrIdProducto LIKE '${strIdProducto}%'`
+            WHERE StrIdProducto LIKE '${strIdProducto}%' order by P.inthabilitarProd desc`
 
             const data = await obtenerDatosDB_Hgi(query)
             resolve(data)
@@ -122,7 +122,7 @@ const GetUnidades_Query = async () => {
     })
 }
 
-const DeshabilitarTrigger = async()=>{
+const DeshabilitarTrigger = async () => {
     try {
 
         let sql = `EXEC('use INMODANET; 
@@ -143,21 +143,48 @@ const DeshabilitarTrigger = async()=>{
         console.log("----------------------------ERROR------------------------")
         return false;
     }
-    
+
 }
 
 const PostActualizarUbicacion_Query = async (value, referencia, idUsuario, ultima_ubicacion) => {
-    return new Promise(async(resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
         try {
             const fecha = new Date()
             const HGI_SQL = `update tblProductos set strParam2 = '${value}' where stridproducto = '${referencia}' `
             const DASH_SQL = `INSERT INTO tblUbicacionesRegistro (idLogin,nueva_ubicacion,antigua_ubicacion,fecha_cambio) VALUES (?,?,?,?)`
             await DeshabilitarTrigger()
             await obtenerDatosDB_Hgi(HGI_SQL)
-            await obtenerDatosDb_Dash(DASH_SQL,[idUsuario,value,ultima_ubicacion,fecha])
+            await obtenerDatosDb_Dash(DASH_SQL, [idUsuario, value, ultima_ubicacion, fecha])
             resolve("Actualizada con exito")
         } catch (error) {
             resolve(error)
+        }
+    })
+}
+
+const GetProductoXidQuery = (strIdProducto) => {
+    return new Promise(async (resolve, reject) => {
+
+        const fecha = new Date();
+        const year = fecha.getFullYear();
+        const month = fecha.getMonth() + 1;
+
+        const query = `SELECT p.StrIdProducto AS referencia, p.StrDescripcion AS descripcion, 
+        p.strunidad AS UM,p.strauxiliar as cantxEmpaque, p.strparam2 AS Ubicacion,  p.strparam3 AS medida,
+        (SELECT strarchivo 
+        FROM tblimagenes 
+        WHERE stridcodigo = p.StrIdProducto AND StrDescripcion = '1') AS productoImg, 
+        (SELECT intCantidadFinal 
+        FROM qrySaldosInv 
+        WHERE strProducto = p.StrIdProducto and IntAno = ${year} and IntPeriodo = ${month} and IntBodega = '01') AS saldoInv
+        FROM tblproductos AS p
+        WHERE StrIdProducto = '${strIdProducto}'`
+
+        try {
+            const data = await obtenerDatosDB_Hgi(query)
+            resolve(data)
+        } catch (error) {
+            reject(error)
         }
     })
 }
@@ -170,5 +197,6 @@ module.exports = {
     GetInfoProductos_Query,
     GetImagenesUnProducto_Query,
     GetInfoProductos_Nombre_Query,
-    PostActualizarUbicacion_Query
+    PostActualizarUbicacion_Query,
+    GetProductoXidQuery
 }
