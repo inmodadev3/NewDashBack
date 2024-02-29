@@ -1,4 +1,4 @@
-const { GetPedidosEnProceso_query, GetPedidosEnTerminal_Query, GetPedidosNuevos_Query, GetInfoPedido_Query, GetInfoPedidoTerminal_Query, GetPedidoXId_Query, GetPedidos_Query, PutEstadoPedido_Query, PutEstadoProductoPedido_query, PostProductoPedido_query } = require('../../Querys/Pedidos_Querys')
+const { GetPedidosEnProceso_query, GetPedidosEnTerminal_Query, GetPedidosNuevos_Query, GetInfoPedido_Query, GetInfoPedidoTerminal_Query, GetPedidoXId_Query, GetPedidos_Query, PutEstadoPedido_Query, PutEstadoProductoPedido_query, PostProductoPedido_query, PutActualizarPreciosPedidoQuery } = require('../../Querys/Pedidos_Querys')
 const { GetUbicaciones } = require('../../helpers/helpers')
 
 const DASH = require('../../databases/DashConexion').dashConexion
@@ -114,6 +114,16 @@ const PostProductoPedido = async (req, res) => {
     }
 }
 
+const PutActualizarPreciosPedido = async(req,res) =>{
+    const {idPedido , intPrecio} = req.body
+    try {
+        const total = await PutActualizarPreciosPedidoQuery(idPedido,intPrecio)
+        res.status(200).json({total})
+    } catch (error) {
+        res.status(400).json({error:error.message, stack:error.stack , success:false})
+    }
+}
+
 
 module.exports = {
     GetPedidosNuevos,
@@ -125,5 +135,6 @@ module.exports = {
     GetPedidos,
     PutEstadoPedido,
     PutEstadoProductoPedido,
-    PostProductoPedido
+    PostProductoPedido,
+    PutActualizarPreciosPedido
 }

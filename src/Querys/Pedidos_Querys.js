@@ -1,4 +1,5 @@
-const { obtenerDatosDB_Hgi, obtenerDatosDb_Dash } = require('./Global_Querys')
+const poolDash = require('../databases/DashConexion')
+const { obtenerDatosDB_Hgi, obtenerDatosDb_Dash, obtenerDatosDb_Dash_transaccion } = require('./Global_Querys')
 
 const GetPedidos_Query = async () => {
     return new Promise(async (resolve, reject) => {
@@ -278,6 +279,65 @@ const PostProductoPedido_query = async(idCliente,idProducto,idPedido)=>{
     })
 }
 
+const PutActualizarPreciosPedidoQuery = (idPedido,precio) =>{
+    return new Promise(async(resolve, reject) => {
+        let connection;
+        try {
+            const precioProducto = `intPrecio${precio}`
+            const productosActualizados = []
+
+            const query = `select intIdPedDetalle,strIdProducto,intCantidad, intPrecio from tbldetallepedidos where intIdPedido = ? and intEstado = 1`
+            const Productos_pedido = await obtenerDatosDb_Dash(query,[idPedido])
+
+            connection = await poolDash.promise().getConnection();
+            await connection.beginTransaction();
+            
+            for (const producto of Productos_pedido) {
+                const obtenerPreciosReales_Query = `select ${precioProducto} from tblproductos where strIdProducto = '${producto.strIdProducto}'`
+                let obtenerPreciosReales = await obtenerDatosDB_Hgi(obtenerPreciosReales_Query)
+                obtenerPreciosReales = obtenerPreciosReales[0]
+                const precioReal = Object.values(obtenerPreciosReales)
+
+                const updatePrecios_Query = `Update tbldetallepedidos set intPrecio = ? where intIdPedDetalle = ?`
+
+                if(producto.intPrecio !== precioReal[0]){
+                    await obtenerDatosDb_Dash_transaccion(connection,updatePrecios_Query,[precioReal[0],producto.intIdPedDetalle])
+                    productosActualizados.push({
+                        intPrecio:precioReal[0],
+                        intCantidad:producto.intCantidad
+                    })
+                }else{
+                    productosActualizados.push({
+                        intPrecio:producto.intPrecio,
+                        intCantidad:producto.intCantidad
+                    })
+                }
+            }
+            
+            let total_pedido = 0;
+
+            for (const producto of productosActualizados) {
+                total_pedido += (producto.intPrecio * producto.intCantidad)
+            }
+
+            const actualizarTotalPedido_Query = `update tblpedidos set intValorTotal = ? where intIdPedido = ?`
+            await obtenerDatosDb_Dash_transaccion(connection,actualizarTotalPedido_Query,[total_pedido,idPedido])
+
+            await connection.commit();
+            resolve(total_pedido)
+        } catch (error) {
+            if (connection) {
+                await connection.rollback();
+            }
+            reject(error)
+        } finally {
+            if (connection) {
+                connection.release();
+            }
+        }
+    })
+}
+
 module.exports = {
     GetPedidosNuevos_Query,
     GetPedidosEnProceso_query,
@@ -288,5 +348,6 @@ module.exports = {
     GetPedidos_Query,
     PutEstadoPedido_Query,
     PutEstadoProductoPedido_query,
-    PostProductoPedido_query
+    PostProductoPedido_query,
+    PutActualizarPreciosPedidoQuery
 }

@@ -9,7 +9,8 @@ const {
     GetPedidos,
     PutEstadoPedido,
     PutEstadoProductoPedido,
-    PostProductoPedido
+    PostProductoPedido,
+    PutActualizarPreciosPedido
 } = require('../../controllers/v1/Pedidos_Controller')
 
 route.get('/',GetPedidos)
@@ -22,6 +23,7 @@ route.get('/id/:id',GetPedidoXId)
 
 route.put('/actualizar_estado',PutEstadoPedido)
 route.put('/producto',PutEstadoProductoPedido)
+route.put('/precios_productos',PutActualizarPreciosPedido)
 
 
 route.post('/producto',PostProductoPedido)
