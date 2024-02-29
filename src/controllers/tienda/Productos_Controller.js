@@ -98,7 +98,7 @@ const ContarProductos = async (req, res) => {
         let cantidadPaginas = CalcularPaginas(data.totalColumna)
         res.status(200).json({ success: true, data: data.totalColumna, Paginas: cantidadPaginas })
     } catch (error) {
-        res.status(400).json({ success: false, error: error, message: `Ha ocurrido un error al contar los productos de la clase ${clase}` })
+        res.status(400).json({ success: false, error: error, message: `Ha ocurrido un error al contar los productos de la clase` })
     }
 }
 
