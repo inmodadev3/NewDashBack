@@ -128,7 +128,7 @@ const DeshabilitarTrigger = async () => {
         let sql = `EXEC('use INMODANET; 
         IF OBJECT_ID (''TgHgiNet_TblProductos'', ''TR'') IS NOT NULL
             BEGIN 
-                DROP TRIGGER TgHgiNet_TblProductos;
+                DISABLE TRIGGER TgHgiNet_TblProductos;
                 SELECT 1;
             END
         ELSE
