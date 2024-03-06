@@ -225,10 +225,10 @@ const PostProductoPedido_query = async(idCliente,idProducto,idPedido)=>{
             const obtener_precioProducto_query = `select TTT.IntPrecio as tipo_precio from TblTerceros as TT
             inner join TblTiposTercero as TTT on TT.IntTipoTercero = TTT.IntIdTipoTercero
             where TT.StrIdTercero = '${idCliente}'`
-            const obtener_precioProducto = await obtenerDatosDB_Hgi(obtener_precioProducto_query)
+            let obtener_precioProducto = await obtenerDatosDB_Hgi(obtener_precioProducto_query)
 
             //obtener los datos del producto
-            const data_producto_query = `select StrIdProducto, StrDescripcion,StrUnidad,IntPrecio${obtener_precioProducto[0].tipo_precio} as precio from TblProductos
+            const data_producto_query = `select StrIdProducto, StrDescripcion,StrUnidad,IntPrecio${obtener_precioProducto[0].tipo_precio !== 0 ? obtener_precioProducto[0].tipo_precio : 1 } as precio from TblProductos
             where StrIdProducto = '${idProducto}'`
             const data_producto = await obtenerDatosDB_Hgi(data_producto_query)
             const producto = data_producto[0]
