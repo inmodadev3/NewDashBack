@@ -3,7 +3,7 @@ const { obtenerDatosDB_Hgi } = require('../Global_Querys')
 const GetClases_Query = async () => {
     return new Promise(async (resolve, reject) => {
         try {
-            const query = `select StrIdClase,StrDescripcion from TblClases where StrIdClase in ('1001','101','1011','1021','1031','971','981','991','731') order by StrDescripcion`
+            const query = `select StrIdClase,StrDescripcion from TblClases where StrIdClase in ('1001','101','1011','1021','1031','971','741','991','731') order by StrDescripcion`
             const data = await obtenerDatosDB_Hgi(query)
 
             resolve(data)
