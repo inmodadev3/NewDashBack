@@ -124,17 +124,7 @@ const GetUnidades_Query = async () => {
 
 const DeshabilitarTrigger = async () => {
     try {
-
-        let sql = `EXEC('use INMODANET; 
-        IF OBJECT_ID (''TgHgiNet_TblProductos'', ''TR'') IS NOT NULL
-            BEGIN 
-                DISABLE TRIGGER TgHgiNet_TblProductos;
-                SELECT 1;
-            END
-        ELSE
-            BEGIN
-                SELECT 0;
-            END')`;
+        let sql = `DISABLE TRIGGER TgHgiNet_TblProductos on tblProductos`
         const rpta = await obtenerDatosDB_Hgi(sql);
         return rpta;
     } catch (error) {
@@ -157,7 +147,7 @@ const PostActualizarUbicacion_Query = async (value, referencia, idUsuario, ultim
             await obtenerDatosDb_Dash(DASH_SQL, [idUsuario, value, ultima_ubicacion, fecha])
             resolve("Actualizada con exito")
         } catch (error) {
-            resolve(error)
+            reject(error)
         }
     })
 }
