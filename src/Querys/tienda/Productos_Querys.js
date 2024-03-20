@@ -14,7 +14,18 @@ const GetProductosPrincipal = (instruccion_adicional, skipReg, cantidadReg) => {
     WHERE IntHabilitarProd = 1
     ${instruccion_adicional}
     AND I.IntOrden = 1
-    ORDER BY DatFechaFProdHab desc,DatFechaFProdNuevo desc, P.StrIdProducto
+    ORDER BY 
+        CASE 
+            WHEN DatFechaFProdHab >= DATEADD(DAY, -15, GETDATE()) THEN 0 
+            ELSE 1 
+        END,
+        CASE 
+            WHEN DatFechaFProdNuevo >= DATEADD(DAY, -15, GETDATE()) THEN 0 
+            ELSE 1 
+        END,
+        DatFechaFProdHab DESC,
+        DatFechaFProdNuevo DESC,
+        P.StrIdProducto
     OFFSET ${skipReg} ROWS
     FETCH NEXT ${cantidadReg} ROWS ONLY`
 
