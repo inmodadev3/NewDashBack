@@ -263,7 +263,7 @@ const GetDataClientes_dataGrafica_Query = async (id) => {
 const GetCarteraClienteQuery = async (id) => {
     return new Promise(async (resolve, reject) => {
         try {
-            let sql = `select IntTotal from Cartera WHERE StrIdTercero = '${id}'  order by IntEdadDoc ASC `
+            let sql = `select intSaldoF as IntTotal from Cartera WHERE StrIdTercero = '${id}'  order by IntEdadDoc ASC `
 
             const dataComprados = await obtenerDatosDB_Hgi(sql)
             resolve(dataComprados.length > 0 ? dataComprados[0].IntTotal : 0)
