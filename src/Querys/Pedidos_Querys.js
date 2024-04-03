@@ -66,8 +66,10 @@ const GetInfoPedido_Query = async (id) => {
         try {
             const query = `SELECT * FROM tbldetallepedidos where intIdpedido = ? and intEstado != -1`;
             const queryCabecera = `SELECT strIdCliente,strNombCliente,strCiudadCliente,strTelefonoClienteAct,dtFechaEnvio,strNombVendedor,intIdpedido,strCorreoClienteAct,strObservacion,intValorTotal FROM tblpedidos where intIdPedido = ?`;
+
             let data = await obtenerDatosDb_Dash(query, [id])
             const header = await obtenerDatosDb_Dash(queryCabecera, [id])
+            
             const array_productos = []
             for (const producto of data) {
                 let ubicaciones = await GetUbicaciones(producto.strIdProducto)
@@ -85,6 +87,12 @@ const GetInfoPedido_Query = async (id) => {
 
 
             }
+
+            const observacionTerceroQuery = `SELECT strDato0 as observacion FROM TblTerceros where StrIdTercero = '${header[0].strIdCliente}'`
+            const observacionTercero = await obtenerDatosDB_Hgi(observacionTerceroQuery)
+
+            header[0] =  {...header[0],observacionTercero:observacionTercero[0].observacion}
+            
             resolve({ data: array_productos, header })
         } catch (error) {
             reject(error)

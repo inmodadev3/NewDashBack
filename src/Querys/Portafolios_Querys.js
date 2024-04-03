@@ -220,7 +220,7 @@ const GetDataClientes_dataClientes_Query = async (id) => {
             t.strcelular as cel ,t.StrFax as tel2,t.intPlazo, tes.StrDescripcion as estado, 
             tc.StrDescripcion as ciudad, t.strMailFE as emailFE, t.intCupo as cupo, tp1.StrDescripcion as flete, 
             tp2.StrDescripcion as descuento, tt.intprecio as precioTercero, tt.strdescripcion as descTipoTercero,
-            (select intsaldof from QryCarteraTercero where StrTercero = t.StrIdTercero and IntAno = ${year} and IntPeriodo = ${month}) as cartera,StrRepLegal as observacion
+            (select intsaldof from QryCarteraTercero where StrTercero = t.StrIdTercero and IntAno = ${year} and IntPeriodo = ${month}) as cartera,strDato0 as observacion
             from TblTerceros as t
             inner join TblTerParametro1 as tp1 on tp1.StrIdParametro = t.StrParametro1
             inner join TblTerParametro2 as tp2 on tp2.StrIdParametro = t.StrParametro2
