@@ -11,7 +11,8 @@ const {
   obtenerCiudadesClientes_Query,
   obtenerClientesXCiudad_Query,
   GetCarteraClienteQuery,
-  GetContactosCliente_Query
+  GetContactosCliente_Query,
+  PutObservacion_Query
 } = require('../../Querys/Portafolios_Querys')
 
 //Obtener todos los clientes de la zonas correspondientes al vendedor
@@ -134,6 +135,22 @@ const obtenerClientesXCiudad = async (req, res) => {
   }
 }
 
+//Actualizar observacion
+const PutObservacion = async(req,res) =>{
+  const { text,strIdCliente } = req.body
+  
+  if(String(strIdCliente).trim() == ""){
+    res.status(406).json({error:"El id del cliente no puede estar vacio"})
+  }
+  
+  try {
+    await PutObservacion_Query(text, strIdCliente);
+    res.status(200).json({message:"Actualizado correctamente"})
+  } catch (error) {
+    res.status(400).json({error:error})
+  }
+}
+
 module.exports = {
   GetClientes,
   GetClienteXIdentificacion,
@@ -142,5 +159,6 @@ module.exports = {
   PostNuevaGestion,
   GetDataClientes,
   obtenerCiudadesClientes,
-  obtenerClientesXCiudad
+  obtenerClientesXCiudad,
+  PutObservacion
 }

@@ -1,22 +1,14 @@
+const Portafolio = require('../Models/v1/Portafolio_Model');
+const DeshabilitarTrigger = require('../utils/DeshabilitarTrigger');
 const { obtenerDatosDB_Hgi, obtenerDatosDb_Dash } = require('./Global_Querys')
 const moment = require('moment-timezone');
 
 
-const ConsultaDeDatosPrincipalesClientes = `SELECT T.StrIdTercero,T.StrNombre as Nombre_tercero, E.StrDescripcion as Estado,T.StrDato1 as Viaja, C.StrDescripcion as ciudad,
-(SELECT TOP 1 DatFecha
-FROM TblDocumentos
-WHERE StrTercero = T.StrIdTercero
-AND (IntTransaccion = '041' OR IntTransaccion = 47)
-ORDER BY DatFecha DESC) AS ultima_Compra
-FROM TblTerceros AS T
-INNER JOIN TblEstados AS E ON T.IntTEstado = E.intIdEstado
-INNER JOIN TblCiudades AS C ON C.StrIdCiudad = T.StrCiudad`
+const ConsultaDeDatosPrincipalesClientes = Portafolio.ConsultaDeDatosPrincipalesClientes()
 
 const OrdenPrincipal = `E.StrDescripcion`
 
-const contarTerceros = `select COUNT(*) as total FROM TblTerceros AS T 
-INNER JOIN TblEstados AS E ON T.IntTEstado = E.intIdEstado 
-INNER JOIN TblCiudades AS C ON C.StrIdCiudad = T.StrCiudad`
+const contarTerceros = Portafolio.ContarTerceros()
 
 const DatosPorPagina = 50
 
@@ -33,10 +25,7 @@ const limiteOffset = (pagina) => {
 const ObtenerCiudades_Query = async (vendedorId) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const sqlDash = `select distinct c.intIdCiudad from dash.tblvendedores as v
-                        inner join dash.tblvendedoreszonas as vz on v.strCedula = vz.strIdVendedor
-                        inner join dash.tblciudadeszonas as c on c.intIdZona = vz.intIdZona
-                        where v.strCedula = ?`
+            const sqlDash = Portafolio.ObtenerCiudades();
 
             const ciudadesIdArr = []
             const ObtenerCiudades = await obtenerDatosDb_Dash(sqlDash, [vendedorId.toString()])
@@ -73,7 +62,7 @@ const contarPaginas = (condiciones = "") => {
 const GetUltimaGestion = (arrayTerceros) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const sqlUltimaGestion = `select dtFechaGestion from dash.tblgestiondestapemadrinatercero where strIdTercero = ? order by intIdGestion desc LIMIT 1`
+            const sqlUltimaGestion = Portafolio.UltimaGestion()
             const datosClientes = []
             for (const cliente of arrayTerceros) {
                 const gestion = await obtenerDatosDb_Dash(sqlUltimaGestion, [cliente.StrIdTercero])
@@ -196,10 +185,7 @@ const obtenerClientesXCiudad_Query = async (ciudadId, segmentoInt, pag) => {
 const GetGestionesXCliente_Query = async (idTercero) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const query = `select g.intIdGestion,g.intTipoGestion, l.strNombreEmpleado,g.strObservacion,g.dtFechaGestion from dash.tblgestiondestapemadrinatercero as g
-                            inner join dash.tbllogin as  l on g.intIdLogin = l.idLogin
-                            where strIdTercero = ? order by dtFechaGestion desc`
-
+            const query = Portafolio.Gestiones()
             const gestiones_Cliente = await obtenerDatosDb_Dash(query, [idTercero])
             resolve(gestiones_Cliente)
         } catch (error) {
@@ -214,24 +200,9 @@ const GetDataClientes_dataClientes_Query = async (id) => {
             const fecha = new Date();
             const year = fecha.getFullYear();
             const month = fecha.getMonth() + 1;
-
-            let sql = `select top 15 t.StrTipoId as tipoId, t.StrIdTercero as idTercero,t.StrNombre as nombre,
-            t.strNombreComercial as nomCcial, t.strDireccion as direcc1,t.strdireccion2 as direcc2,t.StrTelefono as tel,
-            t.strcelular as cel ,t.StrFax as tel2,t.intPlazo, tes.StrDescripcion as estado, 
-            tc.StrDescripcion as ciudad, t.strMailFE as emailFE, t.intCupo as cupo, tp1.StrDescripcion as flete, 
-            tp2.StrDescripcion as descuento, tt.intprecio as precioTercero, tt.strdescripcion as descTipoTercero,
-            (select intsaldof from QryCarteraTercero where StrTercero = t.StrIdTercero and IntAno = ${year} and IntPeriodo = ${month}) as cartera,strDato0 as observacion
-            from TblTerceros as t
-            inner join TblTerParametro1 as tp1 on tp1.StrIdParametro = t.StrParametro1
-            inner join TblTerParametro2 as tp2 on tp2.StrIdParametro = t.StrParametro2
-            inner join TblEstados as tes on tes.IntIdEstado = t.IntTEstado
-            inner join TblCiudades as tc on tc.StrIdCiudad = t.StrCiudad
-            inner join TblTiposTercero as tt on tt.IntIdTipoTercero = t.IntTipoTercero
-            where t.StrIdTercero = '${id}'`;
-
+            let sql = Portafolio.DatosCliente(id,year,month);
             let data = await obtenerDatosDB_Hgi(sql)
             resolve(data[0])
-
         } catch (error) {
             reject(error)
         }
@@ -241,17 +212,7 @@ const GetDataClientes_dataClientes_Query = async (id) => {
 const GetDataClientes_dataGrafica_Query = async (id) => {
     return new Promise(async (resolve, reject) => {
         try {
-            let sql = `SELECT tc.StrDescripcion, SUM(tdet.IntCantidad) as TotalCantidad
-            FROM tbldocumentos as tdoc
-            INNER JOIN TblDetalleDocumentos as tdet ON tdet.IntDocumento = tdoc.IntDocumento and tdet.IntTransaccion = tdoc.IntTransaccion
-            INNER JOIN TblProductos as tp ON tdet.StrProducto = tp.StrIdProducto
-            INNER JOIN TblClases as tc ON tc.StrIdClase = tp.StrClase
-            WHERE tdoc.strTercero = '${id}'
-              AND tdoc.IntTransaccion IN ('041', '47')
-              AND tdet.StrProducto != '0'
-              AND tc.StrIdClase IN ('1001', '101', '1011', '1021', '1031', '971', '981', '991')
-            GROUP BY tc.StrDescripcion;`
-
+            let sql = Portafolio.DatosGraficosCliente(id)
             const dataGrafica = await obtenerDatosDB_Hgi(sql)
             resolve(dataGrafica)
         } catch (error) {
@@ -263,8 +224,7 @@ const GetDataClientes_dataGrafica_Query = async (id) => {
 const GetCarteraClienteQuery = async (id) => {
     return new Promise(async (resolve, reject) => {
         try {
-            let sql = `select intSaldoF as IntTotal from Cartera WHERE StrIdTercero = '${id}'  order by IntEdadDoc ASC `
-
+            let sql = Portafolio.Cartera(id)
             const dataComprados = await obtenerDatosDB_Hgi(sql)
             resolve(dataComprados.length > 0 ? dataComprados[0].IntTotal : 0)
         } catch (error) {
@@ -279,10 +239,8 @@ const PostNuevaGestion_Query = async (clienteId, intTipoGestion, intIdLogin, str
             const fecha = moment();
             const fechaColombia = fecha.tz('America/Bogota');
             const fechaFormated = fechaColombia.format('YYYY-MM-DD HH:mm:ss')
-            const sql = "INSERT INTO tblgestiondestapemadrinatercero (intTipoGestion,intIdLogin,strIdTercero,dtFechaGestion,intEstado,strObservacion) VALUES (?,?,?,?,?,?)"
-
+            const sql = Portafolio.NuevaGestion()
             const data = await obtenerDatosDb_Dash(sql, [intTipoGestion, intIdLogin, clienteId, fechaFormated, 1, strObservacion])
-
             resolve({ data: data, completed: true, message: "Gestion agregada con exito" })
         } catch (error) {
             reject(error)
@@ -294,9 +252,8 @@ const obtenerCiudadesClientes_Query = async (vendedorId) => {
     return new Promise(async (resolve, reject) => {
         try {
             const ciudadesString = await ObtenerCiudades_Query(vendedorId)
-            const SqlHGI = `select StrDescripcion,StrIdCiudad from TblCiudades AS C where C.StrIdCiudad in (${ciudadesString})`
+            const SqlHGI = Portafolio.CiudadesVendedor(ciudadesString)
             const data = await obtenerDatosDB_Hgi(SqlHGI)
-
             resolve(data)
         } catch (error) {
             reject(error)
@@ -305,25 +262,24 @@ const obtenerCiudadesClientes_Query = async (vendedorId) => {
 }
 
 const GetContactosCliente_Query = async (StrIdTercero) => {
-    return new Promise(async(resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
         try {
-            const sql = `SELECT 
-            TC.StrTercero,
-            TC.StrNombres,
-            TC.StrApellidos,
-            TP.StrDescripcion as pago,
-            TPR.Strnombre as compra ,
-            TC.strTelefono
-            FROM 
-            TblContactos as TC
-            LEFT JOIN 
-            TblParentesco as TP ON TC.StrParentesco = TP.StrIdParentesco
-            LEFT JOIN 
-            TblProfesiones as TPR ON TC.StrProfesion = TPR.IntIdProfesion
-            WHERE 
-            TC.StrTercero = '${StrIdTercero}'`
+            const sql = Portafolio.ContactosCliente(StrIdTercero)
             const data = await obtenerDatosDB_Hgi(sql)
             resolve(data)
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+
+const PutObservacion_Query = (text, strIdCliente) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const Actualizar = Portafolio.ActualizarObservacionGeneral(text,strIdCliente)
+            DeshabilitarTrigger('TblTerceros')
+            await obtenerDatosDB_Hgi(Actualizar)
+            resolve(true)
         } catch (error) {
             reject(error)
         }
@@ -342,5 +298,6 @@ module.exports = {
     obtenerCiudadesClientes_Query,
     obtenerClientesXCiudad_Query,
     ObtenerCiudades_Query,
-    GetContactosCliente_Query
+    GetContactosCliente_Query,
+    PutObservacion_Query
 }

@@ -7,7 +7,8 @@ const {
     PostNuevaGestion,
     GetDataClientes,
     obtenerCiudadesClientes,
-    obtenerClientesXCiudad
+    obtenerClientesXCiudad,
+    PutObservacion
 } = require('../../controllers/v1/Portafolios_Controller')
 
 
@@ -23,5 +24,7 @@ route.post('/clientes_ciudades',obtenerClientesXCiudad)
 
 route.get('/gestiones/:id',GetGestionesXCliente)
 route.get('/:vendedorId',GetClientes)
+
+route.put('/observacion',PutObservacion)
 
 module.exports = route
