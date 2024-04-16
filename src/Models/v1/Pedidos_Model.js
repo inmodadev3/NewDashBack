@@ -5,7 +5,7 @@ Pedidos.GetPedidos = () => {
     TP.dtFechaFinalizacion,TP.dtFechaEnvio,TP.intValorTotal,TP.intEstado, TS.estado as pago, TS.isDropi
     FROM tblPedidos as TP
     LEFT JOIN TblSeguimientoPedidos as TS on TP.intIdPedido = TS.intIdPedido
-    order by intIdPedido desc limit 80 offset 0`
+    order by intIdPedido desc limit 1000 offset 0`
 }
 
 Pedidos.GetUbicaciones = (strIdProducto) => {
