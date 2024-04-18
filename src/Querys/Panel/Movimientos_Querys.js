@@ -1,4 +1,4 @@
-const { obtenerDatosDB_Hgi, obtenerDatosDb_Dash } = require('./Global_Querys')
+const { obtenerDatosDB_Hgi, obtenerDatosDb_Dash } = require('../Global_Querys')
 const { ObtenerCiudades_Query } = require('./Portafolios_Querys')
 
 const GetFacturas_Query = (mes, year, strIdVendedor) => {

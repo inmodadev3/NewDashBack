@@ -13,7 +13,7 @@ const {
     CargarDetallesContenedorDatos_Query,
     Obtener_Compras_Query,
     Obtener_productos_compra_query
-} = require('../../Querys/Compras_Querys')
+} = require('../../Querys/Panel/Compras_Querys')
 
 const CargarDetallesContenedor = async (req, res) => {
     //excel, importacion, raggi

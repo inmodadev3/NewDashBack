@@ -1,4 +1,4 @@
-const {Consultar_Ventas_Empleados_Query, Consultar_Ventas_DiasdelMes_Query, Consultar_Datos_generalesMes_Query, Consultar_Top_compradoresMes_Query} = require('../../Querys/informe_Query')
+const {Consultar_Ventas_Empleados_Query, Consultar_Ventas_DiasdelMes_Query, Consultar_Datos_generalesMes_Query, Consultar_Top_compradoresMes_Query} = require('../../Querys/Panel/informe_Query')
 
 
 const Consultar_Ventas_Empleados = async(req,res) =>{

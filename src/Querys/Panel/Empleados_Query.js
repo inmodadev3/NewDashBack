@@ -1,4 +1,4 @@
-const { obtenerDatosDb_Dash } = require('./Global_Querys')
+const { obtenerDatosDb_Dash } = require('../Global_Querys')
 
 const Crear_Empleado_Query = (nombre,id,user,passw,celular) =>{
     return new Promise(async(resolve, reject) => {

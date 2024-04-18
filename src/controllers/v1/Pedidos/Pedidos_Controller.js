@@ -1,7 +1,4 @@
-const { GetPedidosEnProceso_query, GetPedidosEnTerminal_Query, GetPedidosNuevos_Query, GetInfoPedido_Query, GetInfoPedidoTerminal_Query, GetPedidoXId_Query, GetPedidos_Query, PutEstadoPedido_Query, PutEstadoProductoPedido_query, PostProductoPedido_query, PutActualizarPreciosPedidoQuery, ConsultarEncargados_Query, obtenerDatosSeguimiento_Query, AgregarDatosSeguimiento_Query, ObtenerSeguimientos_Query, CrearEncargado_Query } = require('../../Querys/Pedidos_Querys')
-const { GetUbicaciones } = require('../../helpers/helpers')
-
-const DASH = require('../../databases/DashConexion').dashConexion
+const { GetPedidosEnProceso_query, GetPedidosEnTerminal_Query, GetPedidosNuevos_Query, GetInfoPedido_Query, GetInfoPedidoTerminal_Query, GetPedidoXId_Query, GetPedidos_Query, PutEstadoPedido_Query, PutEstadoProductoPedido_query, PostProductoPedido_query, PutActualizarPreciosPedidoQuery } = require('../../../Querys/Panel/Pedidos/Pedidos_Querys')
 
 const GetPedidos = async (req, res) => {
     try {
@@ -124,85 +121,6 @@ const PutActualizarPreciosPedido = async (req, res) => {
     }
 }
 
-const ConsultarEncargados = async (req, res) => {
-    try {
-        const encargados = await ConsultarEncargados_Query();
-        const alistamiento = []
-        const facturacion = []
-        const revision = []
-
-        encargados.map((encargado) => {
-            switch (encargado.tipo_encargado_id) {
-                case 1:
-                    alistamiento.push(encargado)
-                    break;
-
-                case 2:
-                    facturacion.push(encargado)
-                    break;
-
-                case 3:
-                    revision.push(encargado)
-                    break;
-                default:
-                    break;
-            }
-        })
-        res.status(200).json({ alistamiento, facturacion, revision })
-    } catch (error) {
-        res.status(400).json({ message: `${error}` })
-    }
-}
-
-const ConsultarEncargadosDefault = async (req, res) => {
-    try {
-        const encargados = await ConsultarEncargados_Query();
-        res.status(200).json({ encargados })
-    } catch (error) {
-        res.status(400).json({ message: `${error}` })
-    }
-}
-
-const obtenerDatosSeguimiento = async (req, res) => {
-    const { idPedido } = req.query
-    try {
-        const data = await obtenerDatosSeguimiento_Query(idPedido)
-        res.status(200).json({ data })
-    } catch (error) {
-        res.status(400).json({ message: `${error}` })
-    }
-}
-
-const AgregarSeguimiento = async = (req, res) => {
-    const { seguimiento } = req.body
-    try {
-        const response = AgregarDatosSeguimiento_Query(seguimiento)
-        if (response) {
-            res.status(200).json({ data: response })
-        }
-    } catch (error) {
-        res.status(400).json({ message: `${error}` })
-    }
-}
-
-const ObtenerSeguimientos = async (req, res) => {
-    try {
-        const seguimientos = await ObtenerSeguimientos_Query()
-        res.status(200).json({ seguimientos })
-    } catch (error) {
-        res.status(400).json({ error: `${error}` })
-    }
-}
-
-const CrearEncargado = async (req,res) =>{
-    const {nombre , rol} = req.body
-    try {
-        await CrearEncargado_Query(nombre,rol)
-        res.status(200).json({ data:'Creado con exito' })
-    } catch (error) {
-        res.status(400).json({ error: `${error}` })
-    }
-}
 
 
 module.exports = {
@@ -216,11 +134,5 @@ module.exports = {
     PutEstadoPedido,
     PutEstadoProductoPedido,
     PostProductoPedido,
-    PutActualizarPreciosPedido,
-    ConsultarEncargados,
-    obtenerDatosSeguimiento,
-    AgregarSeguimiento,
-    ObtenerSeguimientos,
-    ConsultarEncargadosDefault,
-    CrearEncargado
+    PutActualizarPreciosPedido
 }

@@ -1,4 +1,4 @@
-const { Consultar_PedidosEnProceso, Consultar_Detalles_Pedido_Proceso } = require("../../Querys/Procesos_Pedidos")
+const { Consultar_PedidosEnProceso, Consultar_Detalles_Pedido_Proceso } = require("../../Querys/Panel/Procesos_Pedidos")
 
 const GetPedidos = async(req,res) =>{
     const { strIdVendedor } = req.params

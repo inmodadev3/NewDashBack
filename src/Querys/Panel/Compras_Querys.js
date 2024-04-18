@@ -1,8 +1,8 @@
-const DASH = require('../databases/DashConexion').dashConexion
-const HGI = require('../databases/HgiConexion').HgiConexion
+const DASH = require('../../databases/DashConexion').dashConexion
+const HGI = require('../../databases/HgiConexion').HgiConexion
 
-const poolDash = require('../databases/DashConexion')
-const { obtenerDatosDb_Dash, obtenerDatosDB_Hgi, obtenerDatosDb_Dash_transaccion } = require('./Global_Querys')
+const poolDash = require('../../databases/DashConexion')
+const { obtenerDatosDb_Dash, obtenerDatosDB_Hgi, obtenerDatosDb_Dash_transaccion } = require('../Global_Querys')
 
 
 const GetProductosContenedorEstado_Query = async () => {

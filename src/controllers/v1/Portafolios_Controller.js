@@ -13,7 +13,7 @@ const {
   GetCarteraClienteQuery,
   GetContactosCliente_Query,
   PutObservacion_Query
-} = require('../../Querys/Portafolios_Querys')
+} = require('../../Querys/Panel/Portafolios_Querys')
 
 //Obtener todos los clientes de la zonas correspondientes al vendedor
 const GetClientes = async (req, res) => {

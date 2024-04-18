@@ -1,4 +1,4 @@
-const { obtenerDatosDb_Dash } = require("./Global_Querys")
+const { obtenerDatosDb_Dash } = require("../Global_Querys")
 
 const Consultar_PedidosEnProceso = (strIdVendedor) =>{
     return new Promise(async(resolve, reject) => {

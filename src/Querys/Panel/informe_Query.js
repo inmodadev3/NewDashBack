@@ -1,7 +1,7 @@
-const { obtenerDatosDB_Hgi } = require("./Global_Querys")
+const { obtenerDatosDB_Hgi } = require("../Global_Querys")
 
 const Consultar_Ventas_Empleados_Query = (mes, anio) => {
-    return new Promise(async(resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
         try {
             const query = `select TV.StrNombre, CAST(ROUND(SUM(TD.IntTotal),0) as int) as Total from TblDocumentos as TD
             inner join TblVendedores as TV on TV.StrIdVendedor = TD.StrDVendedor
@@ -15,8 +15,8 @@ const Consultar_Ventas_Empleados_Query = (mes, anio) => {
 }
 
 
-const Consultar_Ventas_DiasdelMes_Query = (mes,anio) =>{
-    return new Promise(async(resolve, reject) => {
+const Consultar_Ventas_DiasdelMes_Query = (mes, anio) => {
+    return new Promise(async (resolve, reject) => {
         try {
             const query = `SELECT
             DAY(TD.DatFecha) as dia,
@@ -40,8 +40,8 @@ const Consultar_Ventas_DiasdelMes_Query = (mes,anio) =>{
     })
 }
 
-const Consultar_Datos_generalesMes_Query = (mes, anio) =>{
-    return new Promise(async(resolve, reject) => {
+const Consultar_Datos_generalesMes_Query = (mes, anio) => {
+    return new Promise(async (resolve, reject) => {
         try {
             const query = `select COUNT(IntDocumento) as TotalPedidos, CAST(ROUND(SUM(IntTotal),0) as INT) as TotalValorPedidos  from TblDocumentos 
             where IntPeriodo = ${mes} and IntAno = ${anio} and IntTransaccion in ('041','47')`
@@ -54,8 +54,8 @@ const Consultar_Datos_generalesMes_Query = (mes, anio) =>{
     })
 }
 
-const Consultar_Top_compradoresMes_Query = (mes,anio) =>{
-    return new Promise(async(resolve, reject) => {
+const Consultar_Top_compradoresMes_Query = (mes, anio) => {
+    return new Promise(async (resolve, reject) => {
         try {
             const query = `select TOP 10 TERC.StrNombre, CAST(ROUND(SUM(IntTotal),0) as int) as TotalComprasTercero from TblDocumentos as TDOC
             Inner Join TblTerceros as TERC on TDOC.StrTercero = TERC.StrIdTercero

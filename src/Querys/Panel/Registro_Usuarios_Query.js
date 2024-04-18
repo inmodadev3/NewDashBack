@@ -1,4 +1,4 @@
-const { obtenerDatosDb_Dash } = require('./Global_Querys')
+const { obtenerDatosDb_Dash } = require('../Global_Querys')
 
 const registrar_Usuario_Query = (data_doc,file) =>{
     return new Promise(async(resolve,reject)=>{

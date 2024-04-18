@@ -1,4 +1,4 @@
-const { GetFacturas_Query, GetCartera_Query, GetRecaudos_Query, GetLiquidadas_Query, GetCarteraCiudades_Query } = require("../../Querys/Movimientos_Querys")
+const { GetFacturas_Query, GetCartera_Query, GetRecaudos_Query, GetLiquidadas_Query, GetCarteraCiudades_Query } = require("../../Querys/Panel/Movimientos_Querys")
 
 
 const GetFacturas = async (req, res) => {

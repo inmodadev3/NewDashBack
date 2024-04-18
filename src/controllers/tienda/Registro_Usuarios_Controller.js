@@ -1,4 +1,4 @@
-const { registrar_Usuario_Query, Usuarios_Registrados_Recientes_Query, Cambiar_estado_registro_Query } = require("../../Querys/Registro_Usuarios_Query")
+const { registrar_Usuario_Query, Usuarios_Registrados_Recientes_Query, Cambiar_estado_registro_Query } = require("../../Querys/Panel/Registro_Usuarios_Query")
 const path = require('path')
 
 const Registro_Usuarios_Dash = async (req, res) => {

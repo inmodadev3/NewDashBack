@@ -1,4 +1,4 @@
-const { GetInfoProductos_Query, GetImagenesUnProducto_Query, GetMarcas_Query, GetGeneros_Query, GetUnidades_Query, GetInfoProductos_Nombre_Query, PostActualizarUbicacion_Query, GetProductoXidQuery } = require('../../Querys/Productos_Querys');
+const { GetInfoProductos_Query, GetImagenesUnProducto_Query, GetMarcas_Query, GetGeneros_Query, GetUnidades_Query, GetInfoProductos_Nombre_Query, PostActualizarUbicacion_Query, GetProductoXidQuery } = require('../../Querys/Panel/Productos_Querys');
 
 
 //obtener informacion acerca de un producto

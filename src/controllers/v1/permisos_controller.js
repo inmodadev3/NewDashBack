@@ -1,4 +1,4 @@
-const { Consultar_lista_permisos_Query, crear_nuevo_permiso_Query, consultar_permisos_usuario_Query, Eliminar_Permiso_query, Agregar_Permiso_Query } = require("../../Querys/Permisos_Querys");
+const { Consultar_lista_permisos_Query, crear_nuevo_permiso_Query, consultar_permisos_usuario_Query, Eliminar_Permiso_query, Agregar_Permiso_Query } = require("../../Querys/Panel/Permisos_Querys");
 
 const Consultar_lista_permisos = async(req,res) =>{
     try {

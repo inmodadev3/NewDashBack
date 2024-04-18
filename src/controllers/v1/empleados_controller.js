@@ -1,4 +1,4 @@
-const { Crear_Empleado_Query, Consultar_Empleados_Query, Actualizar_Empleado_Query, Eliminar_Empleado_Query } = require("../../Querys/Empleados_Query")
+const { Crear_Empleado_Query, Consultar_Empleados_Query, Actualizar_Empleado_Query, Eliminar_Empleado_Query } = require("../../Querys/Panel/Empleados_Query")
 
 const Crear_Empleado = async(req,res) =>{
     const {

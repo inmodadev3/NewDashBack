@@ -1,5 +1,5 @@
-const HGI = require('../databases/HgiConexion').HgiConexion
-const { obtenerDatosDb_Dash, obtenerDatosDB_Hgi } = require('./Global_Querys')
+const HGI = require('../../databases/HgiConexion').HgiConexion
+const { obtenerDatosDb_Dash, obtenerDatosDB_Hgi } = require('../Global_Querys')
 
 const GetInfoProductos_Query = async (strIdProducto) => {
     return new Promise(async (resolve, reject) => {
