@@ -44,7 +44,7 @@ Pedidos.BuscarPedido = (Condicional, dato) => {
 }
 
 Pedidos.BuscarPedidoHGI = (idPedido) => {
-    return `select IntDocRef from TblDocumentos where IntDocumento = '${idPedido}'`
+    return `select IntDocRef from TblDocumentos where IntDocumento = '${idPedido}' and intTransaccion = '47'`
 }
 
 Pedidos.CambiarEstado = () => {
