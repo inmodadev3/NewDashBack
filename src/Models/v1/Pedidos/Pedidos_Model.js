@@ -3,9 +3,9 @@ const Pedidos = {}
 Pedidos.GetPedidos = () => {
     return `SELECT TP.intIdPedido,TP.strIdPedidoVendedor,TP.strNombVendedor,TP.strNombCliente,
     TP.dtFechaFinalizacion,TP.dtFechaEnvio,TP.intValorTotal,TP.intEstado, TS.estado as pago, TS.isDropi
-    FROM tblPedidos as TP
-    LEFT JOIN TblSeguimientoPedidos as TS on TP.intIdPedido = TS.intIdPedido
-    order by intIdPedido desc limit 1000 offset 0`
+    FROM dash.tblPedidos as TP
+    LEFT JOIN dash.TblSeguimientoPedidos as TS on TP.intIdPedido = TS.intIdPedido
+    where dtFechaEnvio > ? and dtFechaEnvio < ? order by intIdPedido desc`
 }
 
 Pedidos.GetUbicaciones = (strIdProducto) => {
@@ -41,6 +41,10 @@ Pedidos.BuscarPedido = (Condicional, dato) => {
     FROM tblPedidos as TP
     LEFT JOIN TblSeguimientoPedidos as TS on TP.intIdPedido = TS.intIdPedido 
     where ${Condicional} like '%${dato}%' order by intIdPedido desc limit 80 offset 0`
+}
+
+Pedidos.BuscarPedidoHGI = (idPedido) => {
+    return `select IntDocRef from TblDocumentos where IntDocumento = '${idPedido}'`
 }
 
 Pedidos.CambiarEstado = () => {

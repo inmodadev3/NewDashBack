@@ -2,11 +2,14 @@ const Pedidos = require('../../../Models/v1/Pedidos/Pedidos_Model')
 const poolDash = require('../../../databases/DashConexion')
 const { obtenerDatosDB_Hgi, obtenerDatosDb_Dash, obtenerDatosDb_Dash_transaccion } = require('../../Global_Querys')
 
-const GetPedidos_Query = async () => {
+const GetPedidos_Query = async (anio, mes) => {
     return new Promise(async (resolve, reject) => {
         try {
+            let fecha = `${anio}-${mes}`
+            let fechaInicial = `${fecha}-01`
+            let fechaFinal = `${fecha}-31`
             const query = Pedidos.GetPedidos()
-            const data = await obtenerDatosDb_Dash(query)
+            const data = await obtenerDatosDb_Dash(query, [fechaInicial, fechaFinal])
             resolve(data)
         } catch (error) {
             reject(error)
@@ -165,13 +168,27 @@ const GetPedidoXId_Query = async (id) => {
     return new Promise(async (resolve, reject) => {
         try {
             let condicional = "TP.intIdPedido"
+            let pedidoHGI = [];
+
 
             if (isNaN(Number(id))) {
                 condicional = "TP.strNombCliente"
+            } else {
+                let dataHGI_Query = Pedidos.BuscarPedidoHGI(id)
+                const dataHGI = await obtenerDatosDB_Hgi(dataHGI_Query)
+
+                if (dataHGI.length > 0) {
+                    const idHGI = dataHGI[0].IntDocRef
+                    const query = Pedidos.BuscarPedido(condicional, idHGI)
+                    const data = await obtenerDatosDb_Dash(query)
+                    pedidoHGI.push(data[0])
+                }
             }
+
             const query = Pedidos.BuscarPedido(condicional, id)
             const data = await obtenerDatosDb_Dash(query)
-            resolve(data)
+            pedidoHGI.push(...data)
+            resolve(pedidoHGI)
         } catch (error) {
             reject(error)
         }
