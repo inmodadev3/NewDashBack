@@ -40,13 +40,14 @@ Seguimientos.SeguimientoPedido = {
             id_encargado3,
             id_encargadoFacturacion,
             id_encargadoRevision,
-            Cartera
+            Cartera,
+            PagoHGI
         ) VALUES (
-            ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?
+            ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?
         )`
     },
     ActulizarSeguimiento: () => {
-        return `UPDATE TblSeguimientoPedidos SET  NroFactura = ?, Cliente = ?, Vendedor = ?, Ciudad = ?, Pago = ?, TipoVenta = ?, id_encargado = ?, id_encargado2 = ?, id_encargado3 = ?, id_encargadoRevision = ?, id_encargadoFacturacion = ?, TipoEnvio = ?, NroGuia = ?, Despacho = ?, ValorEnvio = ?, NroCajas = ?, Comentarios = ?, Fecha_Facura = ?, Fecha_Pedido = ?, Fecha_Envio = ?, isDropi = ?, Devolucion = ?, Recaudo = ?, estado = ?, Cartera = ? WHERE intIdPedido = ?`
+        return `UPDATE TblSeguimientoPedidos SET  NroFactura = ?, Cliente = ?, Vendedor = ?, Ciudad = ?, Pago = ?, TipoVenta = ?, id_encargado = ?, id_encargado2 = ?, id_encargado3 = ?, id_encargadoRevision = ?, id_encargadoFacturacion = ?, TipoEnvio = ?, NroGuia = ?, Despacho = ?, ValorEnvio = ?, NroCajas = ?, Comentarios = ?, Fecha_Facura = ?, Fecha_Pedido = ?, Fecha_Envio = ?, isDropi = ?, Devolucion = ?, Recaudo = ?, estado = ?, Cartera = ? , PagoHGI = ? WHERE intIdPedido = ?`
     }
 }
 

@@ -49,7 +49,8 @@ const obtenerDatosSeguimiento_Query = (idPedido) => {
                 Devolucion: false,
                 Recaudo: null,
                 Estado: false,
-                Cartera: false
+                Cartera: false,
+                PagoHGI: false
             }
 
             if (tablaSeguimientos.length > 0) {
@@ -79,6 +80,7 @@ const obtenerDatosSeguimiento_Query = (idPedido) => {
                 objectInfoSeguimientos.Recaudo = tablaSeguimientos[0].Recaudo
                 objectInfoSeguimientos.Estado = tablaSeguimientos[0].estado
                 objectInfoSeguimientos.Cartera = tablaSeguimientos[0].Cartera
+                objectInfoSeguimientos.PagoHGI = tablaSeguimientos[0].PagoHGI
             } else {
                 const tablaPedidoQuery = Seguimientos.SeguimientoPedido.InformacionBasicaPedido()
                 const tablaPedido = await obtenerDatosDb_Dash(tablaPedidoQuery, [idPedido])
@@ -141,6 +143,7 @@ const AgregarDatosSeguimiento_Query = (data) => {
                 Recaudo,
                 Estado,
                 Cartera,
+                PagoHGI
             } = data
             const consultar_seguimientoActivo = Seguimientos.SeguimientoPedido.InformacionSeguimientoDash()
             const seguimiento = await obtenerDatosDb_Dash(consultar_seguimientoActivo, [parseInt(NroPedido)])
@@ -174,7 +177,9 @@ const AgregarDatosSeguimiento_Query = (data) => {
                     (Encargado_Alistamiento3 !== 0 && Encargado_Alistamiento3 !== null) ? parseInt(Encargado_Alistamiento3) : null,
                     (Encargado_Facturacion !== 0 && Encargado_Facturacion !== null) ? parseInt(Encargado_Facturacion) : null,
                     (Encargado_Revision !== 0 && Encargado_Revision !== null) ? parseInt(Encargado_Revision) : null,
-                    Cartera])
+                    Cartera,
+                    PagoHGI
+                ])
             } else {
                 const actualizar = Seguimientos.SeguimientoPedido.ActulizarSeguimiento()
                 await obtenerDatosDb_Dash(actualizar, [
@@ -204,6 +209,7 @@ const AgregarDatosSeguimiento_Query = (data) => {
                     Recaudo,
                     Estado,
                     Cartera,
+                    PagoHGI,
                     parseInt(NroPedido)
                 ])
             }
