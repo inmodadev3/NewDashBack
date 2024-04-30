@@ -3,7 +3,8 @@ const {
     obtenerDatosSeguimiento_Query,
     AgregarDatosSeguimiento_Query,
     ObtenerSeguimientos_Query,
-    CrearEncargado_Query
+    CrearEncargado_Query,
+    BuscarSeguimiento_Query
 } = require("../../../Querys/Panel/Pedidos/Seguimientos_Query");
 
 const ConsultarEncargados = async (req, res) => {
@@ -68,8 +69,14 @@ const AgregarSeguimiento = async = (req, res) => {
 }
 
 const ObtenerSeguimientos = async (req, res) => {
+    const { fecha } = req.query
+
+    if(!fecha){
+        fecha = new Date().toISOString().slice(0, 10)
+    }
+
     try {
-        const seguimientos = await ObtenerSeguimientos_Query()
+        const seguimientos = await ObtenerSeguimientos_Query(fecha)
         res.status(200).json({ seguimientos })
     } catch (error) {
         res.status(400).json({ error: `${error}` })
@@ -86,11 +93,23 @@ const CrearEncargado = async (req, res) => {
     }
 }
 
+const BuscarSeguimiento = async(req,res)=>{
+    const { busqueda } = req.params 
+
+    try {
+        const data = await BuscarSeguimiento_Query(busqueda)
+        res.status(200).json({seguimientos:data})
+    } catch (error) {
+        res.status(400).json({error: `${error}`})
+    }
+}
+
 module.exports = {
     ConsultarEncargados,
     obtenerDatosSeguimiento,
     AgregarSeguimiento,
     ObtenerSeguimientos,
     ConsultarEncargadosDefault,
-    CrearEncargado
+    CrearEncargado,
+    BuscarSeguimiento
 }

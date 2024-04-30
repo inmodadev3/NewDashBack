@@ -221,14 +221,14 @@ const AgregarDatosSeguimiento_Query = (data) => {
     })
 }
 
-const ObtenerSeguimientos_Query = () => {
+const ObtenerSeguimientos_Query = (fecha) => {
     return new Promise(async (resolve, reject) => {
         try {
             const seguimientosArr = [];
             let seguimientosProcesados = new Set();
             const seguimientosConPagoHGI = [];
 
-            const seguimientos = await obtenerDatosDb_Dash(Seguimientos.Seguimientos());
+            const seguimientos = await obtenerDatosDb_Dash(Seguimientos.Seguimientos(), [fecha]);
 
             const intIdPedidos = seguimientos.map(seguimiento => seguimiento.intIdPedido);
             const pagosQueries = intIdPedidos.map(intIdPedido => Seguimientos.PagosHGI(intIdPedido));
@@ -259,7 +259,7 @@ const ObtenerSeguimientos_Query = () => {
             });
 
             seguimientosArr.push(...seguimientosConPagoHGI);
-            
+
             resolve(seguimientosArr)
         } catch (error) {
             reject(error)
@@ -279,11 +279,25 @@ const CrearEncargado_Query = (nombre, rol) => {
     })
 }
 
+const BuscarSeguimiento_Query = (busqueda) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const query = Seguimientos.Buscar();
+            const parametroLike = `%${busqueda}%`
+            const response = await obtenerDatosDb_Dash(query, [parametroLike, parametroLike, parametroLike, parametroLike, parametroLike])
+            resolve(response)
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+
 
 module.exports = {
     ConsultarEncargados_Query,
     obtenerDatosSeguimiento_Query,
     AgregarDatosSeguimiento_Query,
     ObtenerSeguimientos_Query,
-    CrearEncargado_Query
+    CrearEncargado_Query,
+    BuscarSeguimiento_Query
 }

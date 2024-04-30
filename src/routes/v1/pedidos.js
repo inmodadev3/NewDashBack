@@ -19,7 +19,8 @@ const {
     AgregarSeguimiento,
     ObtenerSeguimientos,
     ConsultarEncargadosDefault,
-    CrearEncargado
+    CrearEncargado,
+    BuscarSeguimiento
 } = require('../../controllers/v1/Pedidos/Seguimientos_Controller')
 
 route.get('/', GetPedidos)
@@ -28,10 +29,11 @@ route.get('/proceso', GetPedidosEnProceso)
 route.get('/terminal', GetPedidosEnTerminal)
 route.get('/encargados', ConsultarEncargados)
 route.get('/seguimiento', obtenerDatosSeguimiento)
+route.get('/seguimientos', ObtenerSeguimientos)
+route.get('/seguimientos/id/:busqueda', BuscarSeguimiento)
 route.get('/detalle_pedido/terminal/:id', GetInfoPedidoTerminal)
 route.get('/detalle_pedido/:id', GetInfoPedido)
 route.get('/id/:id', GetPedidoXId)
-route.get('/seguimientos', ObtenerSeguimientos)
 
 route.get('/encargadosDefault', ConsultarEncargadosDefault)
 

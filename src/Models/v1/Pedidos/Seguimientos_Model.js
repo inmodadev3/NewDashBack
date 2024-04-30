@@ -52,7 +52,7 @@ Seguimientos.SeguimientoPedido = {
 }
 
 Seguimientos.Seguimientos = (orden = 'id') => {
-    return `select * from TblSeguimientoPedidos order by ${orden} desc limit 500 offset 0 `
+    return `select * from TblSeguimientoPedidos where Fecha_Pedido = ? order by ${orden} desc limit 500 offset 0 `
 }
 
 Seguimientos.PagosHGI = (DocumetoDash) => {
@@ -74,6 +74,11 @@ Seguimientos.Encargados = {
     Agregar: () => {
         return `insert into TblEncargados (nombre,tipo_encargado_id,intEstado) VALUES (?,?,?)`
     }
+}
+
+Seguimientos.Buscar = () => {
+    return `select * from dash.TblSeguimientoPedidos where intIdPedido like ? or NroFactura like ?
+    or cliente like ? or NroGuia like ? or Vendedor like ? order by id desc`
 }
 
 module.exports = Seguimientos;
