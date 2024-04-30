@@ -71,10 +71,6 @@ const AgregarSeguimiento = async = (req, res) => {
 const ObtenerSeguimientos = async (req, res) => {
     const { fecha } = req.query
 
-    if(!fecha){
-        fecha = new Date().toISOString().slice(0, 10)
-    }
-
     try {
         const seguimientos = await ObtenerSeguimientos_Query(fecha)
         res.status(200).json({ seguimientos })
