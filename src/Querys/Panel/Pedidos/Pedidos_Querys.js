@@ -95,7 +95,12 @@ const GetInfoPedido_Query = async (id) => {
             const observacionTerceroQuery = Pedidos.InfoPedido.Footer(header[0].strIdCliente)
             const observacionTercero = await obtenerDatosDB_Hgi(observacionTerceroQuery)
 
-            header[0] = { ...header[0], observacionTercero: observacionTercero[0].observacion }
+            if(observacionTercero.length > 0){
+                header[0] = { ...header[0], observacionTercero: observacionTercero[0].observacion }
+            }else{
+                header[0] = { ...header[0], observacionTercero: '' }
+            }
+
 
             resolve({ data: array_productos, header })
         } catch (error) {
