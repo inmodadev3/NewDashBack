@@ -551,7 +551,8 @@ const Enviar_Pedido_Local_Query = (
     strCelularClienteAct,
     strCiudadClienteAct,
     seller,
-    arrProductos
+    arrProductos,
+    precioTienda
 ) => {
     return new Promise(async (resolve, reject) => {
         let connection;
@@ -577,7 +578,8 @@ const Enviar_Pedido_Local_Query = (
                 strCorreoClienteAct,
                 strCelularClienteAct,
                 strCiudadClienteAct,
-                seller
+                seller,
+                precioTienda
             )
 
             const lastIdQuery = `SELECT COALESCE((SELECT MAX(intIdPedDetalle) FROM dash.tbldetallepedidos), 0) as ultimoID`
@@ -640,7 +642,8 @@ const Enviar_pedido_tblPedidos = async (
     strCorreoClienteAct,
     strCelularClienteAct,
     strCiudadClienteAct,
-    seller
+    seller,
+    precioTienda
 ) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -659,9 +662,10 @@ const Enviar_pedido_tblPedidos = async (
                 strCelularClienteAct,
                 strCiudadClienteAct,
                 intEstado,
-                intIdLogin
+                intIdLogin,
+                blEspera
             ) VALUES (
-                ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?
+                ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?
             )`
 
             const lastIdQuery = `SELECT MAX(intIdPedido) as ultimoID FROM tblpedidos`
@@ -683,7 +687,8 @@ const Enviar_pedido_tblPedidos = async (
                 strCelularClienteAct,
                 strCiudadClienteAct,
                 1,
-                seller
+                seller,
+                precioTienda
             ])
 
             resolve(lastId)

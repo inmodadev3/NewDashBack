@@ -262,7 +262,13 @@ const PostProductoPedido_query = async (idCliente, idProducto, idPedido) => {
             if(obtener_precioProducto.length > 0){
                 precioProducto = obtener_precioProducto[0].tipo_precio !== 0 ? obtener_precioProducto[0].tipo_precio : 1;
             }else{
-                precioProducto = 2
+                const precioTiendaQuery = Pedidos.PrecioTienda()
+                const PrecioTienda = await obtenerDatosDb_Dash(precioTiendaQuery,[idPedido])
+                if(PrecioTienda.length > 0){
+                    precioProducto = (PrecioTienda[0].blEspera !== 0 && PrecioTienda[0].blEspera !== null)? PrecioTienda[0].blEspera : 4
+                }else{
+                    precioProducto = 4
+                }
             }
             //obtener los datos del producto
             const data_producto_query = `select StrIdProducto, StrDescripcion,StrUnidad,IntPrecio${precioProducto} as precio from TblProductos

@@ -120,4 +120,8 @@ Pedidos.Encargados = {
     }
 }
 
+Pedidos.PrecioTienda = () =>{
+    return `select blEspera from dash.tblpedidos where intIdPedido = ?`
+}
+
 module.exports = Pedidos
