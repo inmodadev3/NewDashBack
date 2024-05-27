@@ -20,7 +20,8 @@ const {
     ObtenerSeguimientos,
     ConsultarEncargadosDefault,
     CrearEncargado,
-    BuscarSeguimiento
+    BuscarSeguimiento,
+    ActualizarEncargadosSeguimientos
 } = require('../../controllers/v1/Pedidos/Seguimientos_Controller')
 
 route.get('/', GetPedidos)
@@ -44,6 +45,7 @@ route.put('/precios_productos', PutActualizarPreciosPedido)
 route.post('/seguimiento', AgregarSeguimiento)
 route.post('/producto', PostProductoPedido)
 route.post('/encargado', CrearEncargado)
+route.post('/seguimiento/encargados', ActualizarEncargadosSeguimientos)
 
 
 module.exports = route

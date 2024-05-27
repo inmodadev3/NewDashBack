@@ -146,73 +146,82 @@ const AgregarDatosSeguimiento_Query = (data) => {
                 PagoHGI
             } = data
             const consultar_seguimientoActivo = Seguimientos.SeguimientoPedido.InformacionSeguimientoDash()
-            const seguimiento = await obtenerDatosDb_Dash(consultar_seguimientoActivo, [parseInt(NroPedido)])
+            let seguimiento = []
 
-            if (seguimiento.length == 0) {
-                const IngresarSeguimiento = Seguimientos.SeguimientoPedido.CrearSeguimiento()
-                await obtenerDatosDb_Dash(IngresarSeguimiento, [
-                    parseInt(NroPedido),
-                    (Encargado_Alistamiento1 !== 0 && Encargado_Alistamiento1 !== null) ? parseInt(Encargado_Alistamiento1) : null,
-                    Pago,
-                    Ciudad,
-                    Vendedor,
-                    TipoVenta,
-                    (NroFactura !== null && NroFactura !== "" && !isNaN(parseInt(NroFactura))) ? parseInt(NroFactura) : null,
-                    TipoEnvio,
-                    NroGuia,
-                    Despacho,
-                    ValorEnvio,
-                    NroCajas,
-                    Comentarios,
-                    ((Fecha_Facura).toString() !== "" && Fecha_Facura !== null && Fecha_Facura !== NaN && typeof(Fecha_Facura) !== "string") ? Fecha_Facura : (NroFactura !== null && NroFactura !== "" && !isNaN(parseInt(NroFactura)) ? new Date().toISOString().slice(0, 10) : null),
-                    Fecha_Pedido,
-                    Fecha_Envio,
-                    isDropi,
-                    Devolucion,
-                    Recaudo,
-                    Estado,
-                    Cliente,
-                    (Encargado_Alistamiento2 !== 0 && Encargado_Alistamiento2 !== null && !isNaN(parseInt(Encargado_Alistamiento2))) ? parseInt(Encargado_Alistamiento2) : null,
-                    (Encargado_Alistamiento3 !== 0 && Encargado_Alistamiento3 !== null && !isNaN(parseInt(Encargado_Alistamiento3))) ? parseInt(Encargado_Alistamiento3) : null,
-                    (Encargado_Facturacion !== 0 && Encargado_Facturacion !== null && !isNaN(parseInt(Encargado_Facturacion))) ? parseInt(Encargado_Facturacion) : null,
-                    (Encargado_Revision !== 0 && Encargado_Revision !== null && !isNaN(parseInt(Encargado_Revision))) ? parseInt(Encargado_Revision) : null,
-                    Cartera,
-                    PagoHGI
-                ])
-            } else {
-                const actualizar = Seguimientos.SeguimientoPedido.ActulizarSeguimiento()
-                await obtenerDatosDb_Dash(actualizar, [
-                    (NroFactura !== null && NroFactura !== "") ? parseInt(NroFactura) : null,
-                    Cliente,
-                    Vendedor,
-                    Ciudad,
-                    Pago,
-                    TipoVenta,
-                    (parseInt(Encargado_Alistamiento1) !== 0 && Encargado_Alistamiento1 !== null && !isNaN(parseInt(Encargado_Alistamiento1))) ? parseInt(Encargado_Alistamiento1) : null,
-                    (parseInt(Encargado_Alistamiento2) !== 0 && Encargado_Alistamiento2 !== null && !isNaN(parseInt(Encargado_Alistamiento2))) ? parseInt(Encargado_Alistamiento2) : null,
-                    (parseInt(Encargado_Alistamiento3) !== 0 && Encargado_Alistamiento3 !== null && !isNaN(parseInt(Encargado_Alistamiento3))) ? parseInt(Encargado_Alistamiento3) : null,
-                    (parseInt(Encargado_Revision) !== 0 && Encargado_Revision !== null && !isNaN(parseInt(Encargado_Revision))) ? parseInt(Encargado_Revision) : null,
-                    (parseInt(Encargado_Facturacion) !== 0 && Encargado_Facturacion !== null && !isNaN(parseInt(Encargado_Facturacion))) ? parseInt(Encargado_Facturacion) : null,
-                    TipoEnvio,
-                    NroGuia,
-                    Despacho,
-                    ValorEnvio,
-                    NroCajas,
-                    Comentarios,
-                    ((Fecha_Facura).toString() !== "" && Fecha_Facura !== null && Fecha_Facura !== NaN && typeof(Fecha_Facura) !== "string") ? Fecha_Facura : (NroFactura !== null && NroFactura !== "" && !isNaN(parseInt(NroFactura)) ? new Date().toISOString().slice(0, 10) : null),
-                    Fecha_Pedido,
-                    Fecha_Envio,
-                    isDropi,
-                    Devolucion,
-                    Recaudo,
-                    Estado,
-                    Cartera,
-                    PagoHGI,
-                    parseInt(NroPedido)
-                ])
+            try {
+                if (NroPedido) {
+                    seguimiento = await obtenerDatosDb_Dash(consultar_seguimientoActivo, [parseInt(NroPedido)])
+
+                    if (seguimiento.length == 0) {
+                        const IngresarSeguimiento = Seguimientos.SeguimientoPedido.CrearSeguimiento()
+                        await obtenerDatosDb_Dash(IngresarSeguimiento, [
+                            parseInt(NroPedido),
+                            (Encargado_Alistamiento1 !== 0 && Encargado_Alistamiento1 !== null) ? parseInt(Encargado_Alistamiento1) : null,
+                            Pago,
+                            Ciudad,
+                            Vendedor,
+                            TipoVenta,
+                            (NroFactura !== null && NroFactura !== "" && !isNaN(parseInt(NroFactura))) ? parseInt(NroFactura) : null,
+                            TipoEnvio,
+                            NroGuia,
+                            Despacho,
+                            ValorEnvio,
+                            NroCajas,
+                            Comentarios,
+                            ((Fecha_Facura).toString() !== "" && Fecha_Facura !== null && Fecha_Facura !== NaN && typeof (Fecha_Facura) !== "string") ? Fecha_Facura : (NroFactura !== null && NroFactura !== "" && !isNaN(parseInt(NroFactura)) ? new Date().toISOString().slice(0, 10) : null),
+                            Fecha_Pedido,
+                            Fecha_Envio,
+                            isDropi,
+                            Devolucion,
+                            Recaudo,
+                            Estado,
+                            Cliente,
+                            (Encargado_Alistamiento2 !== 0 && Encargado_Alistamiento2 !== null && !isNaN(parseInt(Encargado_Alistamiento2))) ? parseInt(Encargado_Alistamiento2) : null,
+                            (Encargado_Alistamiento3 !== 0 && Encargado_Alistamiento3 !== null && !isNaN(parseInt(Encargado_Alistamiento3))) ? parseInt(Encargado_Alistamiento3) : null,
+                            (Encargado_Facturacion !== 0 && Encargado_Facturacion !== null && !isNaN(parseInt(Encargado_Facturacion))) ? parseInt(Encargado_Facturacion) : null,
+                            (Encargado_Revision !== 0 && Encargado_Revision !== null && !isNaN(parseInt(Encargado_Revision))) ? parseInt(Encargado_Revision) : null,
+                            Cartera,
+                            PagoHGI
+                        ])
+                    } else {
+                        const actualizar = Seguimientos.SeguimientoPedido.ActulizarSeguimiento()
+                        await obtenerDatosDb_Dash(actualizar, [
+                            (NroFactura !== null && NroFactura !== "") ? parseInt(NroFactura) : null,
+                            Cliente,
+                            Vendedor,
+                            Ciudad,
+                            Pago,
+                            TipoVenta,
+                            (parseInt(Encargado_Alistamiento1) !== 0 && Encargado_Alistamiento1 !== null && !isNaN(parseInt(Encargado_Alistamiento1))) ? parseInt(Encargado_Alistamiento1) : null,
+                            (parseInt(Encargado_Alistamiento2) !== 0 && Encargado_Alistamiento2 !== null && !isNaN(parseInt(Encargado_Alistamiento2))) ? parseInt(Encargado_Alistamiento2) : null,
+                            (parseInt(Encargado_Alistamiento3) !== 0 && Encargado_Alistamiento3 !== null && !isNaN(parseInt(Encargado_Alistamiento3))) ? parseInt(Encargado_Alistamiento3) : null,
+                            (parseInt(Encargado_Revision) !== 0 && Encargado_Revision !== null && !isNaN(parseInt(Encargado_Revision))) ? parseInt(Encargado_Revision) : null,
+                            (parseInt(Encargado_Facturacion) !== 0 && Encargado_Facturacion !== null && !isNaN(parseInt(Encargado_Facturacion))) ? parseInt(Encargado_Facturacion) : null,
+                            TipoEnvio,
+                            NroGuia,
+                            Despacho,
+                            ValorEnvio,
+                            NroCajas,
+                            Comentarios,
+                            ((Fecha_Facura).toString() !== "" && Fecha_Facura !== null && Fecha_Facura !== NaN && typeof (Fecha_Facura) !== "string") ? Fecha_Facura : (NroFactura !== null && NroFactura !== "" && !isNaN(parseInt(NroFactura)) ? new Date().toISOString().slice(0, 10) : null),
+                            Fecha_Pedido,
+                            Fecha_Envio,
+                            isDropi,
+                            Devolucion,
+                            Recaudo,
+                            Estado,
+                            Cartera,
+                            PagoHGI,
+                            parseInt(NroPedido)
+                        ])
+                    }
+                    resolve(true)
+
+                }
+            } catch (error) {
+                reject(error)
             }
 
-            resolve(true)
         } catch (error) {
             reject(error)
         }
@@ -290,6 +299,65 @@ const BuscarSeguimiento_Query = (busqueda) => {
     })
 }
 
+const ActualizarEncargadosSeguimientos_Query = (idEncargado1, idEncargado2, idEncargado3, idEncargadoRevision, idPedido, nroCajas) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            if (!idPedido || idPedido == null || idPedido == undefined) {
+                reject("Nro de Pedido invalido")
+            }
+
+
+            const query = Seguimientos.SeguimientoPedido.ActualizarEncargadosSeguimiento()
+            const response = await obtenerDatosDb_Dash(query, [idEncargado1, idEncargado2, idEncargado3, idEncargadoRevision, nroCajas, idPedido])
+            if (response.affectedRows == 0) {
+                const query_pedido = Pedidos.InfoPedido.Header()
+                const query_insertar = Seguimientos.SeguimientoPedido.CrearSeguimiento()
+
+                const pedido = await obtenerDatosDb_Dash(query_pedido, [idPedido])
+                try {
+                    await obtenerDatosDb_Dash(query_insertar, [
+                        idPedido,
+                        idEncargado1,
+                        "Contado",
+                        pedido[0].strCiudadCliente,
+                        pedido[0].strNombVendedor,
+                        "",
+                        null,
+                        "",
+                        "",
+                        "",
+                        "",
+                        nroCajas,
+                        "",
+                        null,
+                        pedido[0].dtFechaEnvio,
+                        null,
+                        0,
+                        0,
+                        "",
+                        0,
+                        pedido[0].strNombCliente,
+                        idEncargado2,
+                        idEncargado3,
+                        null,
+                        idEncargadoRevision,
+                        0,
+                        0,
+                        null
+                    ])
+                } catch (error) {
+                    reject(error)
+                }
+            }
+
+            resolve(true)
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+
 
 module.exports = {
     ConsultarEncargados_Query,
@@ -297,5 +365,6 @@ module.exports = {
     AgregarDatosSeguimiento_Query,
     ObtenerSeguimientos_Query,
     CrearEncargado_Query,
-    BuscarSeguimiento_Query
+    BuscarSeguimiento_Query,
+    ActualizarEncargadosSeguimientos_Query
 }
