@@ -4,7 +4,8 @@ const {
     AgregarDatosSeguimiento_Query,
     ObtenerSeguimientos_Query,
     CrearEncargado_Query,
-    BuscarSeguimiento_Query
+    BuscarSeguimiento_Query,
+    ActualizarEncargadosSeguimientos_Query
 } = require("../../../Querys/Panel/Pedidos/Seguimientos_Query");
 
 const ConsultarEncargados = async (req, res) => {
@@ -89,14 +90,32 @@ const CrearEncargado = async (req, res) => {
     }
 }
 
-const BuscarSeguimiento = async(req,res)=>{
-    const { busqueda } = req.params 
+const BuscarSeguimiento = async (req, res) => {
+    const { busqueda } = req.params
 
     try {
         const data = await BuscarSeguimiento_Query(busqueda)
-        res.status(200).json({seguimientos:data})
+        res.status(200).json({ seguimientos: data })
     } catch (error) {
-        res.status(400).json({error: `${error}`})
+        res.status(400).json({ error: `${error}` })
+    }
+}
+
+const ActualizarEncargadosSeguimientos = async (req, res) => {
+    try {
+        const { idEncargado1, idEncargado2, idEncargado3, idEncargadoRevision, idPedido, nroCajas } = req.body
+        if (idPedido) {
+            const update = await ActualizarEncargadosSeguimientos_Query((parseInt(idEncargado1) !== 0 && idEncargado1 !== null && !isNaN(parseInt(idEncargado1))) ? parseInt(idEncargado1) : null, (parseInt(idEncargado2) !== 0 && idEncargado2 !== null && !isNaN(parseInt(idEncargado2))) ? parseInt(idEncargado2) : null, (parseInt(idEncargado3) !== 0 && idEncargado3 !== null && !isNaN(parseInt(idEncargado3))) ? parseInt(idEncargado3) : null, (parseInt(idEncargadoRevision) !== 0 && idEncargadoRevision !== null && !isNaN(parseInt(idEncargadoRevision))) ? parseInt(idEncargadoRevision) : null, idPedido, nroCajas)
+            if (update) {
+                res.status(200).json({ message: update })
+            } else {
+                res.status(400).json({ error: `Error al actualizar el seguimiento` })
+            }
+        } else {
+            res.status(400).json({ error: `Nro de pedido invalido` })
+        }
+    } catch (error) {
+        res.status(400).json({ error: `${error}` })
     }
 }
 
@@ -107,5 +126,6 @@ module.exports = {
     ObtenerSeguimientos,
     ConsultarEncargadosDefault,
     CrearEncargado,
-    BuscarSeguimiento
+    BuscarSeguimiento,
+    ActualizarEncargadosSeguimientos
 }

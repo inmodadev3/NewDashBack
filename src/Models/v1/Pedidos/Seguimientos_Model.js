@@ -48,7 +48,11 @@ Seguimientos.SeguimientoPedido = {
     },
     ActulizarSeguimiento: () => {
         return `UPDATE TblSeguimientoPedidos SET  NroFactura = ?, Cliente = ?, Vendedor = ?, Ciudad = ?, Pago = ?, TipoVenta = ?, id_encargado = ?, id_encargado2 = ?, id_encargado3 = ?, id_encargadoRevision = ?, id_encargadoFacturacion = ?, TipoEnvio = ?, NroGuia = ?, Despacho = ?, ValorEnvio = ?, NroCajas = ?, Comentarios = ?, Fecha_Facura = ?, Fecha_Pedido = ?, Fecha_Envio = ?, isDropi = ?, Devolucion = ?, Recaudo = ?, estado = ?, Cartera = ? , PagoHGI = ? WHERE intIdPedido = ?`
-    }
+    },
+    ActualizarEncargadosSeguimiento: () => {
+        return `UPDATE TblSeguimientoPedidos SET id_encargado = ?, id_encargado2 = ?, id_encargado3 = ?, id_encargadoRevision = ? ,NroCajas = ? WHERE intIdPedido = ?`
+    },
+
 }
 
 Seguimientos.Seguimientos = (orden = 'id') => {
