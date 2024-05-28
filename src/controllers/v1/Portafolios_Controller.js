@@ -12,7 +12,8 @@ const {
   obtenerClientesXCiudad_Query,
   GetCarteraClienteQuery,
   GetContactosCliente_Query,
-  PutObservacion_Query
+  PutObservacion_Query,
+  GetUltimoPedidoCliente
 } = require('../../Querys/Panel/Portafolios_Querys')
 
 //Obtener todos los clientes de la zonas correspondientes al vendedor
@@ -85,7 +86,9 @@ const GetDataClientes = async (req, res) => {
 
     let GetContactosCliente = await GetContactosCliente_Query(id)
 
-    res.status(200).json({ data: dataClientes, grafica: dataGrafica, cartera: GetCarteraCliente, contactos:GetContactosCliente })
+    let Ultimo_Pedido = await GetUltimoPedidoCliente(id)
+
+    res.status(200).json({ data: dataClientes, grafica: dataGrafica, cartera: GetCarteraCliente, contactos:GetContactosCliente, Ultimo_Pedido })
   } catch (error) {
     res.status(400).json({error:error.message})
   }

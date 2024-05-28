@@ -94,8 +94,12 @@ Portafolio.ContactosCliente = (StrIdTercero) => {
     TC.StrTercero = '${StrIdTercero}'`
 }
 
-Portafolio.ActualizarObservacionGeneral = (observacion , strIdCliente) => {
+Portafolio.ActualizarObservacionGeneral = (observacion, strIdCliente) => {
     return `update TblTerceros SET strDato0 = '${observacion}' where StrIdTercero = '${strIdCliente}'`
+}
+
+Portafolio.UltimoPedido = () => {
+    return `select intIdPedido from tblpedidos where strIdCliente = ? order by intIdPedido desc limit 1;`
 }
 
 module.exports = Portafolio
