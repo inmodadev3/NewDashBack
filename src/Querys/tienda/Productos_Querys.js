@@ -1,12 +1,15 @@
 const { obtenerDatosDB_Hgi } = require('../Global_Querys')
 const descripciones = require('../../utils/Descripciones')
 const { levenshteinDistance } = require('../../helpers/helpers')
+const Filtro = require('../../utils/Filtro')
 
 const datosPrinciaplesProductos = `StrIdProducto, P.StrDescripcion, P.strLinea AS linea, Strauxiliar, StrUnidad,
 IntPrecio1,IntPrecio2,IntPrecio3,IntPrecio4,IntPrecio5,
 IntPrecio6,IntPrecio7, IntPrecio8, I.StrArchivo , DatFechaFProdHab,DatFechaFProdNuevo`
 
-const GetProductosPrincipal = (instruccion_adicional, skipReg, cantidadReg) => {
+const GetProductosPrincipal = (instruccion_adicional, skipReg, cantidadReg, filtro = 'recent') => {
+
+    const orden = Filtro(filtro)
 
     const query = `SELECT ${datosPrinciaplesProductos}
     FROM TblProductos AS P
@@ -14,33 +17,22 @@ const GetProductosPrincipal = (instruccion_adicional, skipReg, cantidadReg) => {
     WHERE IntHabilitarProd = 1
     ${instruccion_adicional}
     AND I.IntOrden = 1
-    ORDER BY 
-        CASE 
-            WHEN DatFechaFProdHab >= DATEADD(DAY, -15, GETDATE()) THEN 0 
-            ELSE 1 
-        END,
-        CASE 
-            WHEN DatFechaFProdNuevo >= DATEADD(DAY, -15, GETDATE()) THEN 0 
-            ELSE 1 
-        END,
-        DatFechaFProdHab DESC,
-        DatFechaFProdNuevo DESC,
-        P.StrIdProducto
+    ORDER BY ${orden}
     OFFSET ${skipReg} ROWS
     FETCH NEXT ${cantidadReg} ROWS ONLY`
 
     return query
 }
 
-const GetProductos_Query = async (clase, skipReg, cantidadReg) => {
+const GetProductos_Query = async (clase, skipReg, cantidadReg, filtro) => {
     return new Promise(async (resolve, reject) => {
         try {
             let query;
 
             if (clase) {
-                query = GetProductosPrincipal(`and P.StrClase = ${clase}`, skipReg, cantidadReg)
+                query = GetProductosPrincipal(`and P.StrClase = ${clase}`, skipReg, cantidadReg, filtro)
             } else {
-                query = GetProductosPrincipal('', skipReg, cantidadReg)
+                query = GetProductosPrincipal('', skipReg, cantidadReg, filtro)
             }
 
             const data = await obtenerDatosDB_Hgi(query)
@@ -51,11 +43,11 @@ const GetProductos_Query = async (clase, skipReg, cantidadReg) => {
     })
 }
 
-const GetProductosXlinea_Query = async (lineas, skipReg, cantidadReg) => {
+const GetProductosXlinea_Query = async (lineas, skipReg, cantidadReg, filtro) => {
     return new Promise(async (resolve, reject) => {
         try {
             lineas = lineas.map((linea) => `'${linea}'`).join(', ')
-            const query = GetProductosPrincipal(`and P.strLinea in (${lineas})`, skipReg, cantidadReg)
+            const query = GetProductosPrincipal(`and P.strLinea in (${lineas})`, skipReg, cantidadReg, filtro)
             const data = await obtenerDatosDB_Hgi(query)
             resolve(data)
         } catch (error) {
@@ -64,13 +56,13 @@ const GetProductosXlinea_Query = async (lineas, skipReg, cantidadReg) => {
     })
 }
 
-const GetProductosXGrupos_Query = async (grupos, skipReg, cantidadReg) => {
+const GetProductosXGrupos_Query = async (grupos, skipReg, cantidadReg, filtro) => {
     return new Promise(async (resolve, reject) => {
         try {
             const GrupoConditions = grupos.map(({ IdGrupo, IdLinea }) => `(P.StrGrupo = '${IdGrupo}'
             AND P.StrLinea = '${IdLinea}')`).join(' OR ');
 
-            const query = GetProductosPrincipal(`AND (${GrupoConditions})`, skipReg, cantidadReg)
+            const query = GetProductosPrincipal(`AND (${GrupoConditions})`, skipReg, cantidadReg,filtro)
             const data = await obtenerDatosDB_Hgi(query)
             resolve(data)
         } catch (error) {
@@ -79,12 +71,12 @@ const GetProductosXGrupos_Query = async (grupos, skipReg, cantidadReg) => {
     })
 }
 
-const GetProductosXTipos_Query = async (tipos, skipReg, cantidadReg) => {
+const GetProductosXTipos_Query = async (tipos, skipReg, cantidadReg, filtro) => {
     return new Promise(async (resolve, reject) => {
         try {
             const tipoGrupoConditions = tipos.map(({ IdTipo, IdGrupo, IdLinea }) => `(P.strTipo = '${IdTipo}' AND P.StrGrupo = '${IdGrupo}'
             AND P.StrLinea = '${IdLinea}')`).join(' OR ');
-            const query = GetProductosPrincipal(`AND (${tipoGrupoConditions})`, skipReg, cantidadReg)
+            const query = GetProductosPrincipal(`AND (${tipoGrupoConditions})`, skipReg, cantidadReg,filtro)
             const data = await obtenerDatosDB_Hgi(query)
             resolve(data)
         } catch (error) {
@@ -214,7 +206,7 @@ const Contar_Productos_Busqueda_Query = (text) => {
 const BuscarProductosSimilares_Query = async (text) => {
     return new Promise(async (resolve, reject) => {
         try {
-            
+
 
             const buscador_coincidencias = (umbral) => {
                 const coincidencias = []

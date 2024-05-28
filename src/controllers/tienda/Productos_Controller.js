@@ -18,13 +18,15 @@ const {
 //OBTENER TODOS LOS PRODUCTOS O POR CLASE
 const GetProductos = async (req, res) => {
     const pagina = req.query.pag ? parseInt(req.query.pag) : 0
+    let filtro = (req.query.sort && req.query.sort !== undefined) ? req.query.sort : 'recent'
     const cantidadReg = 30
     const skipReg = pagina * cantidadReg
     const clase = req.query.class
 
     try {
-        const data = await GetProductos_Query(clase, skipReg, cantidadReg)
+        const data = await GetProductos_Query(clase, skipReg, cantidadReg, filtro)
         res.status(200).json({ success: true, data: data })
+
     } catch (error) {
         res.status(400).json({ success: false, error: error, message: "Ha ocurrido un error al obtener los productos" })
     }
@@ -33,12 +35,13 @@ const GetProductos = async (req, res) => {
 //OBTENER PRODUCTOS POR LINEAS
 const GetProductosXlinea = async (req, res) => {
     const pagina = req.query.pag ? req.query.pag : 0
+    let filtro = (req.query.sort && req.query.sort !== undefined) ? req.query.sort : 'recent'
     const cantidadReg = 30
     const skipReg = pagina * cantidadReg
     const { lineas } = req.body
 
     try {
-        const data = await GetProductosXlinea_Query(lineas, skipReg, cantidadReg)
+        const data = await GetProductosXlinea_Query(lineas, skipReg, cantidadReg, filtro)
         res.status(200).json({ success: true, data: data })
     } catch (error) {
         res.status(400).json({ success: false, error: error, message: "Ha ocurrido un error al obtener los productos" })
@@ -48,12 +51,13 @@ const GetProductosXlinea = async (req, res) => {
 //OBTENER PRODUCTOS POR GRUPOS
 const GetProductosXGrupos = async (req, res) => {
     const pagina = req.query.pag ? req.query.pag : 0
+    let filtro = (req.query.sort && req.query.sort !== undefined) ? req.query.sort : 'recent'
     const cantidadReg = 30
     const skipReg = pagina * cantidadReg
     const { grupos } = req.body
 
     try {
-        const data = await GetProductosXGrupos_Query(grupos, skipReg, cantidadReg)
+        const data = await GetProductosXGrupos_Query(grupos, skipReg, cantidadReg, filtro)
         res.status(200).json({ success: true, data: data })
     } catch (error) {
         console.log(error)
@@ -65,12 +69,13 @@ const GetProductosXGrupos = async (req, res) => {
 //OBTENER PRODUCTOS POR TIPO
 const GetProductosXTipos = async (req, res) => {
     const pagina = req.query.pag ? req.query.pag : 0
+    let filtro = (req.query.sort && req.query.sort !== undefined) ? req.query.sort : 'recent'
     const cantidadReg = 30
     const skipReg = pagina * cantidadReg
     const { tipos } = req.body
 
     try {
-        const data = await GetProductosXTipos_Query(tipos, skipReg, cantidadReg)
+        const data = await GetProductosXTipos_Query(tipos, skipReg, cantidadReg, filtro)
         res.status(200).json({ success: true, data: data })
     } catch (error) {
         res.status(400).json({ success: false, error: error, message: "Ha ocurrido un error al obtener los productos" })
@@ -166,10 +171,10 @@ const Buscar_Productos = async (req, res) => {
 
     try {
         const data = await Buscar_Productos_Query(texto, skipReg, cantidadReg)
-        if(data.length > 0){
+        if (data.length > 0) {
             res.status(200).json({ success: true, data: data })
-        }else{
-            res.status(200).json({ success:false, data:0})
+        } else {
+            res.status(200).json({ success: false, data: 0 })
         }
     } catch (error) {
         res.status(400).json({ success: false, error: error, message: "Ha ocurrido un error al obtener los productos" })
