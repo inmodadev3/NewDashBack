@@ -200,7 +200,7 @@ const GetDataClientes_dataClientes_Query = async (id) => {
             const fecha = new Date();
             const year = fecha.getFullYear();
             const month = fecha.getMonth() + 1;
-            let sql = Portafolio.DatosCliente(id,year,month);
+            let sql = Portafolio.DatosCliente(id, year, month);
             let data = await obtenerDatosDB_Hgi(sql)
             resolve(data[0])
         } catch (error) {
@@ -276,10 +276,28 @@ const GetContactosCliente_Query = async (StrIdTercero) => {
 const PutObservacion_Query = (text, strIdCliente) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const Actualizar = Portafolio.ActualizarObservacionGeneral(text,strIdCliente)
+            const Actualizar = Portafolio.ActualizarObservacionGeneral(text, strIdCliente)
             DeshabilitarTrigger('TblTerceros')
             await obtenerDatosDB_Hgi(Actualizar)
             resolve(true)
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+
+const GetUltimoPedidoCliente = (idCliente) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            const query = Portafolio.UltimoPedido()
+            const idPedido = await obtenerDatosDb_Dash(query,[idCliente])
+            
+            if(idPedido.length > 0){
+                const id = idPedido[0].intIdPedido
+                resolve(id)
+            }else{
+                resolve(null)
+            }
         } catch (error) {
             reject(error)
         }
@@ -299,5 +317,6 @@ module.exports = {
     obtenerClientesXCiudad_Query,
     ObtenerCiudades_Query,
     GetContactosCliente_Query,
-    PutObservacion_Query
+    PutObservacion_Query,
+    GetUltimoPedidoCliente
 }
