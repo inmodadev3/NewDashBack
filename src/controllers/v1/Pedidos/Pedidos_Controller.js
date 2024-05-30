@@ -1,11 +1,11 @@
-const { GetPedidosEnProceso_query, GetPedidosEnTerminal_Query, GetPedidosNuevos_Query, GetInfoPedido_Query, GetInfoPedidoTerminal_Query, GetPedidoXId_Query, GetPedidos_Query, PutEstadoPedido_Query, PutEstadoProductoPedido_query, PostProductoPedido_query, PutActualizarPreciosPedidoQuery } = require('../../../Querys/Panel/Pedidos/Pedidos_Querys')
+const { GetPedidosEnProceso_query, GetPedidosEnTerminal_Query, GetPedidosNuevos_Query, GetInfoPedido_Query, GetInfoPedidoTerminal_Query, GetPedidoXId_Query, GetPedidos_Query, PutEstadoPedido_Query, PutEstadoProductoPedido_query, PostProductoPedido_query, PutActualizarPreciosPedidoQuery, GetReporteDropiPendientes_Query } = require('../../../Querys/Panel/Pedidos/Pedidos_Querys')
 
 const GetPedidos = async (req, res) => {
-    
-    const {anio , mes } = req.query
+
+    const { anio, mes } = req.query
 
     try {
-        let data = await GetPedidos_Query(anio , mes )
+        let data = await GetPedidos_Query(anio, mes)
         res.status(200).json({ data: data, success: true })
     } catch (error) {
         res.status(400).json({ error, message: "Ha ocurrido un error al obtener los pedidos nuevos ", success: false })
@@ -124,6 +124,16 @@ const PutActualizarPreciosPedido = async (req, res) => {
     }
 }
 
+const GetReporteDropiPendientes = async (req, res) => {
+    try {
+        const reporte = await GetReporteDropiPendientes_Query()
+        res.status(200).json({ reporte })
+    } catch (error) {
+        res.status(400).json({ error: error.message, stack: error.stack, success: false })
+
+    }
+}
+
 
 
 module.exports = {
@@ -137,5 +147,6 @@ module.exports = {
     PutEstadoPedido,
     PutEstadoProductoPedido,
     PostProductoPedido,
-    PutActualizarPreciosPedido
+    PutActualizarPreciosPedido,
+    GetReporteDropiPendientes
 }

@@ -95,9 +95,9 @@ const GetInfoPedido_Query = async (id) => {
             const observacionTerceroQuery = Pedidos.InfoPedido.Footer(header[0].strIdCliente)
             const observacionTercero = await obtenerDatosDB_Hgi(observacionTerceroQuery)
 
-            if(observacionTercero.length > 0){
+            if (observacionTercero.length > 0) {
                 header[0] = { ...header[0], observacionTercero: observacionTercero[0].observacion }
-            }else{
+            } else {
                 header[0] = { ...header[0], observacionTercero: '' }
             }
 
@@ -259,14 +259,14 @@ const PostProductoPedido_query = async (idCliente, idProducto, idPedido) => {
             let obtener_precioProducto = await obtenerDatosDB_Hgi(obtener_precioProducto_query)
             let precioProducto;
 
-            if(obtener_precioProducto.length > 0){
+            if (obtener_precioProducto.length > 0) {
                 precioProducto = obtener_precioProducto[0].tipo_precio !== 0 ? obtener_precioProducto[0].tipo_precio : 1;
-            }else{
+            } else {
                 const precioTiendaQuery = Pedidos.PrecioTienda()
-                const PrecioTienda = await obtenerDatosDb_Dash(precioTiendaQuery,[idPedido])
-                if(PrecioTienda.length > 0){
-                    precioProducto = (PrecioTienda[0].blEspera !== 0 && PrecioTienda[0].blEspera !== null)? PrecioTienda[0].blEspera : 4
-                }else{
+                const PrecioTienda = await obtenerDatosDb_Dash(precioTiendaQuery, [idPedido])
+                if (PrecioTienda.length > 0) {
+                    precioProducto = (PrecioTienda[0].blEspera !== 0 && PrecioTienda[0].blEspera !== null) ? PrecioTienda[0].blEspera : 4
+                } else {
                     precioProducto = 4
                 }
             }
@@ -381,6 +381,22 @@ const PutActualizarPreciosPedidoQuery = (idPedido, precio) => {
     })
 }
 
+const GetReporteDropiPendientes_Query = () => { 
+    return new Promise(async(resolve, reject) => {
+        try {
+            const query = Pedidos.ReportesDropiPendientes();
+            const response = await obtenerDatosDb_Dash(query)
+            if(response){
+                resolve(response)
+            }else{
+                reject('No se han podido obtener.')
+            }
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+
 module.exports = {
     GetPedidosNuevos_Query,
     GetPedidosEnProceso_query,
@@ -393,4 +409,5 @@ module.exports = {
     PutEstadoProductoPedido_query,
     PostProductoPedido_query,
     PutActualizarPreciosPedidoQuery,
+    GetReporteDropiPendientes_Query
 }
