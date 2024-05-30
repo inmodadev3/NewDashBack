@@ -115,13 +115,21 @@ Pedidos.Encargados = {
         inner join dash.TblTipoEncargados as TE on TE.id = E.tipo_encargado_id
         where intEstado = 1`
     },
-    Agregar:() =>{
+    Agregar: () => {
         return `insert into TblEncargados (nombre,tipo_encargado_id,intEstado) VALUES (?,?,?)`
     }
 }
 
-Pedidos.PrecioTienda = () =>{
+Pedidos.PrecioTienda = () => {
     return `select blEspera from dash.tblpedidos where intIdPedido = ?`
+}
+
+Pedidos.ReportesDropiPendientes = () => {
+    return `SELECT TP.intIdPedido,TP.strIdPedidoVendedor,TP.strNombVendedor,TP.strNombCliente,
+    TP.dtFechaFinalizacion,TP.dtFechaEnvio,TP.intValorTotal,TP.intEstado, TS.estado as pago, TS.isDropi
+    FROM dash.tblPedidos as TP
+    LEFT JOIN dash.TblSeguimientoPedidos as TS on TP.intIdPedido = TS.intIdPedido
+    where TS.isDropi = 1 and TS.estado = 0 and TP.intEstado != -1 and TP.dtFechaEnvio > '2024-04-18' and TS.Devolucion = 0;`
 }
 
 module.exports = Pedidos
