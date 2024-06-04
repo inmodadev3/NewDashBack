@@ -5,9 +5,11 @@ const { obtenerDatosDB_Hgi, obtenerDatosDb_Dash, obtenerDatosDb_Dash_transaccion
 const GetPedidos_Query = async (anio, mes) => {
     return new Promise(async (resolve, reject) => {
         try {
-            let fecha = `${anio}-${mes}`
-            let fechaInicial = `${fecha}-01`
-            let fechaFinal = `${fecha}-31`
+            let fechaI = `${anio}-${mes}`
+            let fechaF = `${anio}-${parseInt(mes) + 1}` //te deja poner una signo mas?
+            let fechaInicial = `${fechaI}-01`
+            let fechaFinal = `${fechaF}-01`
+
             const query = Pedidos.GetPedidos()
             const data = await obtenerDatosDb_Dash(query, [fechaInicial, fechaFinal])
             resolve(data)
