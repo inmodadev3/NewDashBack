@@ -383,18 +383,42 @@ const PutActualizarPreciosPedidoQuery = (idPedido, precio) => {
     })
 }
 
-const GetReporteDropiPendientes_Query = () => { 
-    return new Promise(async(resolve, reject) => {
+const GetReporteDropiPendientes_Query = () => {
+    return new Promise(async (resolve, reject) => {
         try {
             const query = Pedidos.ReportesDropiPendientes();
             const response = await obtenerDatosDb_Dash(query)
-            if(response){
+            if (response) {
                 resolve(response)
-            }else{
+            } else {
                 reject('No se han podido obtener.')
             }
         } catch (error) {
             reject(error)
+        }
+    })
+}
+
+const GetReportesDropi_Query = (params) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const query = Pedidos.ReportesDropi(params)
+            const pedidos = await obtenerDatosDb_Dash(query)
+            resolve(pedidos)
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+
+const GetReportesDropiCartera_Query = () =>{
+    return new Promise(async(resolve, reject) => {
+        try {
+            const obtenerDropiSinPagar = Pedidos.CarteraDropi()
+            const pedidos = await obtenerDatosDb_Dash(obtenerDropiSinPagar)
+            resolve(pedidos)
+        } catch (error) {
+            reject((error))
         }
     })
 }
@@ -411,5 +435,7 @@ module.exports = {
     PutEstadoProductoPedido_query,
     PostProductoPedido_query,
     PutActualizarPreciosPedidoQuery,
-    GetReporteDropiPendientes_Query
+    GetReporteDropiPendientes_Query,
+    GetReportesDropi_Query,
+    GetReportesDropiCartera_Query
 }

@@ -12,6 +12,8 @@ const {
     PostProductoPedido,
     PutActualizarPreciosPedido,
     GetReporteDropiPendientes,
+    GetReporteDropi,
+    GetReportesDropiCartera,
 } = require('../../controllers/v1/Pedidos/Pedidos_Controller')
 
 const {
@@ -26,7 +28,9 @@ const {
 } = require('../../controllers/v1/Pedidos/Seguimientos_Controller')
 
 route.get('/', GetPedidos)
-route.get('/reportes/dropi',GetReporteDropiPendientes)
+route.get('/reportes/dropi/pendientes', GetReporteDropiPendientes)
+route.get('/reportes/dropi', GetReporteDropi)
+route.get('/reportes/dropi/cartera', GetReportesDropiCartera)
 route.get('/nuevos', GetPedidosNuevos)
 route.get('/proceso', GetPedidosEnProceso)
 route.get('/terminal', GetPedidosEnTerminal)

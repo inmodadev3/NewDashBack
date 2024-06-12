@@ -1,4 +1,4 @@
-const { GetPedidosEnProceso_query, GetPedidosEnTerminal_Query, GetPedidosNuevos_Query, GetInfoPedido_Query, GetInfoPedidoTerminal_Query, GetPedidoXId_Query, GetPedidos_Query, PutEstadoPedido_Query, PutEstadoProductoPedido_query, PostProductoPedido_query, PutActualizarPreciosPedidoQuery, GetReporteDropiPendientes_Query } = require('../../../Querys/Panel/Pedidos/Pedidos_Querys')
+const { GetPedidosEnProceso_query, GetPedidosEnTerminal_Query, GetPedidosNuevos_Query, GetInfoPedido_Query, GetInfoPedidoTerminal_Query, GetPedidoXId_Query, GetPedidos_Query, PutEstadoPedido_Query, PutEstadoProductoPedido_query, PostProductoPedido_query, PutActualizarPreciosPedidoQuery, GetReporteDropiPendientes_Query, GetReportesDropi_Query, GetReportesDropiCartera_Query } = require('../../../Querys/Panel/Pedidos/Pedidos_Querys')
 
 const GetPedidos = async (req, res) => {
 
@@ -134,6 +134,54 @@ const GetReporteDropiPendientes = async (req, res) => {
     }
 }
 
+const GetReporteDropi = async (req, res) => {
+    try {
+        const params = req.query
+        let query_paramsSQL = ''
+        let sql = ''
+
+        function fehcaFinal(fecha) {
+            const anio = fecha.split('-')[0]
+            const mes = parseInt(fecha.split('-')[1]) + 1
+
+            return `${anio}-0${mes}-01`
+        }
+
+        switch (params.type) {
+            case 'todos':
+                query_paramsSQL = `dtFechaEnvio > '2024-04-18'`
+                break;
+            case 'rango':
+                query_paramsSQL = `dtFechaEnvio > '${params.fechaIni}-01' and dtFechaEnvio < '${fehcaFinal(params.fechaFin)}'`
+                break;
+            case 'unico':
+                query_paramsSQL = `dtFechaEnvio > '${params.fecha}-01' and dtFechaEnvio < '${fehcaFinal(params.fecha)}'`
+                break;
+        }
+
+        if (query_paramsSQL !== "") {
+            sql = `and ${query_paramsSQL}`
+        }
+
+        const reporte = await GetReportesDropi_Query(sql)
+
+        console.log(reporte)
+
+        res.status(200).json({ reporte })
+
+    } catch (error) {
+        res.status(400).json({ error: `${error}` })
+    }
+}
+
+const GetReportesDropiCartera = async (req,res) => {
+    try {
+        const reporte = await GetReportesDropiCartera_Query()
+        res.status(200).json({reporte})
+    } catch (error) {
+        res.status(400).json({error:`${error}`})
+    }
+}
 
 
 module.exports = {
@@ -148,5 +196,7 @@ module.exports = {
     PutEstadoProductoPedido,
     PostProductoPedido,
     PutActualizarPreciosPedido,
-    GetReporteDropiPendientes
+    GetReporteDropiPendientes,
+    GetReporteDropi,
+    GetReportesDropiCartera
 }

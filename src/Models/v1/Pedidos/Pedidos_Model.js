@@ -132,4 +132,23 @@ Pedidos.ReportesDropiPendientes = () => {
     where TS.isDropi = 1 and TS.estado = 0 and TP.intEstado != -1 and TP.dtFechaEnvio > '2024-04-18' and TS.Devolucion = 0;`
 }
 
+Pedidos.ReportesDropi = (params) => {
+    return `SELECT TP.intIdPedido,TP.strIdPedidoVendedor,TP.strNombVendedor,TP.strNombCliente,
+    TP.dtFechaFinalizacion,TP.dtFechaEnvio,TP.intValorTotal,TP.intEstado, TS.estado as pago, TS.isDropi, 
+    TS.Devolucion as devolucion
+    FROM dash.tblPedidos as TP
+    LEFT JOIN dash.TblSeguimientoPedidos as TS on TP.intIdPedido = TS.intIdPedido where TS.isDropi = 1 ${params} order by intIdPedido desc`
+}
+
+Pedidos.CarteraDropi = () =>{
+    return `SELECT TP.intIdPedido,TP.strNombVendedor,TP.strNombCliente,TP.dtFechaEnvio,TP.intValorTotal
+    FROM dash.tblPedidos as TP
+    LEFT JOIN dash.TblSeguimientoPedidos as TS ON TP.intIdPedido = TS.intIdPedido
+    WHERE stridCliente IN ('99999', '1231166') 
+    AND TP.intEstado != -1 
+    AND dtFechaEnvio > '2024-05-01' 
+    AND (TS.Devolucion != 1 OR TS.Devolucion IS NULL)
+    AND (Ts.PagoHGI != 1 or TS.PagoHGI IS NULL);`
+}
+
 module.exports = Pedidos
