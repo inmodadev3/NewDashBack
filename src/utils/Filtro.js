@@ -3,10 +3,10 @@ const Filtro = (filtro = 'recent') => {
 
     switch (filtro) {
         case 'recent':
-            order = `CASE WHEN DatFechaFProdHab >= DATEADD(DAY, -15, GETDATE()) THEN 0 ELSE 1 END, 
-            CASE WHEN DatFechaFProdNuevo >= DATEADD(DAY, -15, GETDATE()) THEN 0 ELSE 1 END,
-            DatFechaFProdHab DESC,
+            order = `CASE WHEN DatFechaFProdNuevo >= DATEADD(DAY, -15, GETDATE()) THEN 0 ELSE 1 END,
+            CASE WHEN DatFechaFProdHab >= DATEADD(DAY, -15, GETDATE()) THEN 0 ELSE 1 END, 
             DatFechaFProdNuevo DESC,
+            DatFechaFProdHab DESC,
             P.StrIdProducto`
             break;
 
@@ -19,10 +19,10 @@ const Filtro = (filtro = 'recent') => {
             break;
 
         default:
-            order = `CASE WHEN DatFechaFProdHab >= DATEADD(DAY, -15, GETDATE()) THEN 0 ELSE 1 END,
-            CASE WHEN DatFechaFProdNuevo >= DATEADD(DAY, -15, GETDATE()) THEN 0 ELSE 1 END,
-            DatFechaFProdHab DESC,
+            order = `CASE WHEN DatFechaFProdNuevo >= DATEADD(DAY, -15, GETDATE()) THEN 0 ELSE 1 END,
+            CASE WHEN DatFechaFProdHab >= DATEADD(DAY, -15, GETDATE()) THEN 0 ELSE 1 END, 
             DatFechaFProdNuevo DESC,
+            DatFechaFProdHab DESC,
             P.StrIdProducto`
             break;
     }

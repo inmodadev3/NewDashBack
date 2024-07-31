@@ -2,10 +2,20 @@ const { obtenerDatosDB_Hgi } = require('../Global_Querys')
 const descripciones = require('../../utils/Descripciones')
 const { levenshteinDistance } = require('../../helpers/helpers')
 const Filtro = require('../../utils/Filtro')
+const ProductosTienda = require('../../Models/tienda/Productos')
 
 const datosPrinciaplesProductos = `StrIdProducto, P.StrDescripcion, P.strLinea AS linea, Strauxiliar, StrUnidad,
 IntPrecio1,IntPrecio2,IntPrecio3,IntPrecio4,IntPrecio5,
-IntPrecio6,IntPrecio7, IntPrecio8, I.StrArchivo , DatFechaFProdHab,DatFechaFProdNuevo`
+IntPrecio6,IntPrecio7, IntPrecio8, 
+(SELECT I1.StrArchivo 
+FROM TblImagenes AS I1 
+WHERE I1.StrIdCodigo = P.StrIdProducto 
+AND I1.IntOrden = 1) AS StrArchivo ,
+(SELECT I2.StrArchivo 
+FROM TblImagenes AS I2 
+WHERE I2.StrIdCodigo = P.StrIdProducto 
+AND I2.IntOrden = 2) AS ImagenOrden2, 
+DatFechaIProdHab,DatFechaFProdHab,DatFechaFProdNuevo`
 
 const GetProductosPrincipal = (instruccion_adicional, skipReg, cantidadReg, filtro = 'recent') => {
 
@@ -43,11 +53,11 @@ const GetProductos_Query = async (clase, skipReg, cantidadReg, filtro) => {
     })
 }
 
-const GetProductosXlinea_Query = async (lineas, skipReg, cantidadReg, filtro) => {
+const GetProductosXlinea_Query = async (linea, skipReg, cantidadReg, filtro) => {
     return new Promise(async (resolve, reject) => {
         try {
-            lineas = lineas.map((linea) => `'${linea}'`).join(', ')
-            const query = GetProductosPrincipal(`and P.strLinea in (${lineas})`, skipReg, cantidadReg, filtro)
+            /* lineas = lineas.map((linea) => `'${linea}'`).join(', ') */
+            const query = GetProductosPrincipal(`and P.strLinea = '${linea}'`, skipReg, cantidadReg, filtro)
             const data = await obtenerDatosDB_Hgi(query)
             resolve(data)
         } catch (error) {
@@ -59,10 +69,7 @@ const GetProductosXlinea_Query = async (lineas, skipReg, cantidadReg, filtro) =>
 const GetProductosXGrupos_Query = async (grupos, skipReg, cantidadReg, filtro) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const GrupoConditions = grupos.map(({ IdGrupo, IdLinea }) => `(P.StrGrupo = '${IdGrupo}'
-            AND P.StrLinea = '${IdLinea}')`).join(' OR ');
-
-            const query = GetProductosPrincipal(`AND (${GrupoConditions})`, skipReg, cantidadReg,filtro)
+            const query = GetProductosPrincipal(`AND P.StrGrupo = '${grupos.IdGrupo}' AND P.StrLinea = '${grupos.IdLinea}'`, skipReg, cantidadReg, filtro)
             const data = await obtenerDatosDB_Hgi(query)
             resolve(data)
         } catch (error) {
@@ -74,9 +81,7 @@ const GetProductosXGrupos_Query = async (grupos, skipReg, cantidadReg, filtro) =
 const GetProductosXTipos_Query = async (tipos, skipReg, cantidadReg, filtro) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const tipoGrupoConditions = tipos.map(({ IdTipo, IdGrupo, IdLinea }) => `(P.strTipo = '${IdTipo}' AND P.StrGrupo = '${IdGrupo}'
-            AND P.StrLinea = '${IdLinea}')`).join(' OR ');
-            const query = GetProductosPrincipal(`AND (${tipoGrupoConditions})`, skipReg, cantidadReg,filtro)
+            const query = GetProductosPrincipal(`AND P.strTipo = '${tipos.IdTipo}' AND P.StrGrupo = '${tipos.IdGrupo}' AND P.StrLinea = '${tipos.IdLinea}'`, skipReg, cantidadReg, filtro)
             const data = await obtenerDatosDB_Hgi(query)
             resolve(data)
         } catch (error) {
@@ -115,7 +120,7 @@ const GetImagesXid_Query = async (referencia) => {
 const ContarProductos_Query = () => {
     return new Promise(async (resolve, reject) => {
         try {
-            const query = `select COUNT(*) as totalColumna from(select * from TblProductos where TblProductos.IntHabilitarProd = 1 ) as subconsulta `
+            const query = `	select COUNT(*) as totalColumna from(select StrIdProducto from TblProductos as p INNER JOIN TblImagenes AS I ON P.StrIdProducto = I.StrIdCodigo WHERE IntHabilitarProd = 1 AND I.IntOrden = 1 ) as subconsulta`
             const data = await obtenerDatosDB_Hgi(query)
             resolve(data[0])
         } catch (error) {
@@ -136,10 +141,10 @@ const ContarProductosXClase_Query = async (clase) => {
     })
 }
 
-const ContarProductosXLineas_Query = async (lineasString) => {
+const ContarProductosXLineas_Query = async (linea) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const query = `SELECT COUNT(*) AS total FROM TblProductos WHERE strLinea IN (${lineasString}) AND IntHabilitarProd = 1`;
+            const query = `SELECT COUNT(*) AS total FROM TblProductos WHERE strLinea = '${linea}' AND IntHabilitarProd = 1`;
             const data = await obtenerDatosDB_Hgi(query)
             resolve(data[0])
         } catch (error) {
@@ -148,10 +153,10 @@ const ContarProductosXLineas_Query = async (lineasString) => {
     })
 }
 
-const ContarProductosXGrupos_Query = async (grusposString) => {
+const ContarProductosXGrupos_Query = async (grupos) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const query = `SELECT COUNT(*) AS total FROM TblProductos WHERE strGrupo IN (${grusposString}) AND IntHabilitarProd = 1`;
+            const query = `SELECT COUNT(*) AS total FROM TblProductos WHERE StrGrupo = '${grupos.IdGrupo}' AND StrLinea = '${grupos.IdLinea}' AND IntHabilitarProd = 1`;
             const data = await obtenerDatosDB_Hgi(query)
             resolve(data[0])
         } catch (error) {
@@ -160,10 +165,10 @@ const ContarProductosXGrupos_Query = async (grusposString) => {
     })
 }
 
-const ContarProductosXTipos_Query = async (tiposString) => {
+const ContarProductosXTipos_Query = async (tipos) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const query = `SELECT COUNT(*) AS total FROM TblProductos WHERE StrTipo IN (${tiposString}) AND IntHabilitarProd = 1`;
+            const query = `SELECT COUNT(*) AS total FROM TblProductos WHERE strTipo = '${tipos.IdTipo}' AND StrGrupo = '${tipos.IdGrupo}' AND StrLinea = '${tipos.IdLinea}' AND IntHabilitarProd = 1`;
             const data = await obtenerDatosDB_Hgi(query)
             resolve(data[0])
         } catch (error) {
@@ -172,11 +177,11 @@ const ContarProductosXTipos_Query = async (tiposString) => {
     })
 }
 
-const Buscar_Productos_Query = async (text, skipReg, cantidadReg) => {
+const Buscar_Productos_Query = async (text, skipReg, cantidadReg, filtro) => {
     return new Promise(async (resolve, reject) => {
         try {
             const query_extra = `and (P.strIdproducto like '%${text}%' or P.StrDescripcion like '%${text}%')`
-            const query = GetProductosPrincipal(query_extra, skipReg, cantidadReg)
+            const query = GetProductosPrincipal(query_extra, skipReg, cantidadReg, filtro)
             const data = await obtenerDatosDB_Hgi(query)
             resolve(data)
         } catch (error) {
@@ -226,35 +231,39 @@ const BuscarProductosSimilares_Query = async (text) => {
 
             const coincidencias = buscador_coincidencias(2);
             let coincidencias_exactas = [];
-            /* for (const palabraBD of descripciones) {
-                const palabrasBD = palabraBD.split(" ");
-                for (const palabraEnBD of palabrasBD) {
-                    const distancia = levenshteinDistance(text.toLowerCase(), palabraEnBD.toLowerCase());
-                    if (distancia <= 2) {
-                        coincidencias.push(palabraBD);
-                        break;
-                    }
-                }
-            } */
 
             if (coincidencias.length > 15) {
                 coincidencias_exactas = buscador_coincidencias(1)
-                /* for (const palabraBD of coincidencias) {
-                    const palabrasBD = palabraBD.split(" ");
-                    for (const palabraEnBD of palabrasBD) {
-                        const distancia = levenshteinDistance(text.toLowerCase(), palabraEnBD.toLowerCase());
-                        if (distancia <= 1) {
-                            coincidencias_exactas.push(palabraBD);
-                            break;
-                        }
-                    }
-                } */
             }
 
             const descripciones_busqueda = coincidencias_exactas.length > 0 ? coincidencias_exactas[0].split(" ")[0] : coincidencias[0].split(" ")[0]
             resolve(descripciones_busqueda)
         } catch (error) {
             reject(error)
+        }
+    })
+}
+
+const ObtenerRecomendaciones_Query = async (id) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const query = ProductosTienda.RecomendacionesxProducto(datosPrinciaplesProductos, id)
+            const productos = await obtenerDatosDB_Hgi(query)
+            resolve(productos)
+        } catch (error) {
+            reject(`${error}`)
+        }
+    })
+}
+
+const ProductoMasVendidosUltimoMes_Query = async () => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const query = ProductosTienda.MasVendidos()
+            const productos = await obtenerDatosDB_Hgi(query)
+            resolve(productos)
+        } catch (error) {
+            reject(`${error}`)
         }
     })
 }
@@ -273,5 +282,7 @@ module.exports = {
     ContarProductosXTipos_Query,
     Buscar_Productos_Query,
     Contar_Productos_Busqueda_Query,
-    BuscarProductosSimilares_Query
+    BuscarProductosSimilares_Query,
+    ObtenerRecomendaciones_Query,
+    ProductoMasVendidosUltimoMes_Query
 }

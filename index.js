@@ -7,6 +7,7 @@ const rutas = require('./src/routes')
 const path = require('path')
 const fs = require('fs')
 const https = require('https')
+const compression = require('compression');
 
 
 let privateKey = fs.readFileSync('certificados/privkey.pem')
@@ -18,6 +19,7 @@ const options = {
   };
 
 app.use(cors({origin:'*'}))
+app.use(compression());
 app.use(express.json())
 app.use(rutas)
 
