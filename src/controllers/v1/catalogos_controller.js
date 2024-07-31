@@ -50,7 +50,6 @@ const createPDF = async (req, res) => {
         pythonProcess.stdout.on('data', (data) => {
             try {
                 const dataString = data.toString()
-                console.log(dataString)
                 /*const result = JSON.parse(dataString)
                 if(result.error) {
                     console.error(`Error en el script de python ${result.error}`)

@@ -12,7 +12,9 @@ const {
     ContarProductosXTipos_Query,
     Buscar_Productos_Query,
     Contar_Productos_Busqueda_Query,
-    BuscarProductosSimilares_Query
+    BuscarProductosSimilares_Query,
+    ObtenerRecomendaciones_Query,
+    ProductoMasVendidosUltimoMes_Query
 } = require('../../Querys/tienda/Productos_Querys')
 
 //OBTENER TODOS LOS PRODUCTOS O POR CLASE
@@ -60,7 +62,7 @@ const GetProductosXGrupos = async (req, res) => {
         const data = await GetProductosXGrupos_Query(grupos, skipReg, cantidadReg, filtro)
         res.status(200).json({ success: true, data: data })
     } catch (error) {
-        console.log(error)
+        console.error(error)
         res.status(400).json({ success: false, error: error, message: "Ha ocurrido un error al obtener los productos" })
     }
 
@@ -122,10 +124,9 @@ const ContarProductosXClase = async (req, res) => {
 //CONTAR LA CANTIDAD DE PRODUCTOS POR LINEA + CANTIDAD DE PAGINAS QUE DEBERIA TENER 
 const ContarProductosXLineas = async (req, res) => {
     const { lineas } = req.body;
-    const lineasString = lineas.map((linea) => `'${linea}'`).join(', ');
 
     try {
-        const data = await ContarProductosXLineas_Query(lineasString)
+        const data = await ContarProductosXLineas_Query(lineas)
         let cantidadPaginas = CalcularPaginas(data.total)
         const totalCount = data.total;
         res.status(200).json({ success: true, data: totalCount, Paginas: cantidadPaginas });
@@ -137,23 +138,24 @@ const ContarProductosXLineas = async (req, res) => {
 //CONTAR LA CANTIDAD DE PRODUCTOS POR GRUPOS + CANTIDAD DE PAGUNAS QUE DEBERIA TENER
 const ContarProductosXGrupos = async (req, res) => {
     const { grupos } = req.body;
-    const grusposString = grupos.map((grupo) => `'${grupo}'`).join(', ');
+
     try {
-        const data = await ContarProductosXGrupos_Query(grusposString)
+        const data = await ContarProductosXGrupos_Query(grupos)
         let cantidadPaginas = CalcularPaginas(data.total)
         const totalCount = data.total;
         res.status(200).json({ success: true, data: totalCount, Paginas: cantidadPaginas });
 
     } catch (error) {
-        res.status(400).json({ success: false, error: err.message, message: `Ha ocurrido un error al contar los productos de los grupos  ${grusposString}` });
+        console.error(error)
+        res.status(400).json({ success: false, error: errror.message, message: `Ha ocurrido un error al contar los productos de los grupos  ${grusposString}` });
     }
 }
 
 const ContarProductosXTipos = async (req, res) => {
     const { tipos } = req.body;
-    const tiposString = tipos.map((grupo) => `'${grupo}'`).join(', ');
+
     try {
-        const data = await ContarProductosXTipos_Query(tiposString)
+        const data = await ContarProductosXTipos_Query(tipos)
         let cantidadPaginas = CalcularPaginas(data.total)
         const totalCount = data.total;
         res.status(200).json({ success: true, data: totalCount, Paginas: cantidadPaginas });
@@ -165,12 +167,13 @@ const ContarProductosXTipos = async (req, res) => {
 
 const Buscar_Productos = async (req, res) => {
     const pagina = req.query.pag ? parseInt(req.query.pag) : 0
+    let filtro = (req.query.sort && req.query.sort !== undefined) ? req.query.sort : 'recent'
     const texto = req.query.p
     const cantidadReg = 30
     const skipReg = pagina * cantidadReg
 
     try {
-        const data = await Buscar_Productos_Query(texto, skipReg, cantidadReg)
+        const data = await Buscar_Productos_Query(texto, skipReg, cantidadReg, filtro)
         if (data.length > 0) {
             res.status(200).json({ success: true, data: data })
         } else {
@@ -209,7 +212,28 @@ const Contar_Productos_Busqueda = async (req, res) => {
 
 // FUNCION PARA CALCULAR LA CANTIDAD DE PAGINAS
 const CalcularPaginas = (cantidadProductos) => {
-    return Math.round(parseInt(cantidadProductos) / 30)
+    return Math.ceil(parseInt(cantidadProductos) / 30)
+}
+
+// FUNCION PARA RECOMENDAR PRODUCTOS SIMILARES
+const ProductosSimilares = async (req, res) => {
+    const { id } = req.params
+    try {
+        const data = await ObtenerRecomendaciones_Query(id)
+        res.status(200).json({ success: true, data: data })
+    } catch (error) {
+        res.status(400).json({ success: false, error: error, message: "Ha ocurrido un error al contar los productos" })
+    }
+}
+
+//FUNCION PARA OBTENER LOS 30 PRODUCTOS MAS VENDIDOS EN LOS ULTIMOS 30 DIAS
+const ProductoMasVendidosUltimoMes = async (req, res) => {
+    try {
+        const productos = await ProductoMasVendidosUltimoMes_Query()
+        res.status(200).json({ success: true, data: productos })
+    } catch (error) {
+        res.status(400).json({ success: false, error: error, message: "Ha ocurrido un error con los productos mas vendidos." })
+    }
 }
 
 module.exports = {
@@ -225,5 +249,7 @@ module.exports = {
     ContarProductosXTipos,
     Buscar_Productos,
     Contar_Productos_Busqueda,
-    BuscarProductosSimilares
+    BuscarProductosSimilares,
+    ProductosSimilares,
+    ProductoMasVendidosUltimoMes
 }

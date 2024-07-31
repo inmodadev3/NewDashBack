@@ -81,8 +81,13 @@ Seguimientos.Encargados = {
 }
 
 Seguimientos.Buscar = () => {
-    return `select * from dash.TblSeguimientoPedidos where intIdPedido like ? or NroFactura like ?
-    or cliente like ? or NroGuia like ? or Vendedor like ? order by id desc`
+    return `SELECT * FROM dash.TblSeguimientoPedidos 
+    WHERE intIdPedido COLLATE latin1_swedish_ci LIKE '%Santiago pul garin%' COLLATE latin1_swedish_ci
+    OR NroFactura COLLATE latin1_swedish_ci LIKE '%Santiago pul garin%' COLLATE latin1_swedish_ci
+    OR cliente COLLATE latin1_swedish_ci LIKE '%Santiago pul garin%' COLLATE latin1_swedish_ci
+    OR NroGuia COLLATE latin1_swedish_ci LIKE '%Santiago pul garin%' COLLATE latin1_swedish_ci
+    OR Vendedor COLLATE latin1_swedish_ci LIKE '%Santiago pul garin%' COLLATE latin1_swedish_ci
+    ORDER BY id DESC;`
 }
 
 module.exports = Seguimientos;
