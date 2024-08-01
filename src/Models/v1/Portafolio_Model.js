@@ -1,7 +1,7 @@
 const Portafolio = {}
 
 Portafolio.ConsultaDeDatosPrincipalesClientes = () => {
-    return `SELECT T.StrIdTercero,T.StrNombre as Nombre_tercero, E.StrDescripcion as Estado,T.StrDato1 as Viaja, C.StrDescripcion as ciudad,
+    return `SELECT T.StrIdTercero,T.StrNombre as Nombre_tercero, E.StrDescripcion as Estado,T.StrDato1 as Viaja, C.StrDescripcion as ciudad,B.StrDescripcion as barrio,
     (SELECT TOP 1 DatFecha
     FROM TblDocumentos
     WHERE StrTercero = T.StrIdTercero
@@ -9,7 +9,8 @@ Portafolio.ConsultaDeDatosPrincipalesClientes = () => {
     ORDER BY DatFecha DESC) AS ultima_Compra
     FROM TblTerceros AS T
     INNER JOIN TblEstados AS E ON T.IntTEstado = E.intIdEstado
-    INNER JOIN TblCiudades AS C ON C.StrIdCiudad = T.StrCiudad`
+    INNER JOIN TblCiudades AS C ON C.StrIdCiudad = T.StrCiudad
+	INNER JOIN TblBarrios AS B on B.StrIdBarrio = T.StrBarrio`
 }
 
 Portafolio.ContarTerceros = () => {
