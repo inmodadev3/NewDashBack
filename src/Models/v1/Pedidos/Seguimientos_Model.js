@@ -82,11 +82,11 @@ Seguimientos.Encargados = {
 
 Seguimientos.Buscar = () => {
     return `SELECT * FROM dash.TblSeguimientoPedidos 
-    WHERE intIdPedido COLLATE latin1_swedish_ci LIKE '%Santiago pul garin%' COLLATE latin1_swedish_ci
-    OR NroFactura COLLATE latin1_swedish_ci LIKE '%Santiago pul garin%' COLLATE latin1_swedish_ci
-    OR cliente COLLATE latin1_swedish_ci LIKE '%Santiago pul garin%' COLLATE latin1_swedish_ci
-    OR NroGuia COLLATE latin1_swedish_ci LIKE '%Santiago pul garin%' COLLATE latin1_swedish_ci
-    OR Vendedor COLLATE latin1_swedish_ci LIKE '%Santiago pul garin%' COLLATE latin1_swedish_ci
+    WHERE intIdPedido  LIKE ?
+    OR NroFactura  LIKE ?
+    OR cliente  LIKE ?
+    OR NroGuia  LIKE ?
+    OR Vendedor  LIKE ?
     ORDER BY id DESC;`
 }
 
