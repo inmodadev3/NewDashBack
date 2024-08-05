@@ -3,6 +3,7 @@ const {
     GetLineas_Query,
     GetGrupo_Query,
     GetTipo_Query,
+    GetCategorias_Query,
 } = require('../../Querys/tienda/Categorias_Querys')
 
 //OBTENER CATEGORIA PRINCIPAL O CLASES
@@ -40,14 +41,14 @@ const GetGrupo = async (req, res) => {
 }
 
 //OBTENER SUBCATEGORIA3 O TIPOS
-const GetTipo = async(req, res) => {
-    const { Grupo,Linea } = req.query
+const GetTipo = async (req, res) => {
+    const { Grupo, Linea } = req.query
 
     try {
-        const data = await GetTipo_Query(Grupo,Linea)
-        if(data.strIdTipo !== 0){
+        const data = await GetTipo_Query(Grupo, Linea)
+        if (data.strIdTipo !== 0) {
             res.status(200).json({ success: true, data: data })
-        }else{
+        } else {
             res.status(200).json({ success: true, data: [] })
         }
     } catch (error) {
@@ -55,4 +56,16 @@ const GetTipo = async(req, res) => {
     }
 }
 
-module.exports = { GetClases, GetLineas, GetGrupo, GetTipo }
+//OBTENER TODA LA LISTA DE CATEGORIAS
+
+const GetCategorias = async (req, res) => {
+    try {
+        const data = await GetCategorias_Query()
+        res.status(200).json({ success: true, data: data })
+    } catch (error) {
+        res.status(400).json({ success: false, data: error })
+    }
+}
+
+
+module.exports = { GetClases, GetLineas, GetGrupo, GetTipo, GetCategorias }

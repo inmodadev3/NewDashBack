@@ -3,14 +3,18 @@ const {
     GetClases,
     GetLineas,
     GetGrupo,
-    GetTipo
+    GetTipo,
+    GetCategorias
 } = require('../../controllers/tienda/Categorias_Controller')
 
-route.get('/',GetClases)
+const categoriasCacheMiddleware = require('../../middlewares/Cache/CategoriasCache_Middleware')
 
-route.get('/lineas',GetLineas)
-route.get('/lineas/grupos',GetGrupo)
-route.get('/lineas/grupos/tipos',GetTipo)
+
+route.get('/array', categoriasCacheMiddleware, GetCategorias)
+route.get('/', GetClases)
+route.get('/lineas', GetLineas)
+route.get('/lineas/grupos', GetGrupo)
+route.get('/lineas/grupos/tipos', GetTipo)
 
 
 

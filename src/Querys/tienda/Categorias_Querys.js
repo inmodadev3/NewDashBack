@@ -61,10 +61,62 @@ const GetTipo_Query = async (Grupo, Linea) => {
     })
 }
 
+//OBTENER TODA LA LISTA DE CATEGORIAS
+const GetCategorias_Query = async () => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const clases = await GetClases_Query();
+            const categorias = [];
+
+            for (const clase of clases) {
+                const lineas = await GetLineas_Query(clase.StrIdClase);
+                const lineasArr = [];
+
+                for (const linea of lineas) {
+                    // Validación de línea
+                    if (linea.StrIdLinea !== '0') {
+                        const grupos = await GetGrupo_Query(linea.StrIdLinea);
+                        const gruposArr = [];
+
+                        for (const grupo of grupos) {
+                            // Validación de grupo
+                            if (grupo.strIdGrupo !== '0') {
+                                const tipos = await GetTipo_Query(grupo.strIdGrupo, linea.StrIdLinea);
+
+                                // Validación de tipos
+                                const grupoInfo = {
+                                    grupo: grupo,
+                                    tipos: tipos.length > 0 && tipos[0].strIdTipo !== '0' ? tipos : [],
+                                };
+                                gruposArr.push(grupoInfo);
+                            }
+                        }
+
+                        const lineaInfo = {
+                            linea: linea,
+                            grupos: gruposArr,
+                        };
+                        lineasArr.push(lineaInfo);
+                    }
+                }
+
+                categorias.push({
+                    clase: clase,
+                    lineas: lineasArr,
+                });
+            }
+
+            resolve(categorias);
+        } catch (error) {
+            reject(`${error}`)
+        }
+    })
+}
 
 module.exports = {
     GetClases_Query,
     GetLineas_Query,
     GetGrupo_Query,
-    GetTipo_Query
+    GetTipo_Query,
+    GetCategorias_Query
 }

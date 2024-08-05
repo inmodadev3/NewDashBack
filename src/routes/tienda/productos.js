@@ -16,12 +16,13 @@ const {
     ProductosSimilares,
     ProductoMasVendidosUltimoMes
 } = require('../../controllers/tienda/Productos_Controller')
+const masVendidosCacheMiddleware = require('../../middlewares/Cache/MasVendidosCache_Middleware')
 
 //OBTENER TODOS LOS PRODUCTOS
 route.get('/', GetProductos)
 
 //OBTENER MAS VENDIDOS
-route.get('/mas-vendidos', ProductoMasVendidosUltimoMes)
+route.get('/mas-vendidos', masVendidosCacheMiddleware, ProductoMasVendidosUltimoMes)
 
 //OBTENER PRODUCTOS POR METODO DE BUSCA
 route.get('/buscar', Buscar_Productos)
