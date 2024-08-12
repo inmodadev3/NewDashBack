@@ -40,10 +40,10 @@ const GetProductosXlinea = async (req, res) => {
     let filtro = (req.query.sort && req.query.sort !== undefined) ? req.query.sort : 'recent'
     const cantidadReg = 30
     const skipReg = pagina * cantidadReg
-    const { lineas } = req.body
+    const { lineas, clase } = req.body
 
     try {
-        const data = await GetProductosXlinea_Query(lineas, skipReg, cantidadReg, filtro)
+        const data = await GetProductosXlinea_Query(lineas, skipReg, cantidadReg, filtro, clase)
         res.status(200).json({ success: true, data: data })
     } catch (error) {
         res.status(400).json({ success: false, error: error, message: "Ha ocurrido un error al obtener los productos" })
@@ -123,10 +123,10 @@ const ContarProductosXClase = async (req, res) => {
 
 //CONTAR LA CANTIDAD DE PRODUCTOS POR LINEA + CANTIDAD DE PAGINAS QUE DEBERIA TENER 
 const ContarProductosXLineas = async (req, res) => {
-    const { lineas } = req.body;
+    const { lineas, clase } = req.body;
 
     try {
-        const data = await ContarProductosXLineas_Query(lineas)
+        const data = await ContarProductosXLineas_Query(lineas, clase)
         let cantidadPaginas = CalcularPaginas(data.total)
         const totalCount = data.total;
         res.status(200).json({ success: true, data: totalCount, Paginas: cantidadPaginas });

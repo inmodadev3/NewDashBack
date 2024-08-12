@@ -53,11 +53,11 @@ const GetProductos_Query = async (clase, skipReg, cantidadReg, filtro) => {
     })
 }
 
-const GetProductosXlinea_Query = async (linea, skipReg, cantidadReg, filtro) => {
+const GetProductosXlinea_Query = async (linea, skipReg, cantidadReg, filtro, clase) => {
     return new Promise(async (resolve, reject) => {
         try {
             /* lineas = lineas.map((linea) => `'${linea}'`).join(', ') */
-            const query = GetProductosPrincipal(`and P.strLinea = '${linea}'`, skipReg, cantidadReg, filtro)
+            const query = GetProductosPrincipal(`and P.strLinea = '${linea}' and P.StrClase = '${clase}'`, skipReg, cantidadReg, filtro)
             const data = await obtenerDatosDB_Hgi(query)
             resolve(data)
         } catch (error) {
@@ -141,10 +141,10 @@ const ContarProductosXClase_Query = async (clase) => {
     })
 }
 
-const ContarProductosXLineas_Query = async (linea) => {
+const ContarProductosXLineas_Query = async (linea, clase) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const query = `SELECT COUNT(*) AS total FROM TblProductos WHERE strLinea = '${linea}' AND IntHabilitarProd = 1`;
+            const query = `SELECT COUNT(*) AS total FROM TblProductos WHERE strLinea = '${linea}' AND strClase = '${clase}' AND IntHabilitarProd = 1`;
             const data = await obtenerDatosDB_Hgi(query)
             resolve(data[0])
         } catch (error) {
