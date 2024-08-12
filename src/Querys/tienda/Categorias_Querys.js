@@ -3,18 +3,26 @@ const { obtenerDatosDB_Hgi } = require('../Global_Querys')
 const GetClases_Query = async () => {
     return new Promise(async (resolve, reject) => {
         try {
-            const query = `select StrIdClase,StrDescripcion from TblClases where StrIdClase in ('741','1001','101','1021','1031','971','991','731','1011') ORDER BY 
+            //761,771,781,02,971,791,801,811,821,831,16,991,1001,1021,57,841
+            const query = `select StrIdClase,StrDescripcion from TblClases where StrIdClase in ('761','771','781','02','971','791','801','811','821','831','16','991','1001','1021','57','841') ORDER BY 
             CASE StrIdClase
-                WHEN '731' THEN 1
+                WHEN '761' THEN 1
                 WHEN '971' THEN 2
-                WHEN '1031' THEN 3
-                WHEN '1001' THEN 4
-                WHEN '101' THEN 5
-                WHEN '1021' THEN 6
-                WHEN '741' THEN 7
-                WHEN '991' THEN 8
-                WHEN '1011' THEN 9
-                ELSE 10
+                WHEN '57' THEN 3
+                WHEN '821' THEN 4
+                WHEN '02' THEN 5
+                WHEN '801' THEN 6
+                WHEN '16' THEN 7
+                WHEN '771' THEN 8
+                WHEN '1001' THEN 9
+                WHEN '811' THEN 10
+                WHEN '831' THEN 11
+                WHEN '781' THEN 12
+                WHEN '991' THEN 13
+                WHEN '791' THEN 14
+                WHEN '1021' THEN 15
+                WHEN '841' THEN 16
+                ELSE 17
             END;`;
             const data = await obtenerDatosDB_Hgi(query)
 
