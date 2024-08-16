@@ -3,9 +3,9 @@ const PosiblesClientes_Model = {}
 PosiblesClientes_Model.CrearNuevoPosibleCliente_Model = () => {
     return `
     INSERT INTO TblPosiblesClientes 
-        (strNombreCliente,strNombreLocal,intSegmento,strTelefono,strCelular,strLinea,strComentario,dtFechaCreacion,intEstado) 
+        (strNombreCliente,strNombreLocal,intSegmento,strTelefono,strCelular,strLinea,strComentario,dtFechaCreacion,strCiudad,intEstado) 
     VALUES 
-        (?,?,?,?,?,?,?,?,?)
+        (?,?,?,?,?,?,?,?,?,?)
     `
 }
 

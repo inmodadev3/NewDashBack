@@ -14,6 +14,7 @@ const CrearNuevoPosibleCliente_Query = async (cliente) => {
                 linea,
                 comentario,
                 fechaCreacion,
+                ciudad,
             } = cliente
 
             const query = PosiblesClientes_Model.CrearNuevoPosibleCliente_Model()
@@ -26,6 +27,7 @@ const CrearNuevoPosibleCliente_Query = async (cliente) => {
                 linea,
                 comentario,
                 fechaCreacion,
+                ciudad,
                 1
             ])
 
