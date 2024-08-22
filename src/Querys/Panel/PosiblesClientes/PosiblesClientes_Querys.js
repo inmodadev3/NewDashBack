@@ -93,6 +93,9 @@ const tipoBusquedaCases = (tipoBusqueda) => {
         case '3':
             busqueda = 'strCelular'
             break;
+        case '4':
+            busqueda = 'intId'
+            break;
         default:
             busqueda = 'strNombreCliente'
             break;
