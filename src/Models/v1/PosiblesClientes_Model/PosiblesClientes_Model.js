@@ -30,4 +30,19 @@ PosiblesClientes_Model.ActualizarEstado = () => {
         WHERE intId = ?`
 }
 
+PosiblesClientes_Model.EditarDatosCliente_Model = () => {
+    return `
+        UPDATE TblPosiblesClientes set
+        strNombreCliente = ?,
+        strNombreLocal = ?,
+        intSegmento = ?,
+        strTelefono = ?,
+        strCelular = ?,
+        strLinea = ?,
+        strComentario = ?,
+        strCiudad = ?
+        where intId = ?
+    `
+}
+
 module.exports = PosiblesClientes_Model

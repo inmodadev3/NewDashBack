@@ -116,11 +116,47 @@ const ActualizarEstado_Query = (estado, id) => {
     })
 }
 
+const EditarInfomacionPosibleCliente_Query = async (cliente, id) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            const {
+                nombreCliente,
+                nombreLocal,
+                segmento,
+                telefono,
+                celular,
+                linea,
+                comentario,
+                ciudad
+            } = cliente
+
+
+            const query = PosiblesClientes_Model.EditarDatosCliente_Model()
+            await obtenerDatosDb_Dash(query, [
+                nombreCliente,
+                nombreLocal,
+                segmento,
+                telefono,
+                celular,
+                linea,
+                comentario,
+                ciudad,
+                id
+            ])
+            resolve(true)
+        } catch (error) {
+            reject(`${error}`)
+        }
+    })
+}
+
 
 module.exports = {
     CrearNuevoPosibleCliente_Query,
     ActualizarInformacionPosibleCliente_Query,
     ConsultarPosiblesClientesXEstado_Query,
     ConsultarPosibleClienteXBusqueda,
-    ActualizarEstado_Query
+    ActualizarEstado_Query,
+    EditarInfomacionPosibleCliente_Query
 }

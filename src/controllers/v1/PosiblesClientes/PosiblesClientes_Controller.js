@@ -1,4 +1,4 @@
-const { CrearNuevoPosibleCliente_Query, ActualizarInformacionPosibleCliente_Query, ConsultarPosiblesClientesXEstado_Query, ConsultarPosibleClienteXBusqueda, ActualizarEstado_Query } = require("../../../Querys/Panel/PosiblesClientes/PosiblesClientes_Querys")
+const { CrearNuevoPosibleCliente_Query, ActualizarInformacionPosibleCliente_Query, ConsultarPosiblesClientesXEstado_Query, ConsultarPosibleClienteXBusqueda, ActualizarEstado_Query, EditarInfomacionPosibleCliente_Query } = require("../../../Querys/Panel/PosiblesClientes/PosiblesClientes_Querys")
 
 const PosiblesClientes_Controller = {}
 
@@ -81,6 +81,24 @@ PosiblesClientes_Controller.ActualizarEstado_Controller = async (req, res) => {
     } catch (error) {
         res.status(400).json({ error: `${error}`, message: `Ha ocurrido un error al actualizar el estado` })
     }
+}
+
+PosiblesClientes_Controller.EditarInfomacionPosibleCliente_Controller = async (req, res) => {
+    const { cliente } = req.body
+    const { id } = req.params
+
+    if (!cliente) res.status(400).json({ message: `Cliente invalido` })
+    if (!id) res.status(400).json({ message: `id invalido` })
+
+    try {
+        const data = await EditarInfomacionPosibleCliente_Query(cliente, id);
+        if (!data) res.status(400).json({ error: `${error}`, message: `Ha ocurrido un error al actualizar el cliente` })
+        res.status(200).json({ message: 'Actualizado Con Exito' })
+    } catch (error) {
+        res.status(400).json({ error: `${error}`, message: `Ha ocurrido un error al actualizar el cliente` })
+
+    }
+
 }
 
 module.exports = PosiblesClientes_Controller
