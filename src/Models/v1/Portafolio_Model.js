@@ -99,8 +99,15 @@ Portafolio.ActualizarObservacionGeneral = (observacion, strIdCliente) => {
     return `update TblTerceros SET strDato0 = '${observacion}' where StrIdTercero = '${strIdCliente}'`
 }
 
-Portafolio.UltimoPedido = () => {
-    return `select intIdPedido from tblpedidos where strIdCliente = ? order by intIdPedido desc limit 1;`
+Portafolio.HistorialPedidosDash = () => {
+    return `select intIdPedido,intValorTotal,dtFechaEnvio from tblpedidos where strIdCliente = ? order by intIdPedido desc limit 20;`
+}
+
+Portafolio.HistorialPedidosFacturadosHgi = (strIdCliente) => {
+    return `select TOP 3 TRANC.StrDescripcion, IntDocumento,DatFecha, IntTotal from TblDocumentos DOC
+            inner join TblTransacciones TRANC on DOC.IntTransaccion = TRANC.IntIdTransaccion
+            where StrTercero = '${strIdCliente}' and IntTransaccion in ('47', '041') order by DatFecha desc
+    `
 }
 
 module.exports = Portafolio

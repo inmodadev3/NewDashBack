@@ -287,15 +287,31 @@ const PutObservacion_Query = (text, strIdCliente) => {
 }
 
 const GetUltimoPedidoCliente = (idCliente) => {
-    return new Promise(async(resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
         try {
-            const query = Portafolio.UltimoPedido()
-            const idPedido = await obtenerDatosDb_Dash(query,[idCliente])
-            
-            if(idPedido.length > 0){
-                const id = idPedido[0].intIdPedido
-                resolve(id)
-            }else{
+            const queryDash = Portafolio.HistorialPedidosDash()
+            const idPedido = await obtenerDatosDb_Dash(queryDash, [idCliente])
+
+            if (idPedido.length > 0) {
+                resolve(idPedido)
+            } else {
+                resolve(null)
+            }
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+
+const GetUltimosPedidosHgiFacturados_query = (idCliente) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const query = Portafolio.HistorialPedidosFacturadosHgi(idCliente)
+            const idPedido = await obtenerDatosDB_Hgi(query)
+
+            if (idPedido.length > 0) {
+                resolve(idPedido)
+            } else {
                 resolve(null)
             }
         } catch (error) {
@@ -318,5 +334,6 @@ module.exports = {
     ObtenerCiudades_Query,
     GetContactosCliente_Query,
     PutObservacion_Query,
-    GetUltimoPedidoCliente
+    GetUltimoPedidoCliente,
+    GetUltimosPedidosHgiFacturados_query
 }

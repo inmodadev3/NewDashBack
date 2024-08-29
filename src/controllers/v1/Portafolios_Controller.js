@@ -13,7 +13,8 @@ const {
   GetCarteraClienteQuery,
   GetContactosCliente_Query,
   PutObservacion_Query,
-  GetUltimoPedidoCliente
+  GetUltimoPedidoCliente,
+  GetUltimosPedidosHgiFacturados_query
 } = require('../../Querys/Panel/Portafolios_Querys')
 
 //Obtener todos los clientes de la zonas correspondientes al vendedor
@@ -88,9 +89,11 @@ const GetDataClientes = async (req, res) => {
 
     let Ultimo_Pedido = await GetUltimoPedidoCliente(id)
 
-    res.status(200).json({ data: dataClientes, grafica: dataGrafica, cartera: GetCarteraCliente, contactos:GetContactosCliente, Ultimo_Pedido })
+    let Ultimas_Facturas = await GetUltimosPedidosHgiFacturados_query(id)
+
+    res.status(200).json({ data: dataClientes, grafica: dataGrafica, cartera: GetCarteraCliente, contactos: GetContactosCliente, Ultimo_Pedido, Facturas: Ultimas_Facturas })
   } catch (error) {
-    res.status(400).json({error:error.message})
+    res.status(400).json({ error: error.message })
   }
 
 
@@ -139,18 +142,18 @@ const obtenerClientesXCiudad = async (req, res) => {
 }
 
 //Actualizar observacion
-const PutObservacion = async(req,res) =>{
-  const { text,strIdCliente } = req.body
-  
-  if(String(strIdCliente).trim() == ""){
-    res.status(406).json({error:"El id del cliente no puede estar vacio"})
+const PutObservacion = async (req, res) => {
+  const { text, strIdCliente } = req.body
+
+  if (String(strIdCliente).trim() == "") {
+    res.status(406).json({ error: "El id del cliente no puede estar vacio" })
   }
-  
+
   try {
     await PutObservacion_Query(text, strIdCliente);
-    res.status(200).json({message:"Actualizado correctamente"})
+    res.status(200).json({ message: "Actualizado correctamente" })
   } catch (error) {
-    res.status(400).json({error:error})
+    res.status(400).json({ error: error })
   }
 }
 
