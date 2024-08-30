@@ -1,4 +1,4 @@
-const { CrearNuevoPosibleCliente_Query, ActualizarInformacionPosibleCliente_Query, ConsultarPosiblesClientesXEstado_Query, ConsultarPosibleClienteXBusqueda, ActualizarEstado_Query, EditarInfomacionPosibleCliente_Query } = require("../../../Querys/Panel/PosiblesClientes/PosiblesClientes_Querys")
+const { CrearNuevoPosibleCliente_Query, ActualizarInformacionPosibleCliente_Query, ConsultarPosiblesClientesXEstado_Query, ConsultarPosibleClienteXBusqueda, ActualizarEstado_Query, EditarInfomacionPosibleCliente_Query, ValidarExistente_Query } = require("../../../Querys/Panel/PosiblesClientes/PosiblesClientes_Querys")
 
 const PosiblesClientes_Controller = {}
 
@@ -99,6 +99,18 @@ PosiblesClientes_Controller.EditarInfomacionPosibleCliente_Controller = async (r
 
     }
 
+}
+
+PosiblesClientes_Controller.ValidarExistente_Controller = async (req, res) => {
+    const { celular } = req.query
+    try {
+        if (!celular) res.status(400).json({ error: `celular invalido` })
+        const existente = await ValidarExistente_Query(celular)
+        res.status(200).json({ existente })
+    } catch (error) {
+        res.status(400).json({ error: `${error}` })
+
+    }
 }
 
 module.exports = PosiblesClientes_Controller

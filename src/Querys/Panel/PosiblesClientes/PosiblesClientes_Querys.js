@@ -151,6 +151,18 @@ const EditarInfomacionPosibleCliente_Query = async (cliente, id) => {
     })
 }
 
+const ValidarExistente_Query = async (celular) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const query = PosiblesClientes_Model.ValidarExistente_Model()
+            const validar = await obtenerDatosDb_Dash(query, [celular])
+            resolve(validar[0].existe)
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+
 
 module.exports = {
     CrearNuevoPosibleCliente_Query,
@@ -158,5 +170,6 @@ module.exports = {
     ConsultarPosiblesClientesXEstado_Query,
     ConsultarPosibleClienteXBusqueda,
     ActualizarEstado_Query,
-    EditarInfomacionPosibleCliente_Query
+    EditarInfomacionPosibleCliente_Query,
+    ValidarExistente_Query
 }

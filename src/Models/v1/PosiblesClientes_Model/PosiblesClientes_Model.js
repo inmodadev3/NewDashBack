@@ -45,4 +45,14 @@ PosiblesClientes_Model.EditarDatosCliente_Model = () => {
     `
 }
 
+PosiblesClientes_Model.ValidarExistente_Model = () => {
+    return `
+    SELECT EXISTS (
+        SELECT 1
+        FROM dash.tblposiblesclientes
+        WHERE REPLACE(strCelular, ' ', '') = REPLACE(?, ' ', '')
+    ) AS existe
+    `
+}
+
 module.exports = PosiblesClientes_Model
