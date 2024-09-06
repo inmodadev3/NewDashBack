@@ -6,7 +6,7 @@ const ProductosTienda = require('../../Models/tienda/Productos')
 
 const datosPrinciaplesProductos = `StrIdProducto, P.StrDescripcion, P.strLinea AS linea, Strauxiliar, StrUnidad,
 IntPrecio1,IntPrecio2,IntPrecio3,IntPrecio4,IntPrecio5,
-IntPrecio6,IntPrecio7, IntPrecio8, 
+IntPrecio6,IntPrecio7, IntPrecio8, P.StrParam3,
 (SELECT I1.StrArchivo 
 FROM TblImagenes AS I1 
 WHERE I1.StrIdCodigo = P.StrIdProducto 
