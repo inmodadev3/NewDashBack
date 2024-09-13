@@ -1,4 +1,4 @@
-const Portafolio = require('../../Models/v1/Portafolio_Model');
+const Portafolio = require('../../Models/v1/Portafolios/Portafolio/Portafolio_Model');
 const DeshabilitarTrigger = require('../../utils/DeshabilitarTrigger');
 const { obtenerDatosDB_Hgi, obtenerDatosDb_Dash } = require('../Global_Querys')
 const moment = require('moment-timezone');

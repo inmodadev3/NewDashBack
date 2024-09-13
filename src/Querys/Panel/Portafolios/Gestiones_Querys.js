@@ -1,4 +1,4 @@
-const { EditarGestion_Model, EliminarGestion_Model } = require('../../../Models/v1/Portafolios/Gestiones')
+const { EditarGestion_Model, EliminarGestion_Model } = require('../../../Models/v1/Portafolios/Gestiones/Gestiones')
 const { obtenerDatosDb_Dash } = require('../../Global_Querys')
 
 const EditarGestion_Query = (idGestion, observacion) => {
