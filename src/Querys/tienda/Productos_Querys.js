@@ -1,20 +1,19 @@
-const { obtenerDatosDB_Hgi } = require('../Global_Querys')
 const descripciones = require('../../utils/Descripciones')
-const { levenshteinDistance } = require('../../helpers/helpers')
 const Filtro = require('../../utils/Filtro')
 const ProductosTienda = require('../../Models/tienda/Productos')
+const Fuse = require('fuse.js')
+const NodeCache = require('node-cache');
+const { obtenerDatosDB_Hgi } = require('../Global_Querys')
+const { levenshteinDistance } = require('../../helpers/helpers')
+
+const cache = new NodeCache({ stdTTL: 600, checkperiod: 120 });
+
 
 const datosPrinciaplesProductos = `StrIdProducto, P.StrDescripcion, P.strLinea AS linea, Strauxiliar, StrUnidad,
 IntPrecio1,IntPrecio2,IntPrecio3,IntPrecio4,IntPrecio5,
 IntPrecio6,IntPrecio7, IntPrecio8, P.StrParam3,
-(SELECT I1.StrArchivo 
-FROM TblImagenes AS I1 
-WHERE I1.StrIdCodigo = P.StrIdProducto 
-AND I1.IntOrden = 1) AS StrArchivo ,
-(SELECT I2.StrArchivo 
-FROM TblImagenes AS I2 
-WHERE I2.StrIdCodigo = P.StrIdProducto 
-AND I2.IntOrden = 2) AS ImagenOrden2, 
+I1.StrArchivo AS StrArchivo,
+I2.StrArchivo AS ImagenOrden2, 
 DatFechaIProdHab,DatFechaFProdHab,DatFechaFProdNuevo`
 
 const GetProductosPrincipal = (instruccion_adicional, skipReg, cantidadReg, filtro = 'recent') => {
@@ -23,10 +22,11 @@ const GetProductosPrincipal = (instruccion_adicional, skipReg, cantidadReg, filt
 
     const query = `SELECT ${datosPrinciaplesProductos}
     FROM TblProductos AS P
-    INNER JOIN TblImagenes AS I ON P.StrIdProducto = I.StrIdCodigo
+    LEFT JOIN TblImagenes AS I1 ON I1.StrIdCodigo = P.StrIdProducto AND I1.IntOrden = 1
+    LEFT JOIN TblImagenes AS I2 ON I2.StrIdCodigo = P.StrIdProducto AND I2.IntOrden = 2
     WHERE IntHabilitarProd = 1
     ${instruccion_adicional}
-    AND I.IntOrden = 1
+    AND I1.IntOrden = 1
     ORDER BY ${orden}
     OFFSET ${skipReg} ROWS
     FETCH NEXT ${cantidadReg} ROWS ONLY`
@@ -180,7 +180,34 @@ const ContarProductosXTipos_Query = async (tipos) => {
 const Buscar_Productos_Query = async (text, skipReg, cantidadReg, filtro) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const query_extra = `and (P.strIdproducto like '%${text}%' or P.StrDescripcion like '%${text}%')`
+            const cacheKey = `buscar:${text}`;
+            const likeQuerys = []
+
+            const cachedResults = cache.get(cacheKey);
+
+            const extraQuery = () => {
+                if (cachedResults) {
+                    return cachedResults
+                } else {
+                    const fuse = new Fuse(descripciones, {
+                        includeScore: true,
+                        threshold: 0.3, // Ajusta la sensibilidad
+                    });
+
+                    const results = fuse.search(text);
+
+                    results.map((result) => {
+                        likeQuerys.push(result.item)
+                    })
+
+                    const orQuerys = likeQuerys.map((like) => `OR P.StrDescripcion LIKE '%${like}%'`).join(' ')
+
+                    cache.set(cacheKey, orQuerys)
+                    return orQuerys
+                }
+            }
+
+            const query_extra = `and (P.strIdproducto like '%${text}%' ${extraQuery()})`
             const query = GetProductosPrincipal(query_extra, skipReg, cantidadReg, filtro)
             const data = await obtenerDatosDB_Hgi(query)
             resolve(data)
@@ -193,12 +220,39 @@ const Buscar_Productos_Query = async (text, skipReg, cantidadReg, filtro) => {
 const Contar_Productos_Busqueda_Query = (text) => {
     return new Promise(async (resolve, reject) => {
         try {
+
+            const cacheKey = `buscar:${text}`;
+            const likeQuerys = []
+
+            const cachedResults = cache.get(cacheKey);
+
+            const extraQuery = () => {
+                if (cachedResults) {
+                    return cachedResults
+                } else {
+                    const fuse = new Fuse(descripciones, {
+                        includeScore: true,
+                        threshold: 0.3, // Ajusta la sensibilidad
+                    });
+
+                    const results = fuse.search(text);
+
+                    results.map((result) => {
+                        likeQuerys.push(result.item)
+                    })
+
+                    const orQuerys = likeQuerys.map((like) => `OR P.StrDescripcion LIKE '%${like}%'`).join(' ')
+
+                    return orQuerys
+                }
+            }
+
             const query = `select COUNT(*) as totalColumna from(select StrIdProducto,P.StrDescripcion, I.StrArchivo ,P.intPrecio1,P.intPrecio2,P.intPrecio3,P.intPrecio4,IntPrecio7, IntPrecio8
                 from TblProductos as P
                 inner join TblImagenes as I on P.StrIdProducto = I.StrIdCodigo
                 where IntHabilitarProd = 1
                 and I.IntOrden = 1
-                and (P.strIdproducto like '%${text}%' or P.StrDescripcion like '%${text}%')) as subconsulta`
+                and (P.strIdproducto like '%${text}%' ${extraQuery()})) as subconsulta`
 
             const data = await obtenerDatosDB_Hgi(query)
             resolve(data)
