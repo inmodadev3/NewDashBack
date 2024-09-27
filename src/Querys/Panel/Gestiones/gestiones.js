@@ -50,13 +50,28 @@ const obtenerGestiones_Query = async (filtrar, zona, vendedor, orden) => {
                 }
                 const idClientes = clientes.map(item => `'${item.strIdTercero}'`).join(',');
 
+                let queryHgiNombreClientes;
                 if (zona == '0') {
-                    const queryHgiNombreClientes = `select StrIdTercero,StrNombre,IntTEstado,C.StrDescripcion as Ciudad from TblTerceros T INNER JOIN TblCiudades AS C ON C.StrIdCiudad = T.StrCiudad where StrIdTercero in (${idClientes})`
-                    const hgiData = await obtenerDatosDB_Hgi(queryHgiNombreClientes)
+                    queryHgiNombreClientes = `select StrIdTercero,StrNombre,IntTEstado,C.StrDescripcion as Ciudad 
+                              from TblTerceros T 
+                              INNER JOIN TblCiudades AS C ON C.StrIdCiudad = T.StrCiudad 
+                              where StrIdTercero in (${idClientes})`;
+                } else {
+                    queryHgiNombreClientes = `select StrIdTercero,StrNombre,IntTEstado,C.StrDescripcion as Ciudad 
+                              from TblTerceros T 
+                              INNER JOIN TblCiudades AS C ON C.StrIdCiudad = T.StrCiudad 
+                              where StrCiudad = '${zona}' and StrIdTercero in (${idClientes})`;
+                }
 
-                    const hgiMap = {};
+                // Obtener datos de la base de datos HGI
+                const hgiData = await obtenerDatosDB_Hgi(queryHgiNombreClientes);
 
-                    hgiData.forEach(user => {
+                const hgiMap = {};
+
+                // Crear un mapa con solo los usuarios cuyo IntTEstado es 1 (clientes activos)
+                hgiData
+                    .filter(user => user.IntTEstado === 1) // Filtrar usuarios con estado activo
+                    .forEach(user => {
                         hgiMap[user.StrIdTercero] = {
                             nombre: user.StrNombre,
                             estado: user.IntTEstado,
@@ -64,43 +79,20 @@ const obtenerGestiones_Query = async (filtrar, zona, vendedor, orden) => {
                         };
                     });
 
-                    const combinedData = clientes.map(record => ({
+                // Crear el array combinado con los clientes de DASH y HGI (solo los activos en HGI)
+                const combinedData = clientes
+                    .filter(record => hgiMap[record.strIdTercero]) // Filtrar clientes que existen en HGI y son activos
+                    .map(record => ({
                         id: record.strIdTercero,
-                        vendedor: record.strNombreEmpleado,
                         nombre: hgiMap[record.strIdTercero].nombre,
                         estado: hgiMap[record.strIdTercero].estado,
                         fecha: record.fechaMasReciente,
                         ciudad: hgiMap[record.strIdTercero].ciudad,
+                        vendedor: record.strNombreEmpleado,
                     }));
 
-                    result = combinedData
-                } else {
-                    const queryHgiNombreClientes = `select StrIdTercero,StrNombre,IntTEstado,C.StrDescripcion as Ciudad from TblTerceros T INNER JOIN TblCiudades AS C ON C.StrIdCiudad = T.StrCiudad where StrCiudad = '${zona}' and StrIdTercero in (${idClientes})`
-                    const hgiData = await obtenerDatosDB_Hgi(queryHgiNombreClientes)
+                result = combinedData;
 
-                    const hgiMap = {};
-
-                    hgiData.forEach(user => {
-                        hgiMap[user.StrIdTercero] = {
-                            nombre: user.StrNombre,
-                            estado: user.IntTEstado,
-                            ciudad: user.Ciudad
-                        };
-                    });
-
-                    const combinedData = clientes
-                        .filter(record => hgiMap[record.strIdTercero])
-                        .map(record => ({
-                            id: record.strIdTercero,
-                            nombre: hgiMap[record.strIdTercero].nombre,
-                            estado: hgiMap[record.strIdTercero].estado,
-                            fecha: record.fechaMasReciente,
-                            ciudad: hgiMap[record.strIdTercero].ciudad,
-                            vendedor: record.strNombreEmpleado,
-                        }));
-
-                    result = combinedData
-                }
             } else {
                 const clientes_Con_Consulta_Query = `select distinct strIdTercero from dash.tblgestiondestapemadrinatercero group by strIdtercero`
                 const clientes_Con_Consulta = await obtenerDatosDb_Dash(clientes_Con_Consulta_Query)
