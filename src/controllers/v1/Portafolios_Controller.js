@@ -29,7 +29,6 @@ const GetClientes = async (req, res) => {
       res.status(200).json({ data: data.datosClientes, pags: data.totalPaginas })
     }
   } catch (error) {
-    console.error(error)
     res.status(400).json({ error: error.message })
   }
 }

@@ -10,7 +10,6 @@ const obtenerDatosDb_Dash = async(query,params) =>{
         const [rows] = await conection.query(query,params);
         return rows
     } catch (error) {
-        console.error('Error al obtener datos desde la base de datos:', error);
         throw error
     } finally {
         if (conection) {
@@ -30,7 +29,6 @@ const obtenerDatosDB_Hgi = async (query) =>{
         const result = await connection.query(query);
         return result.recordset; // Devuelve los resultados de la consulta
     } catch (error) {
-        console.error('Error al obtener datos desde la base de datos HGI:', error);
         throw error;
     } finally {
         // Liberar la conexión de vuelta al pool
