@@ -177,10 +177,15 @@ const Consultar_Producto_Agregado_Query = (strIdCliente, strIdProducto) => {
             const obtener_id_pedido_query = `SELECT intIdPedido FROM tblpedidostienda WHERE strIdCliente = ? AND intEstado = 1`;
             const obtener_id_pedido = await obtenerDatosDb_Dash(obtener_id_pedido_query, [strIdCliente]);
 
-            const query = `select intIdPedDetalle as id, intCantidad, strObservacion from tbldetallepedidostienda where intIdPedido = ? and strIdProducto = ? and intEstado = 1`
+            if (obtener_id_pedido.length > 0) {
+                const query = `select intIdPedDetalle as id, intCantidad, strObservacion from tbldetallepedidostienda where intIdPedido = ? and strIdProducto = ? and intEstado = 1`
 
-            const data = await obtenerDatosDb_Dash(query, [obtener_id_pedido[0].intIdPedido, strIdProducto])
-            resolve(data)
+                const data = await obtenerDatosDb_Dash(query, [obtener_id_pedido[0].intIdPedido, strIdProducto])
+                resolve(data)
+            }else{
+                resolve([])
+            }
+
         } catch (error) {
             reject(error)
         }
@@ -521,10 +526,10 @@ const Enviar_pedido_Database_Query = async (strIdCliente, strObservacion, seller
                 await connection.commit(); // Confirmar la transacción
 
                 const obtener_total_Query = `SELECT intValorTotal FROM tblpedidos where intIdPedido = ?`
-                const total_pedido = await obtenerDatosDb_Dash(obtener_total_Query,[lastId])
+                const total_pedido = await obtenerDatosDb_Dash(obtener_total_Query, [lastId])
                 const total = total_pedido[0].intValorTotal
 
-                return {lastId,total};
+                return { lastId, total };
             }
         } else {
             throw new Error("NO SE ENCUENTRA NINGUN PEDIDO INICIADO");
@@ -698,11 +703,11 @@ const Enviar_pedido_tblPedidos = async (
     })
 }
 
-const cambiar_estado_pedidosTienda_Query = async(estado,idPedido)=> {
-    return new Promise(async(resolve, reject) => {
+const cambiar_estado_pedidosTienda_Query = async (estado, idPedido) => {
+    return new Promise(async (resolve, reject) => {
         try {
             const query_pedido = `UPDATE tblpedidostienda SET intEstado = ? WHERE intIdPedido = ?`;
-            await obtenerDatosDb_Dash(query_pedido,[estado,idPedido])
+            await obtenerDatosDb_Dash(query_pedido, [estado, idPedido])
             resolve(1)
         } catch (error) {
             reject(error)
