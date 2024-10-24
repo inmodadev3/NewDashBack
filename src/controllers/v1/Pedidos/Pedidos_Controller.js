@@ -93,8 +93,8 @@ const PutEstadoPedido = async (req, res) => {
 const PutEstadoProductoPedido = async (req, res) => {
     const { id, valor, valor_total, tipo, pedidoId } = req.body
     try {
-        await PutEstadoProductoPedido_query(id, valor, valor_total, tipo, pedidoId)
-        res.status(200).json({ response: 1, success: true })
+        const data = await PutEstadoProductoPedido_query(id, valor, valor_total, tipo, pedidoId)
+        res.status(200).json({ response: data, success: true })
 
     } catch (error) {
         res.status(400).json({ error: error.message, stack: error.stack, success: false })

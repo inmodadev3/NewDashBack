@@ -237,9 +237,20 @@ const PutEstadoProductoPedido_query = async (id, valor, valor_total, tipo, pedid
             }
 
             const query = `UPDATE tbldetallepedidos SET ${variable_actualizar} = ?  where intIdPedDetalle = ?`
-            await obtenerDatosDb_Dash(query, [valor, id])
-            await PutTotalPrecioPedido_Query(pedidoId, valor_total)
-            resolve(1)
+            const response = await obtenerDatosDb_Dash(query, [valor, id]);
+
+            if (response) {
+                const query_Total = 'select SUM(intCantidad * intPrecio) as Total from dash.tbldetallepedidos where intIdPedido = ? and intEstado = 1'
+                const total = await obtenerDatosDb_Dash(query_Total, [pedidoId]);
+                if (total) {
+                    await PutTotalPrecioPedido_Query(pedidoId, total[0].Total)
+                    resolve(total[0].Total)
+                } else {
+                    reject('Error: No se pudo calcular el total del pedido.')
+                }
+            } else {
+                reject('Error:No se pudo actualizar el producto')
+            }
         } catch (error) {
             reject(error)
         }
@@ -295,7 +306,7 @@ const PostProductoPedido_query = async (idCliente, idProducto, idPedido) => {
             )`;
 
 
-            await obtenerDatosDb_Dash(insertar_producto_Query, [
+            const response = await obtenerDatosDb_Dash(insertar_producto_Query, [
                 nuevoIdDetalle,
                 idPedido,
                 producto.StrIdProducto,
@@ -308,15 +319,29 @@ const PostProductoPedido_query = async (idCliente, idProducto, idPedido) => {
                 1
             ]);
 
-            resolve({
-                nuevoIdDetalle,
-                idPedido,
-                referencia: producto.StrIdProducto,
-                descripcion: producto.StrDescripcion,
-                intCantidad: 1,
-                strUnidad: producto.StrUnidad,
-                precio: producto.precio,
-            })
+            if (response) {
+                const query_Total = 'select SUM(intCantidad * intPrecio) as Total from dash.tbldetallepedidos where intIdPedido = ? and intEstado = 1'
+                const total = await obtenerDatosDb_Dash(query_Total, [idPedido]);
+                if (total) {
+                    await PutTotalPrecioPedido_Query(idPedido, total[0].Total)
+                    resolve({
+                        nuevoIdDetalle,
+                        idPedido,
+                        referencia: producto.StrIdProducto,
+                        descripcion: producto.StrDescripcion,
+                        intCantidad: 1,
+                        strUnidad: producto.StrUnidad,
+                        precio: producto.precio,
+                        totalPedido: total[0].Total
+                    })
+                } else {
+                    reject('Error: No se pudo calcular el total del pedido.')
+                }
+            } else {
+                reject('Error:No se pudo agregar el producto')
+            }
+
+
 
         } catch (error) {
             reject(error)
@@ -411,8 +436,8 @@ const GetReportesDropi_Query = (params) => {
     })
 }
 
-const GetReportesDropiCartera_Query = () =>{
-    return new Promise(async(resolve, reject) => {
+const GetReportesDropiCartera_Query = () => {
+    return new Promise(async (resolve, reject) => {
         try {
             const obtenerDropiSinPagar = Pedidos.CarteraDropi()
             const pedidos = await obtenerDatosDb_Dash(obtenerDropiSinPagar)
