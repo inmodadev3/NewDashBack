@@ -320,7 +320,7 @@ const PostProductoPedido_query = async (idCliente, idProducto, idPedido) => {
             ]);
 
             if (response) {
-                const query_Total = 'select SUM(intCantidad * intPrecio) as Total from dash.tbldetallepedidos where intIdPedido = ? and intEstado = 1'
+                const query_Total = 'select SUM(intCantidad * intPrecio) as Total from dash.tbldetallepedidos where intIdPedido = ? and intEstado != -1'
                 const total = await obtenerDatosDb_Dash(query_Total, [idPedido]);
                 if (total) {
                     await PutTotalPrecioPedido_Query(idPedido, total[0].Total)
