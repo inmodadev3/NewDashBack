@@ -4,7 +4,7 @@ const GetClases_Query = async () => {
     return new Promise(async (resolve, reject) => {
         try {
             //761,771,781,02,971,791,801,811,821,831,16,991,1001,1021,57,841
-            const query = `select StrIdClase,StrDescripcion from TblClases where StrIdClase in ('761','771','781','02','971','791','801','811','821','831','16','991','1001','1021','57','841') ORDER BY 
+            const query = `select StrIdClase,StrDescripcion from TblClases where StrIdClase in ('761','771','781','02','971','791','801','811','821','831','16','991','1001','1021','57','841','851') ORDER BY 
             CASE StrIdClase
                 WHEN '761' THEN 1
                 WHEN '971' THEN 2
@@ -21,8 +21,9 @@ const GetClases_Query = async () => {
                 WHEN '991' THEN 13
                 WHEN '791' THEN 14
                 WHEN '1021' THEN 15
-                WHEN '841' THEN 16
-                ELSE 17
+                WHEN '851' THEN 16
+                WHEN '841' THEN 17
+                ELSE 18
             END;`;
             const data = await obtenerDatosDB_Hgi(query)
 
