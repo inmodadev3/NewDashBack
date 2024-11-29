@@ -3,11 +3,11 @@ const { guardar_archivo } = require('../../controllers/tienda/Guardar_Pdfs_usuar
 const { Registro_Usuarios_Dash, Usuarios_Registrados_Recientes, CambiarEstadoRegistro, Descargar_Ruth } = require('../../controllers/tienda/Registro_Usuarios_Controller')
 
 
-route.post('/',guardar_archivo,Registro_Usuarios_Dash)
+route.post('/', guardar_archivo, Registro_Usuarios_Dash)
 
-route.get('/',Usuarios_Registrados_Recientes)
+route.get('/', Usuarios_Registrados_Recientes)
 
-route.put("/:id",CambiarEstadoRegistro)
+route.put("/:id/:strIdTercero/:estado", CambiarEstadoRegistro)
 
 route.get('/descargar/:nombreArchivo', Descargar_Ruth)
 
