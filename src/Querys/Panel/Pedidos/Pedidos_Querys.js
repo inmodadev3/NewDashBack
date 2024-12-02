@@ -5,10 +5,12 @@ const { obtenerDatosDB_Hgi, obtenerDatosDb_Dash, obtenerDatosDb_Dash_transaccion
 const GetPedidos_Query = async (anio, mes) => {
     return new Promise(async (resolve, reject) => {
         try {
-            let fechaI = `${anio}-${mes}`
-            let fechaF = `${anio}-${parseInt(mes) + 1}` //te deja poner una signo mas?
-            let fechaInicial = `${fechaI}-01`
-            let fechaFinal = `${fechaF}-01`
+            // Ajusta el cálculo del mes y el año
+            const nextMonth = parseInt(mes) === 12 ? 1 : parseInt(mes) + 1;
+            const nextYear = parseInt(mes) === 12 ? parseInt(anio) + 1 : anio;
+
+            const fechaInicial = `${anio}-${mes.padStart(2, '0')}-01`;
+            const fechaFinal = `${nextYear}-${nextMonth.toString().padStart(2, '0')}-01`;
 
             const query = Pedidos.GetPedidos()
             const data = await obtenerDatosDb_Dash(query, [fechaInicial, fechaFinal])
