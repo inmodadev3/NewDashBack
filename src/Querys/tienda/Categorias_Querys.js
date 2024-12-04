@@ -4,7 +4,7 @@ const GetClases_Query = async () => {
     return new Promise(async (resolve, reject) => {
         try {
             //761,771,781,02,971,791,801,811,821,831,16,991,1001,1021,57,841
-            const query = `select StrIdClase,StrDescripcion from TblClases where StrIdClase in ('761','771','781','02','971','791','801','811','821','831','16','991','1001','1021','57','841','851') ORDER BY 
+            const query = `select StrIdClase,StrDescripcion from TblClases where StrIdClase in ('761','771','781','02','971','791','801','811','821','831','16','991','1001','1021','57','841','851','871') ORDER BY 
             CASE StrIdClase
                 WHEN '761' THEN 1
                 WHEN '971' THEN 2
