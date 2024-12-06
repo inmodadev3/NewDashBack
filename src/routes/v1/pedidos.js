@@ -14,6 +14,7 @@ const {
     GetReporteDropiPendientes,
     GetReporteDropi,
     GetReportesDropiCartera,
+    enviarPedidoHgi_Controller,
 } = require('../../controllers/v1/Pedidos/Pedidos_Controller')
 
 const {
@@ -52,6 +53,7 @@ route.post('/seguimiento', AgregarSeguimiento)
 route.post('/producto', PostProductoPedido)
 route.post('/encargado', CrearEncargado)
 route.post('/seguimiento/encargados', ActualizarEncargadosSeguimientos)
+route.post('/enviar/hgi', enviarPedidoHgi_Controller)
 
 
 module.exports = route

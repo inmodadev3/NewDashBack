@@ -1,6 +1,9 @@
+const axios = require('axios')
 const Pedidos = require('../../../Models/v1/Pedidos/Pedidos_Model')
 const poolDash = require('../../../databases/DashConexion')
 const { obtenerDatosDB_Hgi, obtenerDatosDb_Dash, obtenerDatosDb_Dash_transaccion } = require('../../Global_Querys')
+
+const TransaccionHgi = 47;
 
 const GetPedidos_Query = async (anio, mes) => {
     return new Promise(async (resolve, reject) => {
@@ -82,7 +85,7 @@ const GetInfoPedido_Query = async (id) => {
             for (const producto of data) {
                 let ubicaciones = await GetUbicaciones(producto.strIdProducto)
 
-                const ValidarPrecio = await ValidarPrecios_PDF(producto.strIdProducto, producto.intPrecio, header[0].strIdCliente)
+                const ValidarPrecio = await ValidarPrecios_PDF(producto.strIdProducto, producto.intPrecio, header[0].strIdCliente, producto.strUnidadMedida)
                 if (ValidarPrecio) {
                     await array_productos.push({
                         ...producto, ubicaciones: ubicaciones[0].StrParam2, precio_cambio: true
@@ -113,7 +116,7 @@ const GetInfoPedido_Query = async (id) => {
     })
 }
 
-const ValidarPrecios_PDF = (productoId, producto_Precio_Actual, terceroId) => {
+const ValidarPrecios_PDF = (productoId, producto_Precio_Actual, terceroId, udm) => {
     return new Promise(async (resolve, reject) => {
         try {
             const query_Precio = Pedidos.ValidarPreciosPDF.PrecioTercero(terceroId)
@@ -121,7 +124,7 @@ const ValidarPrecios_PDF = (productoId, producto_Precio_Actual, terceroId) => {
             const IntPrecio = await obtenerDatosDB_Hgi(query_Precio);
             if (IntPrecio.length > 0) {
                 if ((IntPrecio[0].IntPrecio).toString() !== '0') {
-                    const obtenerPrecioProducto_query = Pedidos.ValidarPreciosPDF.PrecioProducto(IntPrecio[0].IntPrecio, productoId)
+                    const obtenerPrecioProducto_query = Pedidos.ValidarPreciosPDF.PrecioProducto(IntPrecio[0].IntPrecio, productoId, udm)
                     const Precio_Producto = await obtenerDatosDB_Hgi(obtenerPrecioProducto_query)
                     const objeto = Precio_Producto[0];
                     let valor;
@@ -450,6 +453,150 @@ const GetReportesDropiCartera_Query = () => {
     })
 }
 
+const enviarPedidoHgi_Query = (idPedido) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const productosPedidoQuery = `SELECT 
+            strIdProducto,
+            intCantidad,
+            strUnidadMedida,
+            intPrecio from tbldetallepedidos
+            WHERE intIdPedido = ? and intEstado = 1 `
+
+            const informacionPedidoQuery = 'select strIdCliente,strIdVendedor from dash.tblpedidos where intIdPedido = ?'
+
+            //OBTENER VALORES DEL PEDIDO DEL DASH
+            const productosPedido = await obtenerDatosDb_Dash(productosPedidoQuery, [idPedido])
+            const informacionPedido = await obtenerDatosDb_Dash(informacionPedidoQuery, [idPedido])
+
+            let arrProductosHgi = []
+
+
+            //CREAR CUERPO DE LOS PRODUCTOS
+            for (const producto of productosPedido) {
+                const nuevoProducto = crearCuerpoDetallePedidoHgi(producto.intCantidad, producto.strIdProducto, informacionPedido[0].strIdCliente, producto.strUnidadMedida, producto.intPrecio, informacionPedido[0].strIdVendedor)
+                arrProductosHgi.push(nuevoProducto)
+            }
+            //CREAR JSON DEL PEDIDO
+            const pedido = crearCabeceraPedidoHgi(arrProductosHgi, idPedido, informacionPedido[0].strIdCliente, informacionPedido[0].strIdVendedor)
+            //OBTENER CREDENCIALES PARA API DE HGI
+            const tokenHgiRequest = await axios.get('http://10.10.10.150/HGInetServiciosWeb/Api/Autenticar?usuario=ANDRES_OROZCO&clave=AO1141*&cod_compania=1&cod_empresa=1')
+            const tokenHgiResponse = tokenHgiRequest.data.JwtToken;
+
+            // Configuración del encabezado
+            const headers = {
+                Authorization: `Bearer ${tokenHgiResponse}`,
+                "Content-Type": "application/json",
+            };
+
+            const responseHGI = await axios.post("http://10.10.10.150/HGInetServiciosWeb/Api/Documentos/crear", pedido, { headers });
+            const dataHgi = responseHGI.data
+
+            if (validateNoErrors(dataHgi)) {
+                resolve(dataHgi[0].Numero)
+            } else {
+                reject("Error al enviar el pedido a HGI contactarse con sistemas")
+            }
+
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+
+const crearCuerpoDetallePedidoHgi = (cantidad, referencia, idTercero, unidad, valorProducto, vendedor) => {
+
+    const fechaActual = new Date()
+    const producto = {
+        "Bodega": "01",
+        "CantidadDocumento": cantidad,
+        "Descripcion1": "",
+        "Empresa": 1,
+        "Fecha1": fechaActual.toISOString(),
+        "Fecha2": fechaActual.toISOString(),
+        "Lote": "0",
+        "PorcentajeDescuento": 0.0,
+        "Producto": referencia,
+        "ProductoGratis": false,
+        "Sucursal": "0",
+        "Tercero": idTercero,
+        "Tipo": 0,
+        "Transaccion": TransaccionHgi,
+        "Unidad": unidad,
+        "Vendedor": vendedor,
+        "Vinculado": "0",
+        "ValorUnitario": Number(valorProducto)
+    }
+
+    return producto
+}
+
+const crearCabeceraPedidoHgi = (detallePedido, idPedido, terceroId, vendedorId) => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth();
+
+    const header = [
+        {
+            "Ano": Number(year),
+            "Bodega": "01",
+            "BodegaDestino": "0",
+            "Cuotas": 1,
+            "DescuentoTotalDocumento": 0.0,
+            "DocumentoDetalle": detallePedido,
+            "DocumentoReferencia": idPedido,
+            "Empresa": 1,
+            "EnviaEmail": 0,
+            "Estado": 1,
+            "Fecha": today,
+            "Local": "0",
+            "Moneda": "01",
+            "Observaciones": "",
+            "Periodo": month + 1,
+            "Plazo": 0,
+            "PorcentajeDescuento": 0.0,
+            "PorcentajeDescuentoFinanciero": 0.0,
+            "ProductoP": "0",
+            "Referencia": "0",
+            "Referencia1": "0",
+            "Referencia2": "0",
+            "Referencia3": "0",
+            "Subtotal": 0,
+            "Sucursal": "0",
+            "Tercero": terceroId,
+            "TerceroAuxiliar": terceroId,
+            "TipoDocumento": 0,
+            "TipoEvento": "0",
+            "Total": 0,
+            "Transaccion": TransaccionHgi,
+            "TransaccionAuxiliar": "0",
+            "Transportador": "0",
+            "UsuarioGraba": "SANTIAGO_FRANCO",
+            "Vendedor": vendedorId,
+            "Vinculado": "0"
+        }
+    ]
+
+    return header
+}
+
+const validateNoErrors = (obj) => {
+    for (const key in obj) {
+        // Verificar si la clave es "Error" y su valor no es null
+        if (key === "Error" && obj[key] !== null) {
+            return false; // Retorna falso si hay algún "Error" con un valor no null
+        }
+
+        // Si el valor es un objeto o array, continuar la búsqueda recursivamente
+        if (typeof obj[key] === "object" && obj[key] !== null) {
+            if (!validateNoErrors(obj[key])) {
+                return false; // Retorna falso si algún nivel anidado contiene un "Error" no null
+            }
+        }
+    }
+    return true; // Retorna verdadero si todas las claves "Error" son null
+}
+
 module.exports = {
     GetPedidosNuevos_Query,
     GetPedidosEnProceso_query,
@@ -464,5 +611,6 @@ module.exports = {
     PutActualizarPreciosPedidoQuery,
     GetReporteDropiPendientes_Query,
     GetReportesDropi_Query,
-    GetReportesDropiCartera_Query
+    GetReportesDropiCartera_Query,
+    enviarPedidoHgi_Query
 }

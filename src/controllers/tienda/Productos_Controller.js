@@ -90,8 +90,8 @@ const GetProductoXid = async (req, res) => {
 
     try {
         let imagenes = await GetImagesXid_Query(id)
-        const data = await GetProductoXid_Query(id)
-        res.status(200).json({ success: true, data: data, images: imagenes })
+        const producto = await GetProductoXid_Query(id)
+        res.status(200).json({ success: true, data: producto, images: imagenes })
     } catch (error) {
         res.status(400).json({ success: false, error: error, message: "Ha ocurrido un error al obtener la informacion del producto" })
     }

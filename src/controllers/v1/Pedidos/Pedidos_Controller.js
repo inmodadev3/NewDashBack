@@ -1,4 +1,4 @@
-const { GetPedidosEnProceso_query, GetPedidosEnTerminal_Query, GetPedidosNuevos_Query, GetInfoPedido_Query, GetInfoPedidoTerminal_Query, GetPedidoXId_Query, GetPedidos_Query, PutEstadoPedido_Query, PutEstadoProductoPedido_query, PostProductoPedido_query, PutActualizarPreciosPedidoQuery, GetReporteDropiPendientes_Query, GetReportesDropi_Query, GetReportesDropiCartera_Query } = require('../../../Querys/Panel/Pedidos/Pedidos_Querys')
+const { GetPedidosEnProceso_query, GetPedidosEnTerminal_Query, GetPedidosNuevos_Query, GetInfoPedido_Query, GetInfoPedidoTerminal_Query, GetPedidoXId_Query, GetPedidos_Query, PutEstadoPedido_Query, PutEstadoProductoPedido_query, PostProductoPedido_query, PutActualizarPreciosPedidoQuery, GetReporteDropiPendientes_Query, GetReportesDropi_Query, GetReportesDropiCartera_Query, enviarPedidoHgi_Query } = require('../../../Querys/Panel/Pedidos/Pedidos_Querys')
 
 const GetPedidos = async (req, res) => {
 
@@ -165,8 +165,6 @@ const GetReporteDropi = async (req, res) => {
 
         const reporte = await GetReportesDropi_Query(sql)
 
-        console.log(reporte)
-
         res.status(200).json({ reporte })
 
     } catch (error) {
@@ -174,15 +172,25 @@ const GetReporteDropi = async (req, res) => {
     }
 }
 
-const GetReportesDropiCartera = async (req,res) => {
+const GetReportesDropiCartera = async (req, res) => {
     try {
         const reporte = await GetReportesDropiCartera_Query()
-        res.status(200).json({reporte})
+        res.status(200).json({ reporte })
     } catch (error) {
-        res.status(400).json({error:`${error}`})
+        res.status(400).json({ error: `${error}` })
     }
 }
 
+
+const enviarPedidoHgi_Controller = async (req, res) => {
+    const { id } = req.body
+    try {
+        const data = await enviarPedidoHgi_Query(id)
+        res.status(200).json({ pedido: data, success: true })
+    } catch (error) {
+        res.status(400).json({ error: `${error}` })
+    }
+}
 
 module.exports = {
     GetPedidosNuevos,
@@ -198,5 +206,6 @@ module.exports = {
     PutActualizarPreciosPedido,
     GetReporteDropiPendientes,
     GetReporteDropi,
-    GetReportesDropiCartera
+    GetReportesDropiCartera,
+    enviarPedidoHgi_Controller
 }

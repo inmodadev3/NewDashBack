@@ -93,12 +93,50 @@ const GetProductosXTipos_Query = async (tipos, skipReg, cantidadReg, filtro) => 
 const GetProductoXid_Query = async (id) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const query = `select P.StrIdProducto,P.StrDescripcion,P.Strauxiliar,P.StrUnidad,P.IntPrecio1,P.IntPrecio2,
-            P.IntPrecio3,P.IntPrecio4,P.IntPrecio5,P.IntPrecio6,IntPrecio7, IntPrecio8,P.StrParam3,P2.StrDescripcion as material,P.StrDescripcionCorta , 
-            P.IntControl as CantPaca, P.StrParam5 as Color
-            from TblProductos as P inner join TblProdParametro2 as P2 on P2.StrIdPParametro = P.StrPParametro2  where StrIdProducto = '${id}'`
-            const data = await obtenerDatosDB_Hgi(query)
-            resolve(data)
+            const queryProductoInfo = `
+                select P.StrIdProducto,
+                P.StrDescripcion,
+                P.Strauxiliar,
+                P.StrUnidad,
+                P.IntPrecio1,
+                P.IntPrecio2,
+                P.IntPrecio3,
+                P.IntPrecio4,
+                P.IntPrecio5,
+                P.IntPrecio6,
+                IntPrecio7,
+                IntPrecio8,
+                P.StrParam3,
+                P2.StrDescripcion as material,
+                P.StrDescripcionCorta, 
+                P.IntControl as CantPaca,
+                P.StrParam5 as Color
+                from TblProductos as P 
+                inner join TblProdParametro2 as P2 on P2.StrIdPParametro = P.StrPParametro2  
+                where StrIdProducto = '${id}'
+            `
+
+            const queryPresentacionesProducto = `
+                select 
+                StrUnidad,
+                intCantidad,
+                intPrecio1,
+                intPrecio2,
+                intPrecio3,
+                intPrecio4,
+                IntPrecio5,
+                IntPrecio6,
+                IntPrecio7,
+                IntPrecio8
+                from TblPresentacion where StrProducto = '${id}' and IntPrecio1 != 0
+            `
+
+            const data = await obtenerDatosDB_Hgi(queryProductoInfo)
+            const presentacion = await obtenerDatosDB_Hgi(queryPresentacionesProducto)
+
+            const producto = { ...data[0], presentacion: presentacion }
+
+            resolve(producto)
         } catch (error) {
             reject(error)
         }

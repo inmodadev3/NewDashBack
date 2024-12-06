@@ -28,9 +28,9 @@ const Agregar_productos = async (req, res) => {
 }
 
 const Actualizar_Cantidad_Observacion_Producto = async (req, res) => {
-    const { cantidad, observacion, id, strIdCliente } = req.body
+    const { cantidad, observacion, id, strIdCliente, strUnidadMedida, precio } = req.body
     try {
-        const data = await Actualizar_Cantidad_Observacion_Producto_Query(cantidad, observacion, id, strIdCliente)
+        const data = await Actualizar_Cantidad_Observacion_Producto_Query(cantidad, observacion, id, strIdCliente, strUnidadMedida, precio)
         if (data === 1) {
             res.status(200).json({ message: "Datos actualizados correctamente" })
         }

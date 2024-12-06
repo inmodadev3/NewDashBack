@@ -30,8 +30,8 @@ Pedidos.ValidarPreciosPDF = {
         inner join TblTerceros as T on TiposT.IntIdTipoTercero = T.IntTipoTercero
         where T.StrIdTercero = '${terceroId}'`
     },
-    PrecioProducto: (precio, producto) => {
-        return `Select intPrecio${precio} from tblProductos where StrIdProducto = '${producto}'`
+    PrecioProducto: (precio, producto, unidad) => {
+        return `Select intPrecio${precio} from TblPresentacion where StrProducto = '${producto}' and StrUnidad = '${unidad}'`
     }
 }
 
@@ -140,7 +140,7 @@ Pedidos.ReportesDropi = (params) => {
     LEFT JOIN dash.TblSeguimientoPedidos as TS on TP.intIdPedido = TS.intIdPedido where TS.isDropi = 1 ${params} order by intIdPedido desc`
 }
 
-Pedidos.CarteraDropi = () =>{
+Pedidos.CarteraDropi = () => {
     return `SELECT TP.intIdPedido,TP.strNombVendedor,TP.strNombCliente,TP.dtFechaEnvio,TP.intValorTotal
     FROM dash.tblPedidos as TP
     LEFT JOIN dash.TblSeguimientoPedidos as TS ON TP.intIdPedido = TS.intIdPedido

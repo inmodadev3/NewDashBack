@@ -129,7 +129,7 @@ const Agregar_productos_Query = (Idvendedor, clienteData, productoData) => {
     })
 }
 
-const Actualizar_Cantidad_Observacion_Producto_Query = (cantidad, observacion, id, strIdCliente) => {
+const Actualizar_Cantidad_Observacion_Producto_Query = (cantidad, observacion, id, strIdCliente, strUnidadMedida, precio) => {
     return new Promise(async (resolve, reject) => {
         try {
 
@@ -137,8 +137,8 @@ const Actualizar_Cantidad_Observacion_Producto_Query = (cantidad, observacion, i
 
             if (obtener_id_pedido.length > 0) {
                 const idPedidoActivo = obtener_id_pedido[0].intIdPedido;
-                const query = `UPDATE tbldetallepedidostienda SET intCantidad = ? , strObservacion = ? where intIdPedDetalle = ?`
-                await obtenerDatosDb_Dash(query, [cantidad, observacion, id])
+                const query = `UPDATE tbldetallepedidostienda SET intCantidad = ? , strObservacion = ? , strUnidadMedida = ? , intPrecio = ? where intIdPedDetalle = ?`
+                await obtenerDatosDb_Dash(query, [cantidad, observacion, strUnidadMedida, precio, id])
                 await Actualizar_total_pedido_Query(idPedidoActivo);
                 resolve(1)
             }
@@ -178,11 +178,11 @@ const Consultar_Producto_Agregado_Query = (strIdCliente, strIdProducto) => {
             const obtener_id_pedido = await obtenerDatosDb_Dash(obtener_id_pedido_query, [strIdCliente]);
 
             if (obtener_id_pedido.length > 0) {
-                const query = `select intIdPedDetalle as id, intCantidad, strObservacion from tbldetallepedidostienda where intIdPedido = ? and strIdProducto = ? and intEstado = 1`
+                const query = `select intIdPedDetalle as id, intCantidad, strObservacion,strUnidadMedida as medida from tbldetallepedidostienda where intIdPedido = ? and strIdProducto = ? and intEstado = 1`
 
                 const data = await obtenerDatosDb_Dash(query, [obtener_id_pedido[0].intIdPedido, strIdProducto])
                 resolve(data)
-            }else{
+            } else {
                 resolve([])
             }
 
@@ -246,7 +246,8 @@ const Consultar_Productos_Query = (strIdCliente) => {
                 strRutaImg as imagen,
                 strDescripcion as descripcion,
                 intPrecio as precio, 
-                intCantidad as cantidad, 
+                intCantidad as cantidad,
+                strUnidadMedida as medida,
                 (intPrecio * intCantidad) as subTotal 
             FROM 
                 tbldetallepedidostienda 
@@ -339,15 +340,23 @@ const Validar_Precios_Pedido_Query = (arrProductos, strIdCliente, precio) => {
             }
             const referenciasString = referenciasIdArr.map((producto) => `'${producto}'`).join(', ');
 
-
-            const query = `select StrIdProducto,intPrecio${(precio == null && strIdCliente) ? tipo_tercero[0].IntPrecio : precio} as precio from TblProductos where strIdProducto in (${referenciasString}) and intHabilitarProd = 1`
-            const productos = await obtenerDatosDB_Hgi(query)
+            const queryPresentacion = `
+            SELECT 
+                StrProducto,
+                TP.StrUnidad,
+                TP.IntPrecio${(precio == null && strIdCliente) ? tipo_tercero[0].IntPrecio : precio} AS precio 
+            from TblPresentacion AS TP
+            inner join  TblProductos AS P
+            ON P.StrIdProducto = TP.StrProducto
+            where TP.StrProducto in (${referenciasString}) and P.intHabilitarProd = 1
+            `
+            const productos = await obtenerDatosDB_Hgi(queryPresentacion)
 
             const cambios_precioArr = []
             for (const producto of arrProductos) {
                 for (const Producto_cambio of productos) {
-                    if (producto.referencia.toString().toUpperCase() == Producto_cambio.StrIdProducto.toString().toUpperCase()) {
-                        if (producto.precio !== Producto_cambio.precio) {
+                    if (producto.referencia.toString().toUpperCase() == Producto_cambio.StrProducto.toString().toUpperCase()) {
+                        if (producto.precio !== Producto_cambio.precio && producto.medida == Producto_cambio.StrUnidad) {
                             cambios_precioArr.push({
                                 id: producto.id,
                                 pedidoId: producto.pedidoId,
