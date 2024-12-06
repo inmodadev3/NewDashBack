@@ -461,7 +461,7 @@ const enviarPedidoHgi_Query = (idPedido) => {
             intCantidad,
             strUnidadMedida,
             intPrecio from tbldetallepedidos
-            WHERE intIdPedido = ? and intEstado = 1 `
+            WHERE intIdPedido = ? and intEstado != -1 `
 
             const informacionPedidoQuery = 'select strIdCliente,strIdVendedor from dash.tblpedidos where intIdPedido = ?'
 
