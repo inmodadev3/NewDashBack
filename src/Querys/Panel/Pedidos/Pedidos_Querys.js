@@ -456,6 +456,10 @@ const GetReportesDropiCartera_Query = () => {
 const enviarPedidoHgi_Query = (idPedido) => {
     return new Promise(async (resolve, reject) => {
         try {
+
+            //CREAR QUERYS PARA OBTENER INFORMACION DEL PEDIDO Y DE LOS PRODUTOS
+
+            //OBTENER PRODUCTOS DEL PEDIDO QUERY
             const productosPedidoQuery = `SELECT 
             strIdProducto,
             intCantidad,
@@ -463,139 +467,322 @@ const enviarPedidoHgi_Query = (idPedido) => {
             intPrecio from tbldetallepedidos
             WHERE intIdPedido = ? and intEstado != -1 `
 
+            //OBTENER DETALLES DEL PEDIDO QUERY
             const informacionPedidoQuery = 'select strIdCliente,strIdVendedor from dash.tblpedidos where intIdPedido = ?'
 
             //OBTENER VALORES DEL PEDIDO DEL DASH
             const productosPedido = await obtenerDatosDb_Dash(productosPedidoQuery, [idPedido])
             const informacionPedido = await obtenerDatosDb_Dash(informacionPedidoQuery, [idPedido])
 
-            let arrProductosHgi = []
+            //VALIDAR QUE LA CEDULA SEA VALIDA O PONERLO COMO CONSUMIDOR FINAL
+            let cedula = informacionPedido[0].strIdCliente
+            const listTerceros = ['0','128', '130', '123111', '123112', '1231166', '12313', '12314', '12345', '5249659', '9', '900180739', '900989883', '99', '999', '9999', '99999']
+
+            const verdadero = listTerceros.includes(cedula)
+
+            if (verdadero) {
+                cedula = '222222222222'
+            }
 
 
-            //CREAR CUERPO DE LOS PRODUCTOS
+            //INICIALIZAR CONSTRUCION DE CONSULTA PARA TRANSACCION
+            let productosQueryTransaccion = ''
+            let index = 1
+
+
+            //obtener consecutivo
+            const consecutivo = await obtenerConsecutivoHgi()
+
+            //CREAR ENCABEZADO
+            const pedido = crearCabeceraPedidoHgi(cedula, informacionPedido[0].strIdVendedor, consecutivo, idPedido)
+
+            //CREAR DETALLE
             for (const producto of productosPedido) {
-                const nuevoProducto = crearCuerpoDetallePedidoHgi(producto.intCantidad, producto.strIdProducto, informacionPedido[0].strIdCliente, producto.strUnidadMedida, producto.intPrecio, informacionPedido[0].strIdVendedor)
-                arrProductosHgi.push(nuevoProducto)
-            }
-            //CREAR JSON DEL PEDIDO
-            const pedido = crearCabeceraPedidoHgi(arrProductosHgi, idPedido, informacionPedido[0].strIdCliente, informacionPedido[0].strIdVendedor)
-            //OBTENER CREDENCIALES PARA API DE HGI
-            const tokenHgiRequest = await axios.get('http://10.10.10.150/HGInetServiciosWeb/Api/Autenticar?usuario=ANDRES_OROZCO&clave=AO1141*&cod_compania=1&cod_empresa=1')
-            const tokenHgiResponse = tokenHgiRequest.data.JwtToken;
-
-            // Configuración del encabezado
-            const headers = {
-                Authorization: `Bearer ${tokenHgiResponse}`,
-                "Content-Type": "application/json",
-            };
-
-            const responseHGI = await axios.post("http://10.10.10.150/HGInetServiciosWeb/Api/Documentos/crear", pedido, { headers });
-            const dataHgi = responseHGI.data
-
-            if (validateNoErrors(dataHgi)) {
-                resolve(dataHgi[0].Numero)
-            } else {
-                reject("Error al enviar el pedido a HGI contactarse con sistemas")
+                const nuevoProducto = crearCuerpoDetallePedidoHgi(producto.intCantidad, producto.strIdProducto, producto.strUnidadMedida, producto.intPrecio, index, consecutivo)
+                productosQueryTransaccion += nuevoProducto;
+                index += 1;
+                productosQueryTransaccion += '\n'
             }
 
+            //CREAR  TRANSACCION
+
+            const queryTransaccion = `
+                BEGIN TRY
+                    BEGIN TRANSACTION
+                        ${pedido}
+                        DISABLE TRIGGER TgHgiNet_TblDetalleDocumentos ON TblDetalleDocumentos; 
+                        ${productosQueryTransaccion}
+                        COMMIT TRANSACTION;
+                END TRY
+                BEGIN CATCH
+                    ROLLBACK TRANSACTION;
+                    PRINT 'Ocurrio un error en la transaccion: ' + ERROR_MESSAGE();
+                END CATCH
+
+            `
+
+            //EJECUTAR TRANSACCION
+            await obtenerDatosDB_Hgi(queryTransaccion)
+
+
+            //DEVOLVER CONSECUTIVO CREADO
+            resolve(consecutivo)
         } catch (error) {
             reject(error)
         }
     })
 }
 
-const crearCuerpoDetallePedidoHgi = (cantidad, referencia, idTercero, unidad, valorProducto, vendedor) => {
+const crearCuerpoDetallePedidoHgi = (cantidad, referencia, unidad, valorProducto, indice, consecutivo) => {
 
-    const fechaActual = new Date()
-    const producto = {
-        "Bodega": "01",
-        "CantidadDocumento": cantidad,
-        "Descripcion1": "",
-        "Empresa": 1,
-        "Fecha1": fechaActual.toISOString(),
-        "Fecha2": fechaActual.toISOString(),
-        "Lote": "0",
-        "PorcentajeDescuento": 0.0,
-        "Producto": referencia,
-        "ProductoGratis": false,
-        "Sucursal": "0",
-        "Tercero": idTercero,
-        "Tipo": 0,
-        "Transaccion": TransaccionHgi,
-        "Unidad": unidad,
-        "Vendedor": vendedor,
-        "Vinculado": "0",
-        "ValorUnitario": Number(valorProducto)
-    }
-
+    const producto = `
+    insert into TblDetalleDocumentos  
+    (IntEmpresa,IntTransaccion,IntDocumento,StrProducto,StrLote,StrTalla,StrColor,IntBodega, 
+    StrSerie,StrSerie1,StrSerie2,StrSerie3,IntCantidadDoc,IntCantidad,StrUnidad,IntFactor,IntValorUnitario,IntValorTotal,IntValorDescuento,
+    IntValorIva,IntVrImpuesto1,IntValorCosto,IntValorUnitarioW,IntDocRefD,
+    IntCostoAgregado,IntReteFte,IntSaldoI,IntVUSaldoI,IntSaldoF,IntVUSaldoF,DatFecha1,DatFecha2,StrSucursal,StrCCosto,StrSubCCosto,StrDescripcion1,StrTercero,
+    StrVinculado,StrVendedor,IntTipo,IntImpresion,IntPorDescuento)  
+    values('01','${TransaccionHgi}',${consecutivo},'${referencia}',0,0,'0','01',${indice},'0','0','0',${cantidad},${cantidad},
+    '${unidad}',1,${valorProducto},${valorProducto * cantidad},0,0,0,0,0,0,0,0,0,0,0,0,NULL,NULL,'0','0','0',NULL,'0','0','0',0,0,0);`
     return producto
 }
 
-const crearCabeceraPedidoHgi = (detallePedido, idPedido, terceroId, vendedorId) => {
+const crearCabeceraPedidoHgi = (terceroId, vendedorId, consecutivo, docRef) => {
     const today = new Date();
     const year = today.getFullYear();
     const month = today.getMonth();
 
-    const header = [
-        {
-            "Ano": Number(year),
-            "Bodega": "01",
-            "BodegaDestino": "0",
-            "Cuotas": 1,
-            "DescuentoTotalDocumento": 0.0,
-            "DocumentoDetalle": detallePedido,
-            "DocumentoReferencia": idPedido,
-            "Empresa": 1,
-            "EnviaEmail": 0,
-            "Estado": 1,
-            "Fecha": today,
-            "Local": "0",
-            "Moneda": "01",
-            "Observaciones": "",
-            "Periodo": month + 1,
-            "Plazo": 0,
-            "PorcentajeDescuento": 0.0,
-            "PorcentajeDescuentoFinanciero": 0.0,
-            "ProductoP": "0",
-            "Referencia": "0",
-            "Referencia1": "0",
-            "Referencia2": "0",
-            "Referencia3": "0",
-            "Subtotal": 0,
-            "Sucursal": "0",
-            "Tercero": terceroId,
-            "TerceroAuxiliar": terceroId,
-            "TipoDocumento": 0,
-            "TipoEvento": "0",
-            "Total": 0,
-            "Transaccion": TransaccionHgi,
-            "TransaccionAuxiliar": "0",
-            "Transportador": "0",
-            "UsuarioGraba": "SANTIAGO_FRANCO",
-            "Vendedor": vendedorId,
-            "Vinculado": "0"
-        }
-    ]
-
-    return header
+    const query = `
+        ALTER TABLE TBLDOCUMENTOS DISABLE TRIGGER ALL;
+        INSERT INTO [dbo].[TblDocumentos]
+            ([IntEmpresa]
+            ,[IntTransaccion]
+            ,[IntDocumento]
+            ,[IntAno]
+            ,[IntPeriodo]
+            ,[IntAnoCartera]
+            ,[IntPeriodoCartera]
+            ,[DatFecha]
+            ,[DatVencimiento]
+            ,[StrTercero]
+            ,[IntVinculado]
+            ,[StrTerceroAux]
+            ,[StrDVendedor]
+            ,[StrTransportador]
+            ,[IntBodegaDes]
+            ,[IntBodega]
+            ,[StrClase]
+            ,[StrMoneda]
+            ,[StrSucursal]
+            ,[StrCCosto]
+            ,[StrSubCCosto]
+            ,[StrProductoP]
+            ,[StrLoteP]
+            ,[IntCantidadP]
+            ,[IntBaseP]
+            ,[StrTipoEvento]
+            ,[IntTranAux]
+            ,[IntDocRef]
+            ,[StrLocal]
+            ,[StrReferencia]
+            ,[StrReferencia1]
+            ,[StrReferencia2]
+            ,[StrReferencia3]
+            ,[StrConceptoDocAdicional]
+            ,[StrPlazo]
+            ,[StrFormaDePagoDian]
+            ,[IntTipoDoc]
+            ,[IntValor]
+            ,[IntSubtotal]
+            ,[IntDDescuento]
+            ,[IntIva]
+            ,[IntVrImpuesto1]
+            ,[IntFletes]
+            ,[IntIntereses]
+            ,[intPorIntereses]
+            ,[IntOtrosCobros]
+            ,[IntTotal]
+            ,[IntRetFte]
+            ,[IntRetCree]
+            ,[IntRetIva]
+            ,[IntRetIca]
+            ,[IntNeto]
+            ,[IntCostoAgregado]
+            ,[IntPago]
+            ,[IntCambio]
+            ,[StrObservaciones]
+            ,[StrCampo1]
+            ,[IntPasoCupo]
+            ,[IntControl]
+            ,[IntEstado]
+            ,[IntExportado]
+            ,[IntGestion]
+            ,[IntTotalesManual]
+            ,[Impresiones]
+            ,[IntActivacion]
+            ,[IntPedido]
+            ,[IntPorDescuento]
+            ,[IntPorDescuentoFin]
+            ,[IntValDescuentoFin]
+            ,[DatFeclDescuentoFin]
+            ,[IntInteres]
+            ,[IntRegistros]
+            ,[IntCartera]
+            ,[IntCuotas]
+            ,[IntIntervaloCuotas]
+            ,[IntConceptoNotasDian]
+            ,[IntTipoPuntos]
+            ,[IntPuntos]
+            ,[DatVencimientoPuntos]
+            ,[IntSaldoPuntos]
+            ,[IntPuntosPVenc]
+            ,[IntCaja]
+            ,[IntTurno]
+            ,[IntTCantidad]
+            ,[IntValor1]
+            ,[IntValor2]
+            ,[IntValor3]
+            ,[IntValor4]
+            ,[DatFecha1]
+            ,[DatFecha2]
+            ,[DatFecha3]
+            ,[DatFecha4]
+            ,[IntValorPar1]
+            ,[IntValorPar2]
+            ,[IntValorPar3]
+            ,[IntValorPar4]
+            ,[DatFechaGra]
+            ,[StrUsuarioGra]
+            ,[StrParametroDoc]
+            ,[StrFacturaECufe]
+            ,[IntCosto1])
+        VALUES(
+            1
+            ,'${TransaccionHgi}'
+            ,${consecutivo}
+            ,${Number(year)}
+            ,${Number(month) + 1}
+            ,${Number(year)}
+            ,${Number(month) + 1}
+            ,GETDATE()
+            ,dateadd(day, 30, GETDATE())
+            ,'${terceroId}'
+            ,0
+            ,0
+            ,'${vendedorId}'
+            ,'0'
+            ,0
+            ,'01'
+            ,'0'
+            ,'01'
+            ,'0'
+            ,'0'
+            ,'0'
+            ,''
+            ,0
+            ,0
+            ,'0'
+            ,0
+            ,0
+            ,'${docRef}'
+            ,'0'
+            ,'0'
+            ,'0'
+            ,'0'
+            ,'0'
+            ,'0'
+            ,'30'
+            ,0
+            ,0
+            ,0
+            ,0
+            ,0
+            ,0
+            ,0
+            ,0
+            ,0
+            ,0
+            ,0
+            ,0
+            ,0
+            ,0
+            ,0
+            ,0
+            ,0
+            ,0
+            ,0
+            ,0
+            ,NULL
+            ,NULL
+            ,0
+            ,0
+            ,0
+            ,0
+            ,0
+            ,0
+            ,0
+            ,0
+            ,0
+            ,0
+            ,0
+            ,0
+            ,NULL
+            ,0
+            ,0
+            ,1
+            ,1
+            ,0
+            ,0
+            ,0
+            ,0
+            ,CONVERT(DATE, GETDATE())
+            ,0
+            ,0
+            ,'-2'
+            ,0
+            ,0
+            ,0
+            ,0
+            ,0
+            ,0
+            ,GETDATE()
+            ,GETDATE()
+            ,GETDATE()
+            ,GETDATE()
+            ,0
+            ,0
+            ,0
+            ,0
+            ,GETDATE()
+            ,'PAGINA'
+            ,'0'
+            ,NULL
+            ,NULL);
+        ALTER TABLE TBLDOCUMENTOS ENABLE TRIGGER ALL;
+    `
+    return query
 }
 
-const validateNoErrors = (obj) => {
-    for (const key in obj) {
-        // Verificar si la clave es "Error" y su valor no es null
-        if (key === "Error" && obj[key] !== null) {
-            return false; // Retorna falso si hay algún "Error" con un valor no null
-        }
-
-        // Si el valor es un objeto o array, continuar la búsqueda recursivamente
-        if (typeof obj[key] === "object" && obj[key] !== null) {
-            if (!validateNoErrors(obj[key])) {
-                return false; // Retorna falso si algún nivel anidado contiene un "Error" no null
-            }
-        }
-    }
-    return true; // Retorna verdadero si todas las claves "Error" son null
+const obtenerConsecutivoHgi = async () => {
+    const query = `
+        select 
+            (Case 
+                When (
+                    ((select TOP 1 max(TblDocumentos.IntDocumento) from TblDocumentos where TblDocumentos.IntTransaccion=${TransaccionHgi}))is null) 
+                THEN 
+                    0 
+                ELSE 
+                    (select max(TblDocumentos.IntDocumento) from TblDocumentos where TblDocumentos.IntTransaccion=${TransaccionHgi})
+                END
+            )
+        AS 'intDocumento'
+    `
+    const obtenerUltimoConsecutivo = await obtenerDatosDB_Hgi(query)
+    const consecutivo = obtenerUltimoConsecutivo[0].intDocumento + 1
+    return consecutivo
 }
+
+
 
 module.exports = {
     GetPedidosNuevos_Query,
