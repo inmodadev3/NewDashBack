@@ -18,31 +18,31 @@ const Registro_Usuarios_Dash = async (req, res) => {
         } = data
 
         if (!strIdTercero || String(strIdTercero).trim() == "") {
-            res.status(400).json({ error: "Datos inválidos", message: "El campo 'Identificacion' es obligatorio." })
+            return res.status(400).json({ error: "Datos inválidos", message: "El campo 'Identificacion' es obligatorio." })
         }
 
         if (!strNombre || String(strNombre).trim() == "") {
-            res.status(400).json({ error: "Datos inválidos", message: "El campo 'Nombre' es obligatorio." })
+            return res.status(400).json({ error: "Datos inválidos", message: "El campo 'Nombre' es obligatorio." })
         }
 
         if (!StrApellidos || String(StrApellidos).trim() == "") {
-            res.status(400).json({ error: "Datos inválidos", message: "El campo 'Apellidos' es obligatorio." })
+            return res.status(400).json({ error: "Datos inválidos", message: "El campo 'Apellidos' es obligatorio." })
         }
 
         if (!strDireccion || String(strDireccion).trim() == "") {
-            res.status(400).json({ error: "Datos inválidos", message: "El campo 'Dirección' es obligatorio." })
+            return res.status(400).json({ error: "Datos inválidos", message: "El campo 'Dirección' es obligatorio." })
         }
 
         if (!strCelular || String(strCelular).trim() == "") {
-            res.status(400).json({ error: "Datos inválidos", message: "El campo 'Celular' es obligatorio." })
+            return res.status(400).json({ error: "Datos inválidos", message: "El campo 'Celular' es obligatorio." })
         }
 
         if (!StrCiudad || String(StrCiudad).trim() == "") {
-            res.status(400).json({ error: "Datos inválidos", message: "El campo 'Ciudad' es obligatorio." })
+            return res.status(400).json({ error: "Datos inválidos", message: "El campo 'Ciudad' es obligatorio." })
         }
 
         if (!file) {
-            res.status(400).json({ error: "Datos inválidos", message: "El Archivo no es valido" })
+            return res.status(400).json({ error: "Datos inválidos", message: "El Archivo no es valido" })
         }
 
 

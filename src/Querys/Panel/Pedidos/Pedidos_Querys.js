@@ -476,7 +476,7 @@ const enviarPedidoHgi_Query = (idPedido) => {
 
             //VALIDAR QUE LA CEDULA SEA VALIDA O PONERLO COMO CONSUMIDOR FINAL
             let cedula = informacionPedido[0].strIdCliente
-            const listTerceros = ['0','128', '130', '123111', '123112', '1231166', '12313', '12314', '12345', '5249659', '9', '900180739', '900989883', '99', '999', '9999', '99999']
+            const listTerceros = ['0', '128', '130', '123111', '123112', '1231166', '12313', '12314', '12345', '5249659', '9', '900180739', '900989883', '99', '999', '9999', '99999']
 
             const verdadero = listTerceros.includes(cedula)
 
@@ -527,6 +527,76 @@ const enviarPedidoHgi_Query = (idPedido) => {
 
             //DEVOLVER CONSECUTIVO CREADO
             resolve(consecutivo)
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+
+const enviarPedidosMultiplesHgi_Query = (arrPedido) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+
+            //OBTENER PRODUCTOS DEL ARRAY DE PEDIDOS QUERY
+            const productosPedidoQuery = `SELECT 
+            strIdProducto,
+            intCantidad,
+            strUnidadMedida,
+            intPrecio from tbldetallepedidos
+            WHERE intIdPedido in (?) and intEstado != -1 `
+
+            //OBTENER DETALLES DEL PEDIDO QUERY
+            const informacionPedidoQuery = 'select strIdVendedor from dash.tblpedidos where intIdPedido = ?'
+
+            //OBTENER VALORES DEL PEDIDO DEL DASH
+            const productosPedido = await obtenerDatosDb_Dash(productosPedidoQuery, [arrPedido])
+            const informacionPedido = await obtenerDatosDb_Dash(informacionPedidoQuery, [arrPedido[0]])
+            let vendedor = informacionPedido[0].strIdVendedor
+            let cedula = '222222222222'
+
+            //INICIALIZAR CONSTRUCION DE CONSULTA PARA TRANSACCION
+            let productosQueryTransaccion = ''
+            let index = 1
+
+            //obtener consecutivo
+            const consecutivo = await obtenerConsecutivoHgi()
+
+            //CREAR ENCABEZADO
+            const pedido = crearCabeceraPedidoHgi(cedula, vendedor, consecutivo, arrPedido[0])
+
+            //CREAR DETALLE
+            for (const producto of productosPedido) {
+                const nuevoProducto = crearCuerpoDetallePedidoHgi(producto.intCantidad, producto.strIdProducto, producto.strUnidadMedida, producto.intPrecio, index, consecutivo)
+                productosQueryTransaccion += nuevoProducto;
+                index += 1;
+                productosQueryTransaccion += '\n'
+            }
+
+            //CREAR  TRANSACCION
+
+            const queryTransaccion = `
+                BEGIN TRY
+                    BEGIN TRANSACTION
+                        ${pedido}
+                        DISABLE TRIGGER TgHgiNet_TblDetalleDocumentos ON TblDetalleDocumentos; 
+                        ${productosQueryTransaccion}
+                        COMMIT TRANSACTION;
+                END TRY
+                BEGIN CATCH
+                    ROLLBACK TRANSACTION;
+                    PRINT 'Ocurrio un error en la transaccion: ' + ERROR_MESSAGE();
+                END CATCH
+
+            `
+
+            //EJECUTAR TRANSACCION
+            await obtenerDatosDB_Hgi(queryTransaccion)
+
+
+            //DEVOLVER CONSECUTIVO CREADO
+            resolve(consecutivo)
+
         } catch (error) {
             reject(error)
         }
@@ -799,5 +869,6 @@ module.exports = {
     GetReporteDropiPendientes_Query,
     GetReportesDropi_Query,
     GetReportesDropiCartera_Query,
-    enviarPedidoHgi_Query
+    enviarPedidoHgi_Query,
+    enviarPedidosMultiplesHgi_Query
 }

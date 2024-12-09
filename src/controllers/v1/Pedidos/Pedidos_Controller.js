@@ -1,4 +1,4 @@
-const { GetPedidosEnProceso_query, GetPedidosEnTerminal_Query, GetPedidosNuevos_Query, GetInfoPedido_Query, GetInfoPedidoTerminal_Query, GetPedidoXId_Query, GetPedidos_Query, PutEstadoPedido_Query, PutEstadoProductoPedido_query, PostProductoPedido_query, PutActualizarPreciosPedidoQuery, GetReporteDropiPendientes_Query, GetReportesDropi_Query, GetReportesDropiCartera_Query, enviarPedidoHgi_Query } = require('../../../Querys/Panel/Pedidos/Pedidos_Querys')
+const { GetPedidosEnProceso_query, GetPedidosEnTerminal_Query, GetPedidosNuevos_Query, GetInfoPedido_Query, GetInfoPedidoTerminal_Query, GetPedidoXId_Query, GetPedidos_Query, PutEstadoPedido_Query, PutEstadoProductoPedido_query, PostProductoPedido_query, PutActualizarPreciosPedidoQuery, GetReporteDropiPendientes_Query, GetReportesDropi_Query, GetReportesDropiCartera_Query, enviarPedidoHgi_Query, enviarPedidosMultiplesHgi_Query } = require('../../../Querys/Panel/Pedidos/Pedidos_Querys')
 
 const GetPedidos = async (req, res) => {
 
@@ -192,6 +192,22 @@ const enviarPedidoHgi_Controller = async (req, res) => {
     }
 }
 
+const enviarMultiplesPedidosHgi_Controller = async (req, res) => {
+    const { arrIdPedidos } = req.body
+
+    try {
+        if (!arrIdPedidos || arrIdPedidos.length == 0) {
+            return res.status(400).json({ error: `Arreglo de pedidos invalido` })
+        }
+
+        const data = await enviarPedidosMultiplesHgi_Query(arrIdPedidos)
+        res.status(200).json({ pedido: data, success: true })
+    } catch (error) {
+        res.status(400).json({ error: `${error}` })
+    }
+}
+
+
 module.exports = {
     GetPedidosNuevos,
     GetPedidosEnProceso,
@@ -207,5 +223,6 @@ module.exports = {
     GetReporteDropiPendientes,
     GetReporteDropi,
     GetReportesDropiCartera,
-    enviarPedidoHgi_Controller
+    enviarPedidoHgi_Controller,
+    enviarMultiplesPedidosHgi_Controller
 }
