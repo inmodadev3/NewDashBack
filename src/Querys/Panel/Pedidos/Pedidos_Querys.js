@@ -548,6 +548,7 @@ const enviarPedidosMultiplesHgi_Query = (arrPedido) => {
 
             //OBTENER DETALLES DEL PEDIDO QUERY
             const informacionPedidoQuery = 'select strIdVendedor from dash.tblpedidos where intIdPedido = ?'
+            const numerosPedidos = arrPedido.join('-');
 
             //OBTENER VALORES DEL PEDIDO DEL DASH
             const productosPedido = await obtenerDatosDb_Dash(productosPedidoQuery, [arrPedido])
@@ -563,7 +564,7 @@ const enviarPedidosMultiplesHgi_Query = (arrPedido) => {
             const consecutivo = await obtenerConsecutivoHgi()
 
             //CREAR ENCABEZADO
-            const pedido = crearCabeceraPedidoHgi(cedula, vendedor, consecutivo, arrPedido[0])
+            const pedido = crearCabeceraPedidoHgi(cedula, vendedor, consecutivo, arrPedido[0], numerosPedidos)
 
             //CREAR DETALLE
             for (const producto of productosPedido) {
@@ -617,7 +618,7 @@ const crearCuerpoDetallePedidoHgi = (cantidad, referencia, unidad, valorProducto
     return producto
 }
 
-const crearCabeceraPedidoHgi = (terceroId, vendedorId, consecutivo, docRef) => {
+const crearCabeceraPedidoHgi = (terceroId, vendedorId, consecutivo, docRef, observacion = '') => {
     const today = new Date();
     const year = today.getFullYear();
     const month = today.getMonth();
@@ -782,7 +783,7 @@ const crearCabeceraPedidoHgi = (terceroId, vendedorId, consecutivo, docRef) => {
             ,0
             ,0
             ,0
-            ,NULL
+            ,'${observacion}'
             ,NULL
             ,0
             ,0
