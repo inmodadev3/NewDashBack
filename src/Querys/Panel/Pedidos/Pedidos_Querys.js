@@ -853,6 +853,100 @@ const obtenerConsecutivoHgi = async () => {
     return consecutivo
 }
 
+const duplicarPedidosDash_Query = async (idPedidoOriginal) => {
+    const conexion = await poolDash.promise().getConnection();
+
+    try {
+        await conexion.beginTransaction();
+
+        // Obtener encabezado del pedido original
+        const encabezadoQuery = `
+            SELECT * 
+            FROM dash.tblpedidos 
+            WHERE intIdPedido = ?`;
+        const [encabezado] = await conexion.query(encabezadoQuery, [idPedidoOriginal]);
+
+        if (!encabezado || encabezado.length === 0) {
+            throw new Error(`Pedido con ID ${idPedidoOriginal} no encontrado.`);
+        }
+
+        // Generar nuevo ID de pedido
+        const lastIdQuery = `SELECT MAX(intIdPedido) AS ultimoID FROM dash.tblpedidos`;
+        const [[{ ultimoID }]] = await conexion.query(lastIdQuery);
+        const nuevoIdPedido = ultimoID + 1;
+
+        // Insertar el nuevo encabezado
+        const crearNuevoEncabezadoQuery = `
+            INSERT INTO dash.tblpedidos (
+                intIdPedido, strIdPedidoVendedor, strIdVendedor, strNombVendedor, 
+                strIdCliente, strNombCliente, strCiudadCliente, intValorTotal, 
+                dtFechaEnvio, strObservacion, strCorreoClienteAct, strCelularClienteAct, 
+                strCiudadClienteAct, intEstado, intIdLogin, blEspera
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+        await conexion.query(crearNuevoEncabezadoQuery, [
+            nuevoIdPedido,
+            encabezado[0].strIdPedidoVendedor,
+            encabezado[0].strIdVendedor,
+            encabezado[0].strNombVendedor,
+            encabezado[0].strIdCliente,
+            encabezado[0].strNombCliente,
+            encabezado[0].strCiudadCliente,
+            encabezado[0].intValorTotal,
+            encabezado[0].dtFechaEnvio,
+            encabezado[0].strObservacion,
+            encabezado[0].strCorreoClienteAct,
+            encabezado[0].strCelularClienteAct,
+            encabezado[0].strCiudadClienteAct,
+            1,
+            encabezado[0].intIdLogin,
+            encabezado[0].blEspera,
+        ]);
+
+        // Obtener los productos del pedido original
+        const productosQuery = `
+            SELECT * 
+            FROM dash.tbldetallepedidos 
+            WHERE intIdPedido = ?`;
+        const [productos] = await conexion.query(productosQuery, [idPedidoOriginal]);
+
+        if (productos.length > 0) {
+            // Insertar productos duplicados
+            const insertarProductoQuery = `
+                INSERT INTO dash.tbldetallepedidos (
+                    intIdPedDetalle, intIdPedido, strIdProducto, strDescripcion, 
+                    intCantidad, strUnidadMedida, strObservacion, intPrecio, 
+                    intPrecioProducto,strColor,strTalla intEstado
+                ) VALUES ?`;
+
+            const lastIdDetalleQuery = `SELECT COALESCE(MAX(intIdPedDetalle), 0) AS ultimoID FROM dash.tbldetallepedidos`;
+            const [[{ ultimoID: ultimoIDDetalle }]] = await conexion.query(lastIdDetalleQuery);
+
+            let nuevoIdDetalle = ultimoIDDetalle;
+            const valores = productos.map(producto => [
+                ++nuevoIdDetalle,
+                nuevoIdPedido,
+                producto.strIdProducto,
+                producto.strDescripcion,
+                producto.intCantidad,
+                producto.strUnidadMedida,
+                producto.strObservacion,
+                producto.intPrecio,
+                producto.intPrecioProducto,
+                producto.intEstado,
+            ]);
+            await conexion.query(insertarProductoQuery, [valores]);
+        }
+
+        await conexion.commit();
+        return nuevoIdPedido;
+    } catch (error) {
+        await conexion.rollback();
+        throw error;
+    } finally {
+        conexion.release();
+    }
+};
+
 
 
 module.exports = {
@@ -871,5 +965,6 @@ module.exports = {
     GetReportesDropi_Query,
     GetReportesDropiCartera_Query,
     enviarPedidoHgi_Query,
-    enviarPedidosMultiplesHgi_Query
+    enviarPedidosMultiplesHgi_Query,
+    duplicarPedidosDash_Query
 }

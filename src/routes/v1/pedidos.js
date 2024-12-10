@@ -16,6 +16,7 @@ const {
     GetReportesDropiCartera,
     enviarPedidoHgi_Controller,
     enviarMultiplesPedidosHgi_Controller,
+    duplicarPedidosDash_Controller,
 } = require('../../controllers/v1/Pedidos/Pedidos_Controller')
 
 const {
@@ -56,6 +57,7 @@ route.post('/encargado', CrearEncargado)
 route.post('/seguimiento/encargados', ActualizarEncargadosSeguimientos)
 route.post('/enviar/hgi', enviarPedidoHgi_Controller)
 route.post('/enviar_multiples/hgi', enviarMultiplesPedidosHgi_Controller)
+route.post('/duplicar', duplicarPedidosDash_Controller)
 
 
 module.exports = route
